@@ -114,4 +114,5 @@ process:
 destination:
   plugin: 'entity:media'
   default_bundle: image
+  validate: true
 migration_dependencies: null
