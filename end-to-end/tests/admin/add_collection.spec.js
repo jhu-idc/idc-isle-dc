@@ -1,6 +1,5 @@
-import { Selector } from 'testcafe'
-import { ClientFunction } from 'testcafe'
-import { localAdmin } from './roles.js'
+import { ClientFunction, Selector } from 'testcafe';
+import { localAdmin } from '../roles';
 
 fixture`Add Collection`
     .page`https://islandora-idc.traefik.me/node/add/collection_object`;

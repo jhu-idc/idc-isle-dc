@@ -1,0 +1,9 @@
+node_id,local_id,title,title_language,alternative_title,member_of,access_terms,contact_email,contact_name,collection_number,description,finding_aid
+,io-collection-01,Arctic Animals,English,,,Arctic Animals,,,,Collection of Arctic Animal images;eng,
+,io-collection-02,Penguin Collection,English,,:::Arctic Animals,Arctic Animals,,,,Collection of penguin images;eng,
+,io-collection-03,Farm Animals,English,,,Farm Animals,,,,Collection of Farm Animal images;eng,
+,io-collection-04,Goat Collection,English,,:::Farm Animals,Farm Animals,,,,Collection of goat mages;eng,
+,io-collection-05,Turkey Collection,English,,:::Farm Animals,Farm Animals,,,,Collection of turkey images;eng,
+,io-collection-06,Cow Collection,English,,:::Farm Animals,Farm Animals,moo@example.com,Moo Jones,,Collection of cow mages;eng,
+,io-collection-07,Duck Collection,English,,:::Farm Animals,Farm Animals,moo@example.com,Moo Jones,,Collection of ducks images;eng,
+,io-collection-08,Image Collection,English,,,,,,,"A collection of images;eng|Fusce vel faucibus sapien, vel vestibulum lacus. Nunc sit amet euismod ex, in egestas nulla. Phasellus in est rutrum, fermentum massa nec, pulvinar lectus. Aenean ultricies, quam vel mollis tincidunt, tellus enim volutpat dolor, ut euismod nibh tortor ac tellus. Fusce convallis neque interdum libero tempor venenatis. Donec ullamcorper iaculis consequat. Morbi rhoncus ex vitae hendrerit blandit. Fusce blandit justo eu leo molestie, nec fringilla mi consequat. Cras sit amet massa vitae tellus sagittis porttitor hendrerit eu velit. Praesent pellentesque justo quis sapien consectetur, id finibus magna condimentum. Sed in gravida sapien.;ger",

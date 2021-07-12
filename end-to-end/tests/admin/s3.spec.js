@@ -1,6 +1,6 @@
 import http from 'http';
-import {Selector} from 'testcafe';
-import {localAdmin, s3Admin} from './roles.js';
+import { Selector } from 'testcafe';
+import { localAdmin, s3Admin } from '../roles';
 
 const migrate_new_items = 'idc_ingest_new_items';
 const migrate_new_collection = 'idc_ingest_new_collection';
@@ -27,7 +27,7 @@ test('Verify original file and derivatives are in S3', async t => {
 
     await t
         .setFilesToUpload('#edit-source-file', [
-            './testdata/s3/s3-collection.csv'
+            '../testdata/s3/s3-collection.csv'
         ])
         .click('#edit-import');
 
@@ -37,7 +37,7 @@ test('Verify original file and derivatives are in S3', async t => {
 
     await t
         .setFilesToUpload('#edit-source-file', [
-            './testdata/s3/s3-islandora_object.csv'
+            '../testdata/s3/s3-islandora_object.csv'
         ])
         .click('#edit-import');
 
@@ -47,7 +47,7 @@ test('Verify original file and derivatives are in S3', async t => {
 
     await t
         .setFilesToUpload('#edit-source-file', [
-            './testdata/s3/s3-file.csv'
+            '../testdata/s3/s3-file.csv'
         ])
         .click('#edit-import');
 

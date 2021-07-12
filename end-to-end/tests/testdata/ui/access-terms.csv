@@ -1,0 +1,5 @@
+local_id,name,parent,description
+accesscontrol_01,Animals,,Collections related to animals
+accesscontrol_02,Farm Animals,Animals,Collections of farm animals
+accesscontrol_03,Arctic Animals,Animals,Collections of arctic animals
+accesscontrol_04,Duck Collection,Farm Animals,Collection for ducks
