@@ -39,10 +39,6 @@ test('Header has expected elements', async (t) => {
     .expect(links.count).eql(7, 'Should contain 7 links')
     .expect(links.withText('Sheridan Libraries').exists).ok();
 
-  for (let i = 0; i < 7; i++) {
-    console.log(await links.nth(i).innerText);
-  }
-
   await t
     .expect(Selector('header img').exists).ok('Library logo is present')
     .expect(Selector('header #block-idcsearchblock').exists).ok('Global search is present');
