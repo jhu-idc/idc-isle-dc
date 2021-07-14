@@ -76,7 +76,6 @@ export async function migrate(t, migrationId, sourceFile, timeout = 10000) {
       console.log('#### Something went wrong: ####');
       console.log(e);
     });
-  // return await t.takeScreenshot(`Migration-result-${migrationId}.png`);
 }
 
 /**
@@ -124,6 +123,7 @@ export async function addUiData(t, timeout = 10000) {
 
 
 async function addUIArticle(t) {
+  const origin = await getCurrentUrl();
   await t.navigateTo('https://islandora-idc.traefik.me/node/add/article');
   console.log('  > Creating marker article');
 
@@ -134,21 +134,27 @@ async function addUIArticle(t) {
   await t
     .typeText('#edit-title-0-value', 'UI Migrations')
     .click('#edit-path-0')
-    .typeText('#edit-path-0-alias', ui_migration_test_path)
-    .takeScreenshot('MarkerArticle_create.png')
+    .typeText('#edit-path-0-alias', `/${ui_migration_test_path}`)
     .click('#edit-submit')
-    .expect(
-      Selector('.messages').withText('Article This is a moo has been created').exists
-    ).ok('Page not created');
+    .expect(Selector('title').withText('UI Migrations | Default')).ok();
+
+  await t.navigateTo(origin);
 }
 
 export async function checkForUIMigrations(t) {
   const origin = await getCurrentUrl();
   console.log('  >>> Checking for marker article <<<');
   await t.navigateTo(`https://islandora-idc.traefik.me/${ui_migration_test_path}`);
-  const result = !(await Selector('main').withText('The requested page could not be found').exists);
+  const result = await Selector('title').withText('UI Migrations | Default').exists;
   console.log('      ' + result);
   await t.navigateTo(origin);
 
   return result;
+}
+
+export async function clearCache(t) {
+  return await t
+    .click('#toolbar-item-devel')
+    .click('a[data-drupal-link-system-path="devel/cache/clear"]')
+    .expect(Selector('.messages').withText('Cache cleared').exists).ok();
 }

@@ -1,14 +1,16 @@
 import { Role, Selector } from 'testcafe';
-import { addUiData, checkForUIMigrations } from '../helpers';
+import { addUiData, checkForUIMigrations, clearCache } from '../helpers';
 import { localAdmin } from '../roles';
 
-fixture `Collections Page`
+fixture
+  .disablePageCaching `Collections Page`
   .page `https://islandora-idc.traefik.me/collections`
   .beforeEach(async (t) => {
     const alreadyDone = await checkForUIMigrations(t);
     if (!alreadyDone) {
       await t.useRole(localAdmin);
       await addUiData(t);
+      await clearCache(t);
       await t.useRole(Role.anonymous());
     }
   });
