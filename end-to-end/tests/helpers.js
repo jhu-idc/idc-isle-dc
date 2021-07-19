@@ -33,7 +33,7 @@ const uiMigrations = {
 
 const ui_migration_test_path = 'ui_migration';
 
-const getCurrentUrl = ClientFunction(() => window.location.href);
+export const getCurrentUrl = ClientFunction(() => window.location.href);
 
 /**
  * This function assumes the test is already on the '/migrate_source_ui' page.
@@ -121,7 +121,12 @@ export async function addUiData(t, timeout = 10000) {
   await t.navigateTo(origin);
 }
 
-
+/**
+ * Add an article with known data so we can later check to see if UI
+ * migrations have already been run.
+ *
+ * @param {class} t Testcafe controller
+ */
 async function addUIArticle(t) {
   const origin = await getCurrentUrl();
   await t.navigateTo('https://islandora-idc.traefik.me/node/add/article');
@@ -141,6 +146,13 @@ async function addUIArticle(t) {
   await t.navigateTo(origin);
 }
 
+/**
+ * See if UI migrations have been done already by checking to see if the
+ * marker article exists
+ *
+ * @param {class} t Testcafe controller
+ * @returns {boolean} TRUE if marker article was found, FALSE otherwise
+ */
 export async function checkForUIMigrations(t) {
   const origin = await getCurrentUrl();
 
