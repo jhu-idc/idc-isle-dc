@@ -136,17 +136,17 @@ async function addUIArticle(t) {
     .click('#edit-path-0')
     .typeText('#edit-path-0-alias', `/${ui_migration_test_path}`)
     .click('#edit-submit')
-    .expect(Selector('title').withText('UI Migrations | Default')).ok();
+    .expect(Selector('title').withText('UI Migrations | Default').exists).ok();
 
   await t.navigateTo(origin);
 }
 
 export async function checkForUIMigrations(t) {
   const origin = await getCurrentUrl();
-  console.log('  >>> Checking for marker article <<<');
+
   await t.navigateTo(`https://islandora-idc.traefik.me/${ui_migration_test_path}`);
   const result = await Selector('title').withText('UI Migrations | Default').exists;
-  console.log('      ' + result);
+
   await t.navigateTo(origin);
 
   return result;

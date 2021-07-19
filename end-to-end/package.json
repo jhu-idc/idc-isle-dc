@@ -6,7 +6,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "testcafe chromium tests/**/*.spec.js"
+    "test": "testcafe chromium tests/ui/data-migrations.js && testcafe chromium tests/**/*.spec.js"
   },
   "author": "",
   "license": "ISC",

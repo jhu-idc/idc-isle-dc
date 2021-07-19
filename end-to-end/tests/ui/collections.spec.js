@@ -1,20 +1,8 @@
 import { Role, Selector } from 'testcafe';
-import { addUiData, checkForUIMigrations, clearCache } from '../helpers';
 import { localAdmin } from '../roles';
 
-fixture
-  .disablePageCaching `Collections Page`
-  .page `https://islandora-idc.traefik.me/collections`
-  .beforeEach(async (t) => {
-    const alreadyDone = await checkForUIMigrations(t);
-    if (!alreadyDone) {
-      await t.useRole(localAdmin);
-      await addUiData(t);
-      await clearCache(t);
-      await t.useRole(Role.anonymous());
-    }
-  });
-
+fixture `Collections Page`
+  .page `https://islandora-idc.traefik.me/collections`;
 
 test('Has expected number of collections', async (t) => {
   const results = Selector('#idc-search .col-span-3 a[href*="/node/"]');
@@ -24,4 +12,8 @@ test('Has expected number of collections', async (t) => {
     .expect(results.count).eql(10)
     .expect(pager.exists).ok()
     .expect(pager.textContent).contains('1 – 10 of');
+});
+
+test('Pager controls work', async (t) => {
+
 });
