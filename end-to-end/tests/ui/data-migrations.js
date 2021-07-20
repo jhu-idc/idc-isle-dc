@@ -8,18 +8,28 @@ const uiSourcePrefix = '../testdata/ui/';
 const uiMigrations = {
   persons: {
     id: 'idc_ingest_taxonomy_persons',
+    index: 0,
     files: [
       'persons.csv'
     ]
   },
   accessTerms: {
     id: 'idc_ingest_taxonomy_islandora_accessterms',
+    index: 1,
     files: [
       'access-terms.csv'
     ]
   },
+  subjects: {
+    id: 'idc_ingest_taxonomy_subject',
+    index: 2,
+    files: [
+      'subject.csv'
+    ]
+  },
   collections: {
     id: 'idc_ingest_new_collection',
+    index: 3,
     files: [
       'series-1-collections-01.csv',
       'series-1-collections-02.csv'
@@ -27,6 +37,7 @@ const uiMigrations = {
   },
   items: {
     id: 'idc_ingest_new_items',
+    index: 4,
     files: [
       'series-2-items-01.csv'
     ]
@@ -104,28 +115,13 @@ async function addUiData(t, timeout = 10000) {
 
   await t.navigateTo('https://islandora-idc.traefik.me/migrate_source_ui');
 
-  let migrationId;
-
-  const doMigration = async (filename) => {
-    if (!migrationId) return;
-    await migrate(t, migrationId, `${uiSourcePrefix}${filename}`, timeout);
-  }
-
-  // Access Terms
-  migrationId = uiMigrations.accessTerms.id;
-  uiMigrations.accessTerms.files.forEach(f =>doMigration(f));
-
-  // Persons
-  migrationId = uiMigrations.persons.id;
-  uiMigrations.persons.files.forEach(f =>doMigration(f));
-
-  // Collections
-  migrationId = uiMigrations.collections.id;
-  uiMigrations.collections.files.forEach(f =>doMigration(f));
-
-  // Repo Items
-  migrationId = uiMigrations.items.id;
-  uiMigrations.items.files.forEach(f =>doMigration(f));
+  Object.values(uiMigrations)
+    .sort((m1, m2) => m1.index - m2.index)
+    .forEach(async (migration) => {
+      migration.files.forEach(async (file) => {
+        await migrate(t, migration.id, `${uiSourcePrefix}${file}`, timeout);
+      });
+    });
 
   // When done, create an article for easy checking
   await addUIArticle(t);

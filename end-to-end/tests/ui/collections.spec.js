@@ -1,5 +1,6 @@
 import { Selector } from 'testcafe';
 import { getCurrentUrl } from '../helpers';
+import page from './pages/collections';
 
 fixture `Collections Page`
   .page `https://islandora-idc.traefik.me/collections`;
@@ -13,45 +14,36 @@ const results = Selector('[data-test-search-results-item]');
  * @returns {string} URL after search is executed
  */
 async function doSearch(t, query) {
-  const input = Selector('[data-test-search-input] input');
-  const submit = Selector('[data-test-search-input] button');
-
   await t
-    .expect(input.exists).ok()
-    .expect(submit.exists).ok()
-    .typeText(input, query, { replace: true, paste: true })
-    .expect(input.value).contains(query)
-    .click(submit);
+    .expect(page.searchInput.exists).ok()
+    .expect(page.searchSubmit.exists).ok()
+    .typeText(page.searchInput, query, { replace: true, paste: true })
+    .expect(page.searchInput.value).contains(query)
+    .click(page.searchSubmit);
 
   return await getCurrentUrl();
 }
 
 test('Has expected number of collections', async (t) => {
-  const results = Selector('[data-test-search-results-item]');
-  const pager = Selector('[data-test-search-pager]').nth(0);
-
   await t
-    .expect(results.count).eql(10)
-    .expect(pager.exists).ok()
-    .expect(pager.textContent).contains('1 – 10 of');
+    .expect(page.results.count).eql(10)
+    .expect(page.pagers[0]).ok()
+    .expect(page.pagers[0].pager.textContent).contains('1 – 10 of');
 });
 
 test('Pager controls work', async (t) => {
-  const pager = Selector('[data-test-search-pager]').nth(0);
-  const pagerButtons = pager.find('button');
+  const pager = page.pagers[0];
 
   await t
-    .expect(pager.exists).ok('No pager found on page')
-    .expect(pagerButtons.count).eql(4);
-
-  const next = pagerButtons.nth(-1);
+    .expect(pager).ok('No pager found on page')
+    .expect(pager.buttons.count).eql(4);
 
   await t
-    .expect(next.exists).ok()
-    .expect(next.withAttribute('disabled').exists).notOk('Next btn was disabled, should be enabled')
-    .click(next)
+    .expect(pager.next.exists).ok()
+    .expect(pager.next.withAttribute('disabled').exists).notOk('Next btn was disabled, should be enabled')
+    .click(pager.next)
     .expect(getCurrentUrl()).contains('page=1')
-    .expect(Selector('[data-test-search-results-item]').count).gte(3);
+    .expect(page.results.count).gte(3);
 });
 
 test('Basic search input', async (t) => {
@@ -71,3 +63,27 @@ test('Proximity search syntax', async (t) => {
     .expect(decodeURI(url)).contains(`query=${query}`)
     .expect(results.count).eql(6);
 });
+
+/**
+ * Do a search, then change sort order to DESC and see that
+ * the ordering has changed.
+ */
+test('List option: sort order', async (t) => {
+  const orderValue = 'sort_order=DESC';
+  await doSearch(t, 'animal');
+
+  await t
+    .expect(page.results.count).eql(7)
+    .expect(page.results.nth(0).withText('Cow Collection').exists).ok()
+    .expect(page.listOptions.sortOrder.exists).ok();
+
+  await page.listOptions.sortOrder.setValue(`&${orderValue}`);
+
+  await t
+    .expect(await getCurrentUrl()).contains(orderValue)
+    .expect(page.results.nth(0).withText('Arctic Animals').exists).ok();
+});
+
+test.skip('List option: sort by', async (t) => {});
+test.skip('List option: items per page', async (t) => {});
+test.skip('List option: go to page', async (t) => {});
