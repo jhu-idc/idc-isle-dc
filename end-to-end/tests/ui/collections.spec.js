@@ -74,8 +74,7 @@ test('List option: sort order', async (t) => {
 
   await t
     .expect(page.results.count).eql(7)
-    .expect(page.results.nth(0).withText('Cow Collection').exists).ok()
-    .expect(page.listOptions.sortOrder.exists).ok();
+    .expect(page.results.nth(0).withText('Cow Collection').exists).ok();
 
   await page.listOptions.sortOrder.setValue(`&${orderValue}`);
 
@@ -84,6 +83,42 @@ test('List option: sort order', async (t) => {
     .expect(page.results.nth(0).withText('Arctic Animals').exists).ok();
 });
 
-test.skip('List option: sort by', async (t) => {});
-test.skip('List option: items per page', async (t) => {});
-test.skip('List option: go to page', async (t) => {});
+test('List option: sort by', async (t) => {
+  const value = 'sort_by=title';
+  await doSearch(t, 'animal');
+
+  await t
+    .expect(page.results.count).eql(7)
+    .expect(page.results.nth(0).withText('Cow Collection').exists).ok();
+
+  await page.listOptions.sortBy.setValue(`&${value}`);
+
+  await t
+    .expect(await getCurrentUrl()).contains(value)
+    .expect(page.results.nth(0).withText('Arctic Animals').exists).ok();
+});
+
+test('List option: items per page', async (t) => {
+  await doSearch(t, 'animal');
+
+  await t.expect(page.results.count).eql(7);
+
+  await page.listOptions.itemsPerPage.setValue('5');
+
+  await t.expect(page.results.count).eql(5);
+});
+
+test('List option: go to page', async (t) => {
+  await t.expect(page.pagers[0].pager.withText('1 – 10').exists).ok();
+
+  await page.listOptions.currentPage.setValue('2');
+
+  await t.expect(page.pagers[0].pager.withText('11 – ').exists).ok();
+});
+
+test.skip('Featured items', async (t) => {
+  await t
+    .expect(page.featuredItems.list.exists).ok()
+    .expect(page.featuredItems.items.count).eql(2)
+    .expect(page.featuredItems.items.withText('Duck Collection').exists).ok();
+});

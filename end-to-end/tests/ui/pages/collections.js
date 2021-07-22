@@ -17,12 +17,6 @@ class Dropdown {
     this.options = this.select.find('option');
   }
 
-  async exists() {
-    return t
-      .expect(this.select.exists).ok()
-      .expect(this.options.length).gt(0);
-  }
-
   async setValue(value) {
     await t
       .click(this.select)
@@ -44,6 +38,15 @@ class ListOptions {
   }
 }
 
+class FeaturedItems {
+  constructor() {
+    this.list = Selector('#featured-items');
+
+    this.title = this.list.find('h3');
+    this.items = this.list.find('[data-test-featured-item');
+  }
+}
+
 /**
  * Represents pages that utilze our GlimmerJS based search component.
  * This should include
@@ -59,6 +62,7 @@ class Searchable {
     this.results = Selector('[data-test-search-results-item]');
 
     this.listOptions = new ListOptions();
+    this.featuredItems = new FeaturedItems();
   }
 }
 
