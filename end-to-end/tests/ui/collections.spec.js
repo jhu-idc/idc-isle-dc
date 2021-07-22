@@ -5,8 +5,6 @@ import page from './pages/collections';
 fixture `Collections Page`
   .page `https://islandora-idc.traefik.me/collections`;
 
-const results = Selector('[data-test-search-results-item]');
-
 /**
  *
  * @param {class} t Testcafe controller
@@ -52,7 +50,7 @@ test('Basic search input', async (t) => {
 
   await t
     .expect(url).contains(`query=${query}`)
-    .expect(results.count).eql(7);
+    .expect(page.results.count).eql(7);
 });
 
 test('Proximity search syntax', async (t) => {
@@ -61,7 +59,7 @@ test('Proximity search syntax', async (t) => {
 
   await t
     .expect(decodeURI(url)).contains(`query=${query}`)
-    .expect(results.count).eql(6);
+    .expect(page.results.count).eql(6);
 });
 
 /**
