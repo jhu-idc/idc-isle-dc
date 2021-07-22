@@ -87,7 +87,7 @@ fixture `Run UI Data Migrations`
     // .takeScreenshot(`Migration-result-${migrationId}.png`)
     .expect(
       Selector('.messages--status')
-        .withText(`done with '${migrationId}'`)
+        .withText(`done with "${migrationId}"`)
         .withText('0 failed')
         .exists
     ).ok(
@@ -95,8 +95,19 @@ fixture `Run UI Data Migrations`
       { timeout: timeout }
     )
     .then(() => console.log(`  - Migration done => ${migrationId} : ${sourceFile}`))
-    .catch((e) => {
-      console.log('#### Something went wrong: ####');
+    .catch(async (e) => {
+      const messagesLink = Selector('.messages a').withText('here');
+      const errorScreenshot = `Migration_error_${migrationId}--${sourceFile}.png`;
+
+      if (messagesLink.exists) {
+        await t
+          .click(messagesLink)
+          .takeScreenshot(errorScreenshot);
+      } else {
+        await t.takeScreenshot(errorScreenshot);
+      }
+
+      console.log(`#### Something went wrong: see screenshot ${errorScreenshot} ####`);
       console.log(e);
     });
 }
@@ -109,8 +120,6 @@ fixture `Run UI Data Migrations`
  *                  Default: 10000 (10 seconds)
  */
 async function addUiData(t, timeout = 10000) {
-  console.log('Adding data for UI tests');
-
   const origin = await getCurrentUrl();
 
   await t.navigateTo('https://islandora-idc.traefik.me/migrate_source_ui');
