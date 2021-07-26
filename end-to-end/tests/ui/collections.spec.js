@@ -1,4 +1,3 @@
-import { Selector } from 'testcafe';
 import { getCurrentUrl } from '../helpers';
 import page from './pages/collections';
 
@@ -114,7 +113,7 @@ test('List option: go to page', async (t) => {
   await t.expect(page.pagers[0].pager.withText('11 – ').exists).ok();
 });
 
-test.skip('Featured items', async (t) => {
+test('Featured items', async (t) => {
   await t
     .expect(page.featuredItems.list.exists).ok()
     .expect(page.featuredItems.items.count).eql(2)
