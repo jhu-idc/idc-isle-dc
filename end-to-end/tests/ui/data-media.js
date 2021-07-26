@@ -1,28 +1,13 @@
-import { Selector, t } from "testcafe";
+
 import { download } from "../helpers";
 import { localAdmin } from "../roles";
-
-const MediaType = {
-  Audio: 'Audio',
-  Document: 'Document',
-  ExtractedText: 'Extracted Text',
-  File: 'File',
-  FITS: 'FITS Technical metadata',
-  Image: 'Image',
-  RemoteVideo: 'Remote video',
-  Video: 'Video'
-};
-
-const MediaUse = {
-  ExtractedText: 'Extracted Text',
-  FITS: 'FITS File',
-  Intermediate: 'Intermediate File',
-  Original: 'Original File',
-  Preservation: 'Preservation Master File',
-  Service: 'Service File',
-  Thumbnail: 'Thumbnail Image',
-  Transcript: 'Transcript'
-}
+import {
+  AddMediaPage,
+  ImagePage,
+  MediaPage,
+  MediaType,
+  MediaUse
+} from './pages/media';
 
 const filePrefix = 'http://migration-assets/assets';
 const Files = {
@@ -45,100 +30,18 @@ const Files = {
   ]
 };
 
-class AddMedia {
-  constructor() {
-    this.addBtn = Selector('[data-drupal-link-system-path="media/add"]');
-    this.currentMedia = Selector('table td[headers="view-name-table-column"]');
-  }
-
-  async addMedia(mediaType) {
-    const link = Selector('a .label').withText(mediaType);
-    await t
-      .expect(this.addBtn.exists).ok()
-      .click(this.addBtn)
-      .click(link);
-  }
-}
-
-class Checkbox {
-  constructor(mediaUse) {
-    this.label = Selector('label').withText(mediaUse);
-    this.checkbox = this.label.parent().find('input[type="checkbox"]');
-  }
-}
-
-class Media {
-  constructor() {
-    this.name = Selector('#edit-name-0-value');
-    this.file = Selector('input[type="file"]');
-    this.uploadedFile = Selector('span.file');
-    this.accessTerms = Selector('#edit-field-access-terms option');
-    this.mediaOf = Selector('#edit-field-media-of-0-target-id');
-    this.submit = Selector('#edit-submit');
-
-    this.mediaUse = Selector('#edit-field-media-use');
-  }
-
-  async toggleMediaUse(mediaUse) {
-    // const checkbox = this.mediaUse
-    //   .find('label').withText(mediaUse)
-    //   .parent().find('input[type="checkbox"]');
-    await t.click(this.mediaUse.find('label').withText(mediaUse));
-  }
-
-  /**
-   *
-   * @param {binary} file file bits
-   * @param {string} name file name
-   * @param {string} parent parent object title
-   * @param {string} accessTerm AccessTerm
-   * @param {string} mediaUse MediaUse
-   */
-  async fillInfo(file, name, parent, accessTerm, mediaUse) {
-    await t
-      .typeText(this.name, name, { paste: true }) // Set media name
-      .setFilesToUpload(this.file, file)  // Add file
-      .expect(this.uploadedFile.exists).ok()
-      .click(this.accessTerms.withText(accessTerm)) // Set access term
-      .typeText(this.mediaOf, parent, { paste: true }) // Type name of parent
-      .click(Selector('li').withText(parent)); // Click the autocompleted item to set 'media of'
-
-    await this.toggleMediaUse(mediaUse);
-  }
-
-  async submitMedia() {
-    await t.click(this.submit);
-  }
-}
-
-class Image extends Media {
-  constructor() {
-    super();
-    this.altText = Selector('label').withText('Alternative text').parent().find('input[type="text"]');
-  }
-
-  async addImage(file, name, parent, accessTerm, mediaUse, altText) {
-    await this.fillInfo(file, name, parent, accessTerm, mediaUse);
-    await t.typeText(this.altText, altText, { paste: true });
-  }
-}
-
-const addMediaPage = new AddMedia();
-const mediaPage = new Media();
-const imagePage = new Image();
-
 async function addMedia(mediaType, options) {
   const { name, file, parent, accessTerm, mediaUse, altText } = options;
 
-  await addMediaPage.addMedia(mediaType);
+  await AddMediaPage.addMedia(mediaType);
 
   if (mediaType === MediaType.Image) {
-    await imagePage.addImage(file, name, parent, accessTerm, mediaUse, altText);
+    await ImagePage.addImage(file, name, parent, accessTerm, mediaUse, altText);
   } else {
-    await mediaPage.fillInfo(file, name, parent, accessTerm, mediaUse);
+    await MediaPage.fillInfo(file, name, parent, accessTerm, mediaUse);
   }
 
-  await mediaPage.submitMedia();
+  await MediaPage.submitMedia();
   console.log(`     - ${mediaType}: ${name}`);
 }
 
@@ -167,7 +70,7 @@ fixture('Add media to Drupal')
  * Check OpenSeadragon display hint
  */
 test('Add all test media', async (t) => {
-  if (await addMediaPage.currentMedia.withText('Page 1 img').exists) {
+  if (await AddMediaPage.currentMedia.withText('Page 1 img').exists) {
     return;
   }
 
