@@ -1,4 +1,5 @@
 #!/bin/sh
-testcafe chromium:headless tests/admin/*.spec.js && \
-testcafe chromium:headless tests/ui/data-migrations.js && \
-testcafe --concurrency 2 chromium:headless tests/ui/*.spec.js
+testcafe chromium tests/admin/*.spec.js && \
+testcafe chromium tests/ui/data-migrations.js && \
+testcafe chromium tests/ui/data-media.js && \
+testcafe --concurrency 2 chromium tests/ui/*.spec.js
