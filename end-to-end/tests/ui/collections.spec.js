@@ -71,7 +71,7 @@ test('List option: sort order', async (t) => {
 
   await t
     .expect(page.results.count).eql(7)
-    .expect(page.results.nth(0).withText('Cow Collection').exists).ok();
+    .expect(page.results.nth(0).withText('Arctic Animals').exists).notOk();
 
   await page.listOptions.sortOrder.setValue(`&${orderValue}`);
 
@@ -86,7 +86,7 @@ test('List option: sort by', async (t) => {
 
   await t
     .expect(page.results.count).eql(7)
-    .expect(page.results.nth(0).withText('Cow Collection').exists).ok();
+    .expect(page.results.nth(0).withText('Arctic Animals').exists).notOk();
 
   await page.listOptions.sortBy.setValue(`&${value}`);
 
