@@ -83,7 +83,7 @@ process:
     id_only: true
     destination: '@_destination_drupalpath'
     mimetype: mime_type
-    filename: name
+    filename: '@_url_filename'
   field_mime_type: mime_type
   name: name
   field_media_of:

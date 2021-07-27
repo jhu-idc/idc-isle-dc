@@ -286,6 +286,13 @@ test('Perform Media Migrations', async t => {
     './migrations/media-accessterms.csv'
   );
 
+  // Migrate access rights
+  await doMigration(
+    t,
+    migrate_accessrights_taxonomy,
+    './migrations/media-accessrights.csv'
+  );
+
   // Migrate media subjects
   await doMigration(
     t,
