@@ -54,7 +54,7 @@ class FeaturedItems {
  *    - /node/## (collections details page)
  *    - /advanced-search
  */
-class Searchable {
+export class Searchable {
   constructor() {
     this.searchInput = Selector('[data-test-search-input] input');
     this.searchSubmit = Selector('[data-test-search-input] button');
