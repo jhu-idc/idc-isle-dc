@@ -22,7 +22,7 @@ test('Migrate Images for Derivative Generation', async t => {
     // migrate the test objects into Drupal
     await doMigration(t, migrationType.NEW_COLLECTION, './migrations/derivative-collection.csv');
     await doMigration(t, migrationType.NEW_ITEM, './migrations/derivative-islandora_object.csv');
-    await doMigration(t, migrationType.NEW_MEDIA_FILE, './migrations/derivative-file.csv');
+    await doMigration(t, migrationType.NEW_MEDIA_IMAGE, './migrations/derivative-file.csv');
 
     // verify the presence of the islandora object
     const io_name = "Derivative Repository Item One"
