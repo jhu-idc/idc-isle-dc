@@ -133,10 +133,13 @@ function use_env {
 	cat .env > "${ENV_FILE}"
 	echo "$1" >> "${ENV_FILE}"
 
+	echo -e "TEST_ENVIRONMENT is '$TEST_ENVIRONMENT'\n"
+
 	if [ "$TEST_ENVIRONMENT" == "static" ]; then
 		echo "Using static environment"
 		make -B static-docker-compose.yml env="${ENV_FILE}";
 	else
+		echo "NOT Using static environment"
 		make -B docker-compose.yml args="--env-file ${ENV_FILE}"
 	fi
 	make up
