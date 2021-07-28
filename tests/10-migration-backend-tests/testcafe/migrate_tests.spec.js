@@ -315,12 +315,6 @@ test('Perform Media Migrations', async t => {
 
   await doMigration(
     t,
-    migrate_new_items,
-    './migrations/media-islandora_object.csv'
-  );
-
-  await doMigration(
-    t,
     migrate_media_image,
     './migrations/media-image.csv'
   );
