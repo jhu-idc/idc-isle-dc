@@ -55,6 +55,9 @@ class FeaturedItems {
  *    - /advanced-search
  */
 export class Searchable {
+  /**
+   * @param {number} facets (OPTIONAL) expected number of facets. Default: 0
+   */
   constructor() {
     this.searchInput = Selector('[data-test-search-input] input');
     this.searchSubmit = Selector('[data-test-search-input] button');
@@ -63,6 +66,24 @@ export class Searchable {
 
     this.listOptions = new ListOptions();
     this.featuredItems = new FeaturedItems();
+
+    this.facetCategories = Selector('[data-test-facets-category]');
+  }
+
+  facetToggle(category) {
+    return this.facetCategories.withText(category).find('button:not([data-test-facet-value])');
+  }
+
+  facetValueContainer(category) {
+    return this.facetCategories.withText(category).find('ul');
+  }
+
+  facetValues(category) {
+    return this.facetCategories.withText(category).find('[data-test-facet-value]');
+  }
+
+  async selectFacet(category, value) {
+    await t.click(this.facetValues(category).withText(value));
   }
 }
 

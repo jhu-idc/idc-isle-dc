@@ -1,11 +1,14 @@
-import { getCurrentUrl } from '../helpers';
 import Page from './pages/collection-details';
 
 /**
  * Duck Collection page
  */
 fixture `Collection Details Page`
-  .page `https://islandora-idc.traefik.me/node/42`;
+  .page`https://islandora-idc.traefik.me/node/42`
+  // .page `https://islandora-idc.traefik.me/collections`
+  // .beforeEach(async (t) => {
+  //   await t.click(Selector('[data-test-search-results-item]').withText('Duck Collection'));
+  // });
 
 test('English description is displayed', async (t) => {
   await t
@@ -56,6 +59,31 @@ test('Metadata display', async (t) => {
     .expect(Page.metadata.withText('/node/42').exists).ok();
 });
 
-test('Facet toggle', async (t) => {
+test('Shows both collections and repo items', async (t) => {
+  await t
+    .expect(Page.results.count).eql(3)
+    .expect(Page.results.withText('SubDuck Collection').exists).ok()
+    .expect(Page.results.withText('Mallard').exists).ok();
+});
 
+test('Facet toggle', async (t) => {
+  await t.expect(Page.facetCategories.count).eql(2);
+
+  const category = 'Year';
+  const valueContainer = Page.facetValueContainer(category);
+  await t
+    .expect(valueContainer.clientHeight).gt(0)
+    .click(Page.facetToggle(category))
+    .expect(valueContainer.clientHeight).eql(0);
+});
+
+test('Selecting facets', async (t) => {
+  const category = 'Year';
+  await t
+    .expect(Page.facetValues(category).count).eql(2)
+    .expect(Page.results.count).eql(3);
+
+  await Page.selectFacet(category, '2000-01-01');
+
+  await t.expect(Page.results.count).eql(1);
 });
