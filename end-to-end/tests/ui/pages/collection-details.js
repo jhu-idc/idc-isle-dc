@@ -9,7 +9,7 @@ import { Searchable } from './collections';
  * This page also has facets present on the search component, unlike the
  * /collections list.
  */
-class CollectionDetails extends Searchable {
+export class CollectionDetails extends Searchable {
   constructor() {
     super();
 
