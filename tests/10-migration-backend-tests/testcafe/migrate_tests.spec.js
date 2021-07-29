@@ -224,7 +224,25 @@ test('Perform Repository Object Migration', async t => {
     migrate_new_items,
     './migrations/islandora_object.csv'
   );
+});
 
+// This simply re-runs the collections and islandora objects migrations from the last
+// test to ensure that they can be re-run multiple times.
+// (there was an issue where unique_id constraints were preventing updates from
+// succeeding)
+// TODO - remove skip once PR https://github.com/jhu-idc/idc-isle-dc/pull/198 is in
+test.skip('Perform duplicate migrations to test ingest re-runs', async t => {
+  // migrate collections, again
+  await doMigration(
+    t,
+    migrate_new_collection,
+    './migrations/islandora_object-collections.csv');
+
+  // Migrate Islandora Repository Objects, again
+  await doMigration(
+    t,
+    migrate_new_items,
+    './migrations/islandora_object.csv');
 });
 
 // This is a quick test to ensure that one is able to edit items
