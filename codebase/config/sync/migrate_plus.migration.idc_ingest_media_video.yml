@@ -77,7 +77,7 @@ process:
   field_media_video_file/target_id:
     plugin: file_import
     source: '@_download_filepath'
-    uid: constants/uid
+    uid: constants/ADMIN
     move: true
     reuse: false
     rename: false
