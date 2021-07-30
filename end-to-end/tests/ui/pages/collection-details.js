@@ -1,5 +1,6 @@
 import { Selector, t } from "testcafe";
 import { Searchable } from './collections';
+import ContactModal from "./contact-modal";
 
 /**
  * The collections details page has all the features of the /collections
@@ -28,10 +29,16 @@ export class CollectionDetails extends Searchable {
 
     const facetsContainer = Selector('[data-test-facets-container]');
     this.facetCategories = facetsContainer.child('[data-test-facets-category]');
+
+    this.contactModal = ContactModal;
   }
 
   async toggleMetadata() {
     await t.click(this.drawerToggle);
+  }
+
+  async openContact() {
+    await t.click(this.contactBtn);
   }
 }
 

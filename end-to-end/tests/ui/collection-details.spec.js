@@ -24,10 +24,13 @@ test('Action buttons present', async (t) => {
     .expect(Page.downloadBtn.exists).notOk();
 });
 
-test('Featured repo items are present', async (t) => {
+test('Featured repo items display correctly', async (t) => {
   await t
     .expect(Page.featuredItems.list.exists).ok()
-    .expect(Page.featuredItems.items.count).eql(2);
+    .expect(Page.featuredItems.items.count).eql(2)
+    .expect(Page.featuredItems.items.nth(0).find('image').exists).ok()
+    // Mallard item has a Tiff image, which should never be displayed on the page
+    .expect(Page.featuredItems.items.nth(0).find('image').attributes.src).notContains('.tif');
 });
 
 test('Metadata toggle', async (t) => {
@@ -86,4 +89,14 @@ test('Selecting facets', async (t) => {
   await Page.selectFacet(category, '2000-01-01');
 
   await t.expect(Page.results.count).eql(1);
+});
+
+test('Contact modal displays correctly', async (t) => {
+  await t
+    .expect(Page.contactModal.visibility().exists).notOk()
+    .click(Page.contactBtn)
+    .expect(Page.contactModal.visibility().exists).ok()
+    .expect(Page.contactModal.collection.value).eql('Duck Collection (42)')
+    .click(Page.contactModal.closeBtn)
+    .expect(Page.contactModal.visibility().exists).notOk();
 });
