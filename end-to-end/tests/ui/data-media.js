@@ -77,6 +77,15 @@ test('Add all test media', async (t) => {
   console.log('   > Adding media');
 
   await addMedia(MediaType.Image, {
+    name: 'A single image',
+    file: await getMedia(MediaType.Image, 0),
+    parent: 'Mallard',
+    accessTerm: 'Duck Collection',
+    mediaUse: MediaUse.Original,
+    altText: 'A single image'
+  });
+
+  await addMedia(MediaType.Image, {
     name: 'Page 1 img',
     file: await getMedia(MediaType.Image, 1),
     parent: 'Page 1',
