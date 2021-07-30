@@ -7,9 +7,10 @@ dependencies:
     - media.type.audio
   module:
     - epp
+    - idc_defaults
 third_party_settings:
   epp:
-    value: '[random:md5:?]'
+    value: ''
     on_update: 0
 id: media.audio.field_unique_id
 field_name: field_unique_id
@@ -22,4 +23,4 @@ translatable: false
 default_value: {  }
 default_value_callback: ''
 settings: {  }
-field_type: string
+field_type: idc_unique
