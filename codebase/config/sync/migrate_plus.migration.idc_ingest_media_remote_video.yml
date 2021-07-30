@@ -22,7 +22,7 @@ source:
     TMP_FS: /tmp/
 process:
   field_unique_id: unique_id
-  name: nam
+  name: name
   field_access_terms:
     -
       plugin: skip_on_empty
