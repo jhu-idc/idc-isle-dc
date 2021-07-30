@@ -7,6 +7,7 @@ dependencies:
     - taxonomy.vocabulary.geo_location
   module:
     - epp
+    - idc_defaults
 third_party_settings:
   epp:
     value: ''
