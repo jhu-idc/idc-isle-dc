@@ -23,7 +23,8 @@ const Files = {
   [MediaType.ExtractedText]: [],
   [MediaType.Document]: [
     { name: 'ilford_temperature-compensation-chart.pdf', path: '/document/ilford_temperature-compensation-chart.pdf' },
-    { name: 'hello_world.txt', path: '/extracted_text/hello_world.txt' }
+    { name: 'hello_world.txt', path: '/extracted_text/hello_world.txt' },
+    { name: 'Fuji_acros.pdf', path: '/document/Fuji_acros.pdf' }
   ],
   [MediaType.Video]: [
     { name: 'chair-pop-gif.mp4', path: '/video/chair-pop-gif.mp4' }
@@ -121,7 +122,7 @@ test('Add all test media', async (t) => {
 
   await addMedia(MediaType.Document, {
     name: 'Transcription',
-    file: await getMedia(MediaType.Document, 1),
+    file: await getMedia(MediaType.Document, 2),
     parent: 'Audio plus transcription',
     accessTerm: 'Parent Collection',
     mediaUse: MediaUse.Transcript
