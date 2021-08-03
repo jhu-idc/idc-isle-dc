@@ -1,7 +1,7 @@
-import Page from './pages/item-detail-image';
+import { ImagePage } from './pages/item-details';
 
 async function hasMetadata(t, field, value) {
-  const selector = Page.metadata.withText(field).parent();
+  const selector = ImagePage.metadata.withText(field).parent();
   await t
     .expect(selector.exists).ok()
     .expect(selector.withText(value).exists).ok();
@@ -14,11 +14,11 @@ fixture `Repository Item Details Page`
   .page `https://islandora-idc.traefik.me/node/49`;
 
 test('Description', async (t) => {
-  await t.expect(Page.description.withText('(English)').exists).ok();
+  await t.expect(ImagePage.description.withText('(English)').exists).ok();
 });
 
 test('Metadata', async (t) => {
-  await t.expect(Page.metadata.count).eql(12);
+  await t.expect(ImagePage.metadata.count).eql(12);
 
   await hasMetadata(t, 'Alternative Title', 'Mallard Duck (English)');
   await hasMetadata(t, 'Alternative Title', 'Pato Mallard (Spanish)');
@@ -36,12 +36,12 @@ test('Metadata', async (t) => {
 
 test('Contact modal', async (t) => {
   await t
-    .expect(Page.contactBtn.exists).ok()
-    .expect(Page.contactModal.visibility().exists).notOk()
-    .click(Page.contactBtn)
-    .expect(Page.contactModal.visibility().exists).ok()
+    .expect(ImagePage.contactBtn.exists).ok()
+    .expect(ImagePage.contactModal.visibility().exists).notOk()
+    .click(ImagePage.contactBtn)
+    .expect(ImagePage.contactModal.visibility().exists).ok()
     // Make sure collection is auto-filled
-    .expect(Page.contactModal.collection.value).eql('Duck Collection (42)');
+    .expect(ImagePage.contactModal.collection.value).eql('Duck Collection (42)');
 });
 
 test.skip('Download', async (t) => {});
