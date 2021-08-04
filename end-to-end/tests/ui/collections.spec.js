@@ -1,5 +1,5 @@
 import { getCurrentUrl } from '../helpers';
-import page from './pages/collections';
+import page from './pages/collections-list';
 
 fixture `Collections Page`
   .page `https://islandora-idc.traefik.me/collections`;

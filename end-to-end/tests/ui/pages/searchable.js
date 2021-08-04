@@ -38,15 +38,6 @@ class ListOptions {
   }
 }
 
-class FeaturedItems {
-  constructor() {
-    this.list = Selector('#featured-items');
-
-    this.title = this.list.find('h3');
-    this.items = this.list.find('[data-test-featured-item');
-  }
-}
-
 /**
  * Represents pages that utilze our GlimmerJS based search component.
  * This should include
@@ -65,7 +56,6 @@ export class Searchable {
     this.results = Selector('[data-test-search-results-item]');
 
     this.listOptions = new ListOptions();
-    this.featuredItems = new FeaturedItems();
 
     this.facetCategories = Selector('[data-test-facets-category]');
   }

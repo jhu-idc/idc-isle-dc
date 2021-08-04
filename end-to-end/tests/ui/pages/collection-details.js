@@ -1,5 +1,5 @@
 import { Selector, t } from "testcafe";
-import { Searchable } from './collections';
+import { Searchable } from './searchable';
 import ContactModal from "./contact-modal";
 
 /**

@@ -1,4 +1,4 @@
-import page from './pages/collections';
+import page from './pages/collections-list';
 
 fixture('Collections Page: init from URL')
   .page('https://islandora-idc.traefik.me/collections?query=animal&page=1&sort_by=title&sort_order=DESC&items_per_page=5');
