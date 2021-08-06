@@ -1,6 +1,6 @@
 import http from 'http';
 import { Selector } from 'testcafe';
-import { localAdmin, s3Admin } from '../roles';
+import { localAdmin } from '../roles';
 
 const migrate_new_items = 'idc_ingest_new_items';
 const migrate_new_collection = 'idc_ingest_new_collection';
@@ -8,6 +8,7 @@ const migrate_media_image = 'idc_ingest_media_image';
 
 const selectMigration = Selector('#edit-migrations');
 const migrationOptions = selectMigration.find('option');
+const status = Selector('.messages--status').withText('0 failed');
 
 const contentList = "https://islandora-idc.traefik.me/admin/content";
 
@@ -29,27 +30,30 @@ test('Verify original file and derivatives are in S3', async t => {
         .setFilesToUpload('#edit-source-file', [
             '../testdata/s3/s3-collection.csv'
         ])
-        .click('#edit-import');
+        .click('#edit-import')
+        .expect(status.withText(`done with "${migrate_new_collection}"`).exists).ok();
 
     await t
         .click(selectMigration)
-        .click(migrationOptions.withAttribute('value', migrate_new_items))
+        .click(migrationOptions.withAttribute('value', migrate_new_items));
 
     await t
         .setFilesToUpload('#edit-source-file', [
             '../testdata/s3/s3-islandora_object.csv'
         ])
-        .click('#edit-import');
+        .click('#edit-import')
+        .expect(status.withText(`done with "${migrate_new_items}"`).exists).ok();
 
     await t
         .click(selectMigration)
-        .click(migrationOptions.withAttribute('value', migrate_media_image))
+        .click(migrationOptions.withAttribute('value', migrate_media_image));
 
     await t
         .setFilesToUpload('#edit-source-file', [
             '../testdata/s3/s3-file.csv'
         ])
-        .click('#edit-import');
+        .click('#edit-import')
+        .expect(status.withText(`done with "${migrate_media_image}"`).exists).ok();
 
     // verify the presence of the islandora object
     const io_name = "S3 Repository Item One"
