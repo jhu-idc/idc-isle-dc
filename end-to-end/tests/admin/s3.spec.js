@@ -23,7 +23,7 @@ fixture`S3 Tests`
 test('Verify original file and derivatives are in S3', async t => {
 
     // migrate the test objects into Drupal
-    await doMigration(t, migrate_new_collection, '../testdata/s3.s3-collection.csv');
+    await doMigration(t, migrate_new_collection, '../testdata/s3/s3-collection.csv');
     await doMigration(t, migrate_new_items, '../testdata/s3/s3-islandora_object.csv');
     await doMigration(t, migrate_media_image, '../testdata/s3/s3-file.csv');
 
