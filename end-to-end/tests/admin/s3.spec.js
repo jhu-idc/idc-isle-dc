@@ -1,5 +1,6 @@
 import http from 'http';
 import { Selector } from 'testcafe';
+import { doMigration } from '../helpers';
 import { localAdmin } from '../roles';
 
 const migrate_new_items = 'idc_ingest_new_items';
@@ -22,38 +23,9 @@ fixture`S3 Tests`
 test('Verify original file and derivatives are in S3', async t => {
 
     // migrate the test objects into Drupal
-    await t
-        .click(selectMigration)
-        .click(migrationOptions.withAttribute('value', migrate_new_collection));
-
-    await t
-        .setFilesToUpload('#edit-source-file', [
-            '../testdata/s3/s3-collection.csv'
-        ])
-        .click('#edit-import')
-        .expect(status.withText(`done with "${migrate_new_collection}"`).exists).ok();
-
-    await t
-        .click(selectMigration)
-        .click(migrationOptions.withAttribute('value', migrate_new_items));
-
-    await t
-        .setFilesToUpload('#edit-source-file', [
-            '../testdata/s3/s3-islandora_object.csv'
-        ])
-        .click('#edit-import')
-        .expect(status.withText(`done with "${migrate_new_items}"`).exists).ok();
-
-    await t
-        .click(selectMigration)
-        .click(migrationOptions.withAttribute('value', migrate_media_image));
-
-    await t
-        .setFilesToUpload('#edit-source-file', [
-            '../testdata/s3/s3-file.csv'
-        ])
-        .click('#edit-import')
-        .expect(status.withText(`done with "${migrate_media_image}"`).exists).ok();
+    await doMigration(t, migrate_new_collection, '../testdata/s3.s3-collection.csv');
+    await doMigration(t, migrate_new_items, '../testdata/s3/s3-islandora_object.csv');
+    await doMigration(t, migrate_media_image, '../testdata/s3/s3-file.csv');
 
     // verify the presence of the islandora object
     const io_name = "S3 Repository Item One"
