@@ -13,4 +13,4 @@ docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_
 docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_FOLDER}":/tests testcafe/testcafe --screenshots path=/tests/reports/screenshots,takeOnFails=true chromium /tests/tests/ui/data-migrations.js
 docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_FOLDER}":/tests testcafe/testcafe --screenshots path=/tests/reports/screenshots,takeOnFails=true chromium /tests/tests/ui/data-media.js
 # 'UI' tests
-docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_FOLDER}":/tests testcafe/testcafe --screenshots path=/tests/reports/screenshots,takeOnFails=true --concurrency 2 chromium /tests/tests/ui/*.spec.js
+docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_FOLDER}":/tests testcafe/testcafe --screenshots path=/tests/reports/screenshots,takeOnFails=true chromium /tests/tests/ui/*.spec.js
