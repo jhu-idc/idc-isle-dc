@@ -8,9 +8,8 @@ TESTCAFE_TESTS_FOLDER="$(pwd)/end-to-end"
 startMigrationAssetsContainer
 
 # 'Admin' tests
-docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_FOLDER}":/tests testcafe/testcafe --screenshots path=/tests/reports/screenshots,takeOnFails=true --selector-timeout 60000 --assertion-timeout 60000 chromium /tests/tests/admin/**/*.spec.js
+docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_FOLDER}":/tests testcafe/testcafe --screenshots path=/tests/reports/screenshots,takeOnFails=true chromium /tests/tests/admin/**/*.spec.js
 # Add UI test data
 docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_FOLDER}":/tests testcafe/testcafe --screenshots path=/tests/reports/screenshots,takeOnFails=true chromium /tests/tests/ui/data-migrations.js
-docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_FOLDER}":/tests testcafe/testcafe --screenshots path=/tests/reports/screenshots,takeOnFails=true chromium /tests/tests/ui/data-media.js
 # 'UI' tests
 docker run --rm --network gateway --env-file "${ENV_FILE}" -v "${TESTCAFE_TESTS_FOLDER}":/tests testcafe/testcafe --screenshots path=/tests/reports/screenshots,takeOnFails=true chromium /tests/tests/ui/*.spec.js

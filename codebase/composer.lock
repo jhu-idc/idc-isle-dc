@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9fa31e0b10028b04270027f76fe6ac37",
+    "content-hash": "04abb3f7488d8e7898c50545ab165b32",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -7600,16 +7600,16 @@
         },
         {
             "name": "jhu_idc/idc_migration",
-            "version": "dev-exception-handling",
+            "version": "v1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/idc_migration.git",
-                "reference": "9cb12d90932e5de12eab5b645d98c4c159d20919"
+                "reference": "8f84792ed7813a56b85b4c9fa0ec20e57a95b334"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/idc_migration/zipball/9cb12d90932e5de12eab5b645d98c4c159d20919",
-                "reference": "9cb12d90932e5de12eab5b645d98c4c159d20919",
+                "url": "https://api.github.com/repos/jhu-idc/idc_migration/zipball/8f84792ed7813a56b85b4c9fa0ec20e57a95b334",
+                "reference": "8f84792ed7813a56b85b4c9fa0ec20e57a95b334",
                 "shasum": ""
             },
             "require": {
@@ -7639,9 +7639,9 @@
             ],
             "description": "Custom migration plugins for IDC",
             "support": {
-                "source": "https://github.com/jhu-idc/idc_migration/tree/exception-handling"
+                "source": "https://github.com/jhu-idc/idc_migration/tree/v1.0.7"
             },
-            "time": "2021-08-10T13:59:12+00:00"
+            "time": "2021-07-22T23:36:41+00:00"
         },
         {
             "name": "laminas/laminas-diactoros",
@@ -18277,8 +18277,7 @@
         "jhu-idc/idc_defaults": 20,
         "jhu-idc/idc_export": 20,
         "jhu-idc/idc_ui_module": 20,
-        "jhu-idc/islandora_defaults": 20,
-        "jhu_idc/idc_migration": 20
+        "jhu-idc/islandora_defaults": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

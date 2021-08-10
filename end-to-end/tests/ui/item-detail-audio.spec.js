@@ -6,9 +6,6 @@ fixture `Audio item with transcription`
 test('Audio player and PDF viewer are present', async (t) => {
   await t
     .expect(AudioPage.docViewer.exists).ok()
-    .expect(
-      AudioPage.docViewer.withAttribute('src', '/themes/contrib/idc-ui-theme/js/packages/pdf.js/web/viewer.html?file=/system/files/2021-08/fuji_acros.pdf').exists
-    ).ok()
     .expect(AudioPage.audioPlayer.exists).ok()
     .expect(AudioPage.audioSrc.exists).ok()
     .expect(

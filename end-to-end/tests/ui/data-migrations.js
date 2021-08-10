@@ -9,23 +9,17 @@ const uiMigrations = {
   persons: {
     id: 'idc_ingest_taxonomy_persons',
     index: 0,
-    files: [
-      'persons.csv'
-    ]
+    files: [ 'persons.csv' ]
   },
   accessTerms: {
     id: 'idc_ingest_taxonomy_islandora_accessterms',
     index: 1,
-    files: [
-      'access-terms.csv'
-    ]
+    files: [ 'access-terms.csv' ]
   },
   subjects: {
     id: 'idc_ingest_taxonomy_subject',
     index: 2,
-    files: [
-      'subject.csv'
-    ]
+    files: [ 'subject.csv' ]
   },
   collections: {
     id: 'idc_ingest_new_collection',
@@ -38,9 +32,27 @@ const uiMigrations = {
   items: {
     id: 'idc_ingest_new_items',
     index: 4,
-    files: [
-      'series-2-items-01.csv'
-    ]
+    files: [ 'series-2-items-01.csv' ]
+  },
+  images: {
+    id: 'idc_ingest_media_image',
+    index: 5,
+    files: [ 'media-images.csv' ]
+  },
+  documents: {
+    id: 'idc_ingest_media_document',
+    index: 6,
+    files: [ 'media-documents.csv' ]
+  },
+  audio: {
+    id: 'idc_ingest_media_audio',
+    index: 7,
+    files: [ 'media-audio.csv' ]
+  },
+  video: {
+    id: 'idc_ingest_media_video',
+    index: 8,
+    files: [ 'media-video.csv' ]
   }
 };
 
