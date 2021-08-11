@@ -140,6 +140,7 @@ export const migrationType = {
   NEW_COLLECTION: "idc_ingest_new_collection",
   NEW_MEDIA_FILE: "idc_ingest_media_file",
   NEW_MEDIA_IMAGE: "idc_ingest_media_image",
+  NEW_ACCESS_TERMS: "idc_ingest_taxonomy_islandora_accessterms"
 };
 
 /** Download the contents of a url into a file
@@ -176,6 +177,8 @@ export const uploadImageInUI = async (t, name, file) => {
   await t.click(Selector("#edit-field-media-use-17"));
   await t.expect(Selector("#edit-field-media-use-17").checked).ok();
   await t.setFilesToUpload("#edit-field-media-image-0-upload", file);
+  await t.debug();
+  await t.click(Selector("#edit-field-access-terms").find("option").withText("Group A"));
   await t.click("#edit-submit");
 };
 
