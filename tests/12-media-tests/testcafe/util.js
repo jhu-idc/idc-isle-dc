@@ -177,7 +177,6 @@ export const uploadImageInUI = async (t, name, file) => {
   await t.click(Selector("#edit-field-media-use-17"));
   await t.expect(Selector("#edit-field-media-use-17").checked).ok();
   await t.setFilesToUpload("#edit-field-media-image-0-upload", file);
-  await t.debug();
   await t.click(Selector("#edit-field-access-terms").find("option").withText("Group A"));
   await t.click("#edit-submit");
 };
