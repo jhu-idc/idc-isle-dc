@@ -397,7 +397,7 @@ process:
         bundle_key: vid
         value_key: field_unique_id
   field_display_hints:
-    plugin: parse_entity_lookup
+    plugin: entity_lookup
     source: display_hints
     entity_type: taxonomy_term
     bundle: islandora_display
