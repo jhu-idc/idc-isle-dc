@@ -118,15 +118,12 @@ export const doMigration = async (t, migrationType, file) => {
           return false;
         }
 
-        // Iterate through all messages and look for '0 failed'
-        let messages = Selector(".messages__list");
-        let message_count = await messages.count;
+        // look for the message containing "0 failed", if it's not there,
+        // then there was an issue
+        let msg = Selector(".messages__list").find(".messages__list").withText("0 failed");
+        await t.expect(msg.count).eql(1);
 
-        for (var i = 0; i < message_count; i++) {
-          await t.expect(messages.nth(i).innerText).contains("0 failed");
-        }
-
-        return message_count > 0;
+        return msg.count > 0;
       })
     )
     .eql(true, "Could not perform migration!");

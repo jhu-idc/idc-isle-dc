@@ -879,7 +879,8 @@ func Test_VerifyRepositoryItem(t *testing.T) {
 	for i := range relData.AccessRights.Data {
 		expectedAccessRights := &model.JsonApiAccessRights{}
 		relData.AccessRights.Data[i].Resolve(t, expectedAccessRights)
-		assert.Equal(t, expectedJson.AccessRights[i], expectedAccessRights.JsonApiData[0].JsonApiAttributes.Name)
+    //assert.Equal(t, expectedJson.AccessRights[i], expectedAccessRights.JsonApiData[0].JsonApiAttributes.Name)
+		assert.Contains(t, expectedJson.AccessRights, expectedAccessRights.JsonApiData[0].JsonApiAttributes.Name)
 	}
 
 	// Access Terms
@@ -888,7 +889,7 @@ func Test_VerifyRepositoryItem(t *testing.T) {
 	for i := range relData.AccessTerms.Data {
 		expectedAccessTerms := &model.JsonApiIslandoraAccessTerms{}
 		relData.AccessTerms.Data[i].Resolve(t, expectedAccessTerms)
-		assert.Equal(t, expectedJson.AccessTerms[i], expectedAccessTerms.JsonApiData[0].JsonApiAttributes.Name)
+		assert.Contains(t, expectedJson.AccessTerms, expectedAccessTerms.JsonApiData[0].JsonApiAttributes.Name)
 	}
 
 	// Alt title
