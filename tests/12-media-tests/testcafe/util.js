@@ -167,7 +167,7 @@ export const download = async (uri) => {
  * @param {string} name Name of the repository object for whom to upload an image to
  * @param {string} file path of the file to upload, on disk.
  */
-export const uploadImageInUI = async (t, name, file) => {
+export const uploadImageInUI = async (t, name, file, access) => {
   await navigateToMediaPage(t, name);
   await t.click(
     Selector("#block-idcui-local-tasks").find("a").withText("Media")
@@ -177,7 +177,7 @@ export const uploadImageInUI = async (t, name, file) => {
   await t.click(Selector("#edit-field-media-use-17"));
   await t.expect(Selector("#edit-field-media-use-17").checked).ok();
   await t.setFilesToUpload("#edit-field-media-image-0-upload", file);
-  await t.click(Selector("#edit-field-access-terms").find("option").withText("Group A"));
+  await t.click(Selector("#edit-field-access-terms").find("option").withText(access));
   await t.click("#edit-submit");
 };
 
@@ -187,7 +187,7 @@ export const uploadImageInUI = async (t, name, file) => {
  * @param {string} name Name of the repository object for whom to upload a file to
  * @param {string} file path of the file to upload, on disk.
  */
-export const uploadFileInUI = async (t, name, file) => {
+export const uploadFileInUI = async (t, name, file, access) => {
   await navigateToMediaPage(t, name);
   await t.click(
     Selector("#block-idcui-local-tasks").find("a").withText("Media")
@@ -196,6 +196,7 @@ export const uploadFileInUI = async (t, name, file) => {
   await t.click(Selector(".admin-list").find("a").withText("local files"));
   await t.click(Selector("#edit-field-media-use-17"));
   await t.expect(Selector("#edit-field-media-use-17").checked).ok();
+  await t.click(Selector("#edit-field-access-terms").find("option").withText(access));
   await t.setFilesToUpload("#edit-field-media-file-0-upload", file);
   await t.click("#edit-submit");
 };
