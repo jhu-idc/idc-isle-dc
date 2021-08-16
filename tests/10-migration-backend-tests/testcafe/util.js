@@ -233,8 +233,9 @@ export const tryUntilTrue = async (
 ) => {
   console.log("tryUntilTrue timeout: ", deadline_ms);
   if (deadline_ms == undefined) {
-    deadline_ms = 5000;
+    deadline_ms = 30000;
   }
+  console.log("tryUntilTrue timeout: ", deadline_ms);
   let expired = false;
   setTimeout(() => {
     expired = true;
