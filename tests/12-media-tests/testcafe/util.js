@@ -227,9 +227,6 @@ export const tryUntilTrue = async (
   func,
   deadline_ms = process.env.TEST_OPERATION_TIMEOUT_MS
 ) => {
-  if (deadline_ms == undefined) {
-+    deadline_ms = 5000;
-+  }
   let expired = false;
   setTimeout(() => {
     expired = true;
