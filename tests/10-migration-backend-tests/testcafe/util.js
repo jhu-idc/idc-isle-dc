@@ -179,8 +179,9 @@ export const download = async (uri) => {
  * @param {TestController} t Testcafe test controller
  * @param {string} name Name of the repository object for whom to upload an image to
  * @param {string} file path of the file to upload, on disk.
+ * @param {string} access term that should be applied to the media that's created
  */
-export const uploadImageInUI = async (t, name, file, access) => {
+export const uploadImageInUI = async (t, name, file, accessTerm) => {
   await navigateToMediaPage(t, name);
   await t.click(
     Selector("#block-idcui-local-tasks").find("a").withText("Media")
@@ -189,7 +190,7 @@ export const uploadImageInUI = async (t, name, file, access) => {
   await t.click(Selector(".admin-list").find("a").withText("local images"));
   await t.click(Selector("#edit-field-media-use-17"));
   await t.expect(Selector("#edit-field-media-use-17").checked).ok();
-  await t.click(Selector("#edit-field-access-terms").find("option").withText(access));
+  await t.click(Selector("#edit-field-access-terms").find("option").withText(accessTerm));
   await t.setFilesToUpload("#edit-field-media-image-0-upload", file);
   await t.click("#edit-submit");
 };
@@ -199,8 +200,9 @@ export const uploadImageInUI = async (t, name, file, access) => {
  * @param {TestController} t Testcafe test controller
  * @param {string} name Name of the repository object for whom to upload a file to
  * @param {string} file path of the file to upload, on disk.
+ * @param {string} access term that should be applied to the media that's created
  */
-export const uploadFileInUI = async (t, name, file, access) => {
+export const uploadFileInUI = async (t, name, file, accessTerm) => {
   await navigateToMediaPage(t, name);
   await t.click(
     Selector("#block-idcui-local-tasks").find("a").withText("Media")
@@ -209,7 +211,7 @@ export const uploadFileInUI = async (t, name, file, access) => {
   await t.click(Selector(".admin-list").find("a").withText("local files"));
   await t.click(Selector("#edit-field-media-use-17"));
   await t.expect(Selector("#edit-field-media-use-17").checked).ok();
-  await t.click(Selector("#edit-field-access-terms").find("option").withText(access));
+  await t.click(Selector("#edit-field-access-terms").find("option").withText(accessTerm));
   await t.setFilesToUpload("#edit-field-media-file-0-upload", file);
   await t.click("#edit-submit");
 };
