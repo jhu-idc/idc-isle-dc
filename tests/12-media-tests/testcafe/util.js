@@ -105,22 +105,28 @@ export const doMigration = async (t, migrationType, file) => {
   await t
     .expect(
       await tryUntilTrue(async () => {
-        let status_present = await Selector(".messages--status").count;
-        let error_present = await Selector(".messages--error").count;
+        let status_div = await Selector(".messages--status", { timeout: 1000});
+        let status_count = await status_div.count;
+        let error_div = await Selector(".messages--error", { timeout: 1000});
+        let error_count = await error_div.count;
+
+        console.log("status: ", status_count, ", error: ", error_count);
 
         // If there is no status block, we're not done
-        if (status_present < 1) {
+        if (status_count < 1) {
+          console.log("no status section present");
           return false;
         }
 
         // Something failed and was kind enough to leave a message
-        if (error_present > 0) {
-          let error_count = await Selector(".messages--error").find(".messages__list").count;
+        if (error_count > 0) {
+          let error_msg_count = await Selector(".messages--error").find(".messages__list").count;
           let update_warning_present = await Selector(".messages--error")
             .find(".messages__list")
             .withText("There is a security update available for your version of Drupal.").count;
 
-          if (update_warning_present == 0 || update_warning_present == 1 && error_count > 1) {
+          console.log("error message count: ", error_msg_count);
+          if (update_warning_present == 0 || update_warning_present == 1 && error_msg_count > 1) {
             throw "Error performing migrations!";
           } else {
             console.log("Ignoring Drupal Update message");
@@ -227,6 +233,11 @@ export const tryUntilTrue = async (
   func,
   deadline_ms = process.env.TEST_OPERATION_TIMEOUT_MS
 ) => {
+  console.log("tryUntilTrue timeout: ", deadline_ms);
+  if (deadline_ms == undefined) {
+    deadline_ms = 30000;
+  }
+  console.log("tryUntilTrue timeout: ", deadline_ms);
   let expired = false;
   setTimeout(() => {
     expired = true;
