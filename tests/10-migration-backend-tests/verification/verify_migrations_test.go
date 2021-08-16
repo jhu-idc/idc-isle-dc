@@ -879,7 +879,6 @@ func Test_VerifyRepositoryItem(t *testing.T) {
 	for i := range relData.AccessRights.Data {
 		expectedAccessRights := &model.JsonApiAccessRights{}
 		relData.AccessRights.Data[i].Resolve(t, expectedAccessRights)
-    //assert.Equal(t, expectedJson.AccessRights[i], expectedAccessRights.JsonApiData[0].JsonApiAttributes.Name)
 		assert.Contains(t, expectedJson.AccessRights, expectedAccessRights.JsonApiData[0].JsonApiAttributes.Name)
 	}
 

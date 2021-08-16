@@ -97,36 +97,47 @@ export const doMigration = async (t, migrationType, file) => {
   // migrate the test objects into Drupal
   await t
     .click(selectMigration)
-    .click(migrationOptions.withAttribute("value", migrationType));
-
-  await t.setFilesToUpload("#edit-source-file", [file]).click("#edit-import");
+    .click(migrationOptions.withAttribute("value", migrationType))
+    .setFilesToUpload("#edit-source-file", [file])
+    .click("#edit-import");
 
   // Now, wait until we see messages on screen that everything has migrated successfully
   await t
     .expect(
       await tryUntilTrue(async () => {
-        let error_present = await Selector(".messages--error").count;
         let status_present = await Selector(".messages--status").count;
-
-        // Something failed and was kind enough to leave a message
-        if (error_present > 0) {
-          throw "Error performing migrations!";
-        }
+        let error_present = await Selector(".messages--error").count;
 
         // If there is no status block, we're not done
         if (status_present < 1) {
           return false;
         }
 
-        // look for the message containing '0 failed', if it's not there,
-        // then there was an issue
-        let msg = Selector(".messages__list").find(".messages__list").withText("0 failed");
-        await t.expect(msg.count).eql(1);
+        // Something failed and was kind enough to leave a message
+        if (error_present > 0) {
+          let error_count = await Selector(".messages--error").find(".messages__list").count;
+          let update_warning_present = await Selector(".messages--error")
+            .find(".messages__list")
+            .withText("There is a security update available for your version of Drupal.").count;
 
-        return msg.count > 0;
+          if (update_warning_present == 0 || update_warning_present == 1 && error_count > 1) {
+            throw "Error performing migrations!";
+          } else {
+            console.log("Ignoring Drupal Update message");
+          }
+        }
+
+        // look for the message containing '0 failed', if it's not there, then there was an issue
+        await t.expect(
+          Selector(".messages")
+            .withText(`done with "${migrationType}"`)
+            .withText('0 failed').count
+        ).eql(1, "Migration didn't finish successfully: some objects failed to import")
+        .then(() => console.log(`Migration Done => ${migrationType} : ${file}`));
+
+        return true;
       })
-    )
-    .eql(true, "Could not perform migration!");
+    ).eql(true, "Could not perform migration!");
 };
 
 /**
@@ -214,6 +225,9 @@ export const tryUntilTrue = async (
   func,
   deadline_ms = process.env.TEST_OPERATION_TIMEOUT_MS
 ) => {
+  if (deadline_ms == undefined) {
+    deadline_ms = 5000;
+  }
   let expired = false;
   setTimeout(() => {
     expired = true;
