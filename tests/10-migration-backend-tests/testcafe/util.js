@@ -231,6 +231,7 @@ export const tryUntilTrue = async (
   func,
   deadline_ms = process.env.TEST_OPERATION_TIMEOUT_MS
 ) => {
+  console.log("tryUntilTrue timeout: ", deadline_ms);
   if (deadline_ms == undefined) {
     deadline_ms = 5000;
   }
