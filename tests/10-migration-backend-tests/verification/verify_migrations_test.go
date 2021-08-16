@@ -1575,7 +1575,7 @@ func Test_VerifyMediaVideo(t *testing.T) {
 	for i := range video.JsonApiRelationships.AccessTerms.Data {
 		use := model.JsonApiIslandoraAccessTerms{}
 		video.JsonApiRelationships.AccessTerms.Data[i].Resolve(t, &use)
-		assert.Contains(t, expectedJson.AccessTerms[i], use.JsonApiData[0].JsonApiAttributes.Name)
+		assert.Contains(t, expectedJson.AccessTerms, use.JsonApiData[0].JsonApiAttributes.Name)
 	}
 
 	assert.Equal(t, 2, len(expectedJson.MediaUse))
