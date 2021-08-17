@@ -100,7 +100,7 @@ test('Perform Subject Migration', async t => {
 
   await doMigration(
     t,
-    migrate_copyrightanduse_taxonomy,
+    migrate_subject_taxonomy,
     './migrations/subject.csv'
   );
 
@@ -144,6 +144,12 @@ test('Perform Corporate Body Taxonomy Migration', async t => {
     './migrations/corporatebody-01.csv'
   );
 
+  await doMigration(
+    t,
+    migrate_corporatebody_taxonomy,
+    './migrations/corporatebody-02.csv'
+  );
+
 });
 
 test('Perform Collection Migration', async t => {
@@ -152,6 +158,12 @@ test('Perform Collection Migration', async t => {
     t,
     migrate_new_collection,
     './migrations/collection-01.csv'
+  );
+
+  await doMigration(
+    t,
+    migrate_new_collection,
+    './migrations/collection-02.csv'
   );
 
 });
