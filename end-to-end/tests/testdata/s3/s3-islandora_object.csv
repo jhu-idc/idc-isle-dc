@@ -1,2 +1,2 @@
 unique_id,node_id,title,member_of,model
-,s3_io_01,S3 Repository Item One,:::S3 Test Collection,Image
+s3_io_01,,S3 Repository Item One,:::s3-collection-01

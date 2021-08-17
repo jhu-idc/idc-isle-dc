@@ -1,6 +1,6 @@
 import http from 'http';
 import { Selector } from 'testcafe';
-import { doMigration } from '../helpers';
+import { migrate } from '../helpers';
 import { localAdmin } from '../roles';
 
 const migrate_new_items = 'idc_ingest_new_items';
@@ -23,9 +23,9 @@ fixture`S3 Tests`
 test('Verify original file and derivatives are in S3', async t => {
 
     // migrate the test objects into Drupal
-    await doMigration(t, migrate_new_collection, '../testdata/s3/s3-collection.csv');
-    await doMigration(t, migrate_new_items, '../testdata/s3/s3-islandora_object.csv');
-    await doMigration(t, migrate_media_image, '../testdata/s3/s3-file.csv');
+    await migrate(t, migrate_new_collection, '../testdata/s3/s3-collection.csv');
+    await migrate(t, migrate_new_items, '../testdata/s3/s3-islandora_object.csv');
+    await migrate(t, migrate_media_image, '../testdata/s3/s3-file.csv');
 
     // verify the presence of the islandora object
     const io_name = "S3 Repository Item One"
@@ -64,7 +64,7 @@ test('Verify original file and derivatives are in S3', async t => {
         console.log("Derivatives haven't appeared.  Sleeping for 30 seconds, then trying again ...")
         // sleep 30 seconds, refresh the page
         await t.wait(30000);
-        await t.eval(() => location.reload(true));
+        await t.eval(() => location.reload());
     }
 
     await t.expect(service_derivative.count).eql(1);

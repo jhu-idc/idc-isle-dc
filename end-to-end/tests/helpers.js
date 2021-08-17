@@ -38,80 +38,56 @@ export const download = async (uri) => {
   return saveTo;
 };
 
-/** Tries given function repeatedly until it returns true; throwing an exception if success isn't achieved until deadline_ms milliseconds
+/**
+ * This function assumes the test is already on the '/migrate_source_ui' page.
  *
- * @param {function} func function to call until it returns a truthy result, or the deadline passes
- * @param {number} deadline_ms deadline in miliseconds
- * @returns
+ * Execute a migration in the UI, then wait for a status message to appear
+ * on screen comfirming it was run. This makes no distinction between a
+ * successfull or failed migration.
+ *
+ * Note, if a migration is run multiple times, the system should overwrite or
+ * update already existing nodes.
+ *
+ * @param t testcafe class
+ * @param {string} migrationId system ID of the desired migration
+ * @param {string} sourceFile file path of the migration data
+ * @param {number} timeout (OPTIONAL) time in ms to wait for migration status message
+ *                  Default: 10000 (10 seconds)
  */
- export const tryUntilTrue = async (
-  func,
-  deadline_ms = process.env.TEST_OPERATION_TIMEOUT_MS
-) => {
-  let expired = false;
-  setTimeout(() => {
-    expired = true;
-  }, deadline_ms);
+export async function migrate(t, migrationId, sourceFile, timeout = 10000) {
+  const selectMigration = Selector('#edit-migrations');
+  const migrationOptions = selectMigration.find('option');
+  const fileInput = Selector('#edit-source-file');
 
-  for (;;) {
-    if (expired) {
-      return false;
-    }
-
-    if (await func()) {
-      return true;
-    }
-  }
-};
-
-/** Perform a migration using the given file and migration type
- *
- * There is no specific feedback as to the success or failure of this operation, unless an exception is thrown
- *
- * @param {TestController} t Testcafe controller
- * @param {string} migrationType (e.g. idc_ingest_media_file, idc_ingest_new_collection)
- * @param {string} file Path to the cvs file to upload for migration
- */
- export const doMigration = async (t, migrationType, file) => {
-  await t.navigateTo("https://islandora-idc.traefik.me/migrate_source_ui");
-
-  const selectMigration = Selector("#edit-migrations");
-  const migrationOptions = selectMigration.find("option");
-
-  // migrate the test objects into Drupal
   await t
     .click(selectMigration)
-    .click(migrationOptions.withAttribute("value", migrationType));
-
-  await t.setFilesToUpload("#edit-source-file", [file]).click("#edit-import");
-
-  // Now, wait until we see messages on screen that everything has migrated successfully
-  await t
+    .click(migrationOptions.withAttribute('value', migrationId))
+    .setFilesToUpload(fileInput, [ sourceFile ])
+    .click('#edit-import')
+    // .takeScreenshot(`Migration-result-${migrationId}.png`)
     .expect(
-      await tryUntilTrue(async () => {
-        let error_present = await Selector(".messages--error").count;
-        let status_present = await Selector(".messages--status").count;
-
-        // Something failed and was kind enough to leave a message
-        if (error_present > 0) {
-          throw "Error performing migrations!";
-        }
-
-        // If there is no status block, we're not done
-        if (status_present < 1) {
-          return false;
-        }
-
-        // Iterate through all messages and look for '0 failed'
-        let messages = Selector(".messages__list");
-        let message_count = await messages.count;
-
-        for (var i = 0; i < message_count; i++) {
-          await t.expect(messages.nth(i).innerText).contains("0 failed");
-        }
-
-        return message_count > 0;
-      })
+      Selector('.messages--status')
+        .withText(`done with "${migrationId}"`)
+        .withText('0 failed')
+        .exists
+    ).ok(
+      `Failed migration => (${migrationId} : ${sourceFile})`,
+      { timeout: timeout }
     )
-    .eql(true, "Could not perform migration!");
-};
+    .then(() => console.log(`  - Migration done => ${migrationId} : ${sourceFile}`))
+    .catch(async (e) => {
+      const messagesLink = Selector('.messages a').withText('here');
+      const errorScreenshot = `Migration_error_${migrationId}--${sourceFile}.png`;
+
+      if (messagesLink.exists) {
+        await t
+          .click(messagesLink)
+          .takeScreenshot(errorScreenshot);
+      } else {
+        await t.takeScreenshot(errorScreenshot);
+      }
+
+      console.log(`#### Something went wrong: see screenshot ${errorScreenshot} ####`);
+      console.log(e);
+    });
+}

@@ -1,8 +1,6 @@
-import { getCurrentUrl } from '../helpers';
+import { getCurrentUrl, migrate } from '../helpers';
 import { localAdmin } from '../roles';
 import { Selector } from 'testcafe';
-
-const submitId = '#edit-import';
 
 const uiSourcePrefix = '../testdata/ui/';
 const uiMigrations = {
@@ -68,61 +66,6 @@ fixture `Run UI Data Migrations`
   .beforeEach(async (t) => {
     await t.useRole(localAdmin);
   });
-
-
-/**
- * This function assumes the test is already on the '/migrate_source_ui' page.
- *
- * Execute a migration in the UI, then wait for a status message to appear
- * on screen comfirming it was run. This makes no distinction between a
- * successfull or failed migration.
- *
- * Note, if a migration is run multiple times, the system should overwrite or
- * update already existing nodes.
- *
- * @param t testcafe class
- * @param {string} migrationId system ID of the desired migration
- * @param {string} sourceFile file path of the migration data
- * @param {number} timeout (OPTIONAL) time in ms to wait for migration status message
- *                  Default: 10000 (10 seconds)
- */
- async function migrate(t, migrationId, sourceFile, timeout = 10000) {
-  const selectMigration = Selector('#edit-migrations');
-  const migrationOptions = selectMigration.find('option');
-  const fileInput = Selector('#edit-source-file');
-
-  await t
-    .click(selectMigration)
-    .click(migrationOptions.withAttribute('value', migrationId))
-    .setFilesToUpload(fileInput, [ sourceFile ])
-    .click(submitId)
-    // .takeScreenshot(`Migration-result-${migrationId}.png`)
-    .expect(
-      Selector('.messages--status')
-        .withText(`done with "${migrationId}"`)
-        .withText('0 failed')
-        .exists
-    ).ok(
-      `Failed migration => (${migrationId} : ${sourceFile})`,
-      { timeout: timeout }
-    )
-    .then(() => console.log(`  - Migration done => ${migrationId} : ${sourceFile}`))
-    .catch(async (e) => {
-      const messagesLink = Selector('.messages a').withText('here');
-      const errorScreenshot = `Migration_error_${migrationId}--${sourceFile}.png`;
-
-      if (messagesLink.exists) {
-        await t
-          .click(messagesLink)
-          .takeScreenshot(errorScreenshot);
-      } else {
-        await t.takeScreenshot(errorScreenshot);
-      }
-
-      console.log(`#### Something went wrong: see screenshot ${errorScreenshot} ####`);
-      console.log(e);
-    });
-}
 
 /**
  * Perform a set of migrations to ready the system with data to test UI features
