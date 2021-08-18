@@ -1195,6 +1195,9 @@ func Test_VerifyDuplicateMediaAndFile(t *testing.T) {
 	// will reference the same content.
 	name := "Fuji Acros Datasheet"
 
+	drupalAdmin := env.GetEnvOr("DRUPAL_DEFAULT_ACCOUNT_NAME", "admin")
+	drupalPass := env.GetEnvOr("DRUPAL_DEFAULT_ACCOUNT_PASSWORD", "password")
+
 	u := &jsonapi.JsonApiUrl{
 		T:            t,
 		BaseUrl:      DrupalBaseurl,
@@ -1202,6 +1205,8 @@ func Test_VerifyDuplicateMediaAndFile(t *testing.T) {
 		DrupalBundle: "document",
 		Filter:       "name",
 		Value:        name,
+		Username:     drupalAdmin,
+		Password:     drupalPass,
 	}
 
 	res := model.JsonApiDocumentMedia{}
@@ -1230,7 +1235,7 @@ func Test_VerifyDuplicateMediaAndFile(t *testing.T) {
 
 		// (while we're ranging over the response data, resolve the file entities)
 		file := model.JsonApiFile{}
-		res.JsonApiData[i].JsonApiRelationships.File.Data.Resolve(t, &file)
+		res.JsonApiData[i].JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPassq)
 		resolvedFiles = append(resolvedFiles, file)
 	}
 
