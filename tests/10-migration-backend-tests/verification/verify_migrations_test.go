@@ -1235,7 +1235,7 @@ func Test_VerifyDuplicateMediaAndFile(t *testing.T) {
 
 		// (while we're ranging over the response data, resolve the file entities)
 		file := model.JsonApiFile{}
-		res.JsonApiData[i].JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPassq)
+		res.JsonApiData[i].JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 		resolvedFiles = append(resolvedFiles, file)
 	}
 
