@@ -6,6 +6,6 @@ fixture `Video item detail`
 test('Video player is present', async (t) => {
   await t
     .expect(VideoPage.viewer.exists).ok('Video player not found')
-    .expect(VideoPage.source.withAttribute('src', '/system/files/2021-08/55-Service%20File.mp4').exists).ok()
-    .expect(VideoPage.source.withAttribute('type', 'video/mp4').exists).ok();
+    .expect(VideoPage.source.withAttribute('type', 'video/mp4').exists).ok()
+    .expect((await VideoPage.source.getAttribute('src')).includes('Service%20File.mp4')).ok();
 });

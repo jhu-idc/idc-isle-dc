@@ -8,8 +8,6 @@ test('Audio player and PDF viewer are present', async (t) => {
     .expect(AudioPage.docViewer.exists).ok()
     .expect(AudioPage.audioPlayer.exists).ok()
     .expect(AudioPage.audioSrc.exists).ok()
-    .expect(
-      AudioPage.audioSrc.withAttribute('src', '/system/files/2021-08/56-Service%20File.mp3').exists
-    ).ok()
-    .expect(AudioPage.audioSrc.withAttribute('type', 'audio/mpeg').exists).ok();
+    .expect(AudioPage.audioSrc.withAttribute('type', 'audio/mpeg').exists).ok()
+    .expect((await AudioPage.audioSrc.getAttribute('src')).includes('Service%20File.mp3')).ok();
 });
