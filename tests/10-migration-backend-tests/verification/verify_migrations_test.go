@@ -34,6 +34,11 @@ const (
 	AssetsBaseUrl = "BASE_ASSETS_URL"
 )
 
+var (
+	drupalAdmin = env.GetEnvOr("DRUPAL_DEFAULT_ACCOUNT_NAME", "admin")
+	drupalPass  = env.GetEnvOr("DRUPAL_DEFAULT_ACCOUNT_PASSWORD", "password")
+)
+
 func TestMain(m *testing.M) {
 	var (
 		res *http.Response
@@ -1195,9 +1200,6 @@ func Test_VerifyDuplicateMediaAndFile(t *testing.T) {
 	// will reference the same content.
 	name := "Fuji Acros Datasheet"
 
-	drupalAdmin := env.GetEnvOr("DRUPAL_DEFAULT_ACCOUNT_NAME", "admin")
-	drupalPass := env.GetEnvOr("DRUPAL_DEFAULT_ACCOUNT_PASSWORD", "password")
-
 	u := &jsonapi.JsonApiUrl{
 		T:            t,
 		BaseUrl:      DrupalBaseurl,
@@ -1479,11 +1481,11 @@ func Test_VerifyMediaExtractedText(t *testing.T) {
 	assert.Equal(t, expectedJson.MediaOf, mediaOf.JsonApiData[0].JsonApiAttributes.Title)
 
 	file := model.JsonApiFile{}
-	ext.JsonApiRelationships.File.Data.Resolve(t, &file)
+	ext.JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 	assert.EqualValues(t, expectedJson.Uri, file.JsonApiData[0].JsonApiAttributes.Uri)
 	assert.Equal(t, expectedJson.Size, file.JsonApiData[0].JsonApiAttributes.FileSize)
 	assert.Equal(t, expectedJson.MimeType, file.JsonApiData[0].JsonApiAttributes.MimeType)
-	assert.Equal(t, expectedJson.Name, file.JsonApiData[0].JsonApiAttributes.Filename)
+	assert.Equal(t, expectedJson.OriginalName, file.JsonApiData[0].JsonApiAttributes.Filename)
 }
 
 func Test_VerifyMediaFile(t *testing.T) {
@@ -1541,11 +1543,11 @@ func Test_VerifyMediaFile(t *testing.T) {
 	assert.Equal(t, expectedJson.MediaOf, mediaOf.JsonApiData[0].JsonApiAttributes.Title)
 
 	file := model.JsonApiFile{}
-	genericFile.JsonApiRelationships.File.Data.Resolve(t, &file)
+	genericFile.JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 	assert.EqualValues(t, expectedJson.Uri, file.JsonApiData[0].JsonApiAttributes.Uri)
 	assert.Equal(t, expectedJson.Size, file.JsonApiData[0].JsonApiAttributes.FileSize)
 	assert.Equal(t, expectedJson.MimeType, file.JsonApiData[0].JsonApiAttributes.MimeType)
-	assert.Equal(t, expectedJson.Name, file.JsonApiData[0].JsonApiAttributes.Filename)
+	assert.Equal(t, expectedJson.OriginalName, file.JsonApiData[0].JsonApiAttributes.Filename)
 }
 
 func Test_VerifyMediaAudio(t *testing.T) {
@@ -1603,11 +1605,11 @@ func Test_VerifyMediaAudio(t *testing.T) {
 	assert.Equal(t, expectedJson.MediaOf, mediaOf.JsonApiData[0].JsonApiAttributes.Title)
 
 	file := model.JsonApiFile{}
-	audio.JsonApiRelationships.File.Data.Resolve(t, &file)
+	audio.JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 	assert.EqualValues(t, expectedJson.Uri, file.JsonApiData[0].JsonApiAttributes.Uri)
 	assert.Equal(t, expectedJson.Size, file.JsonApiData[0].JsonApiAttributes.FileSize)
 	assert.Equal(t, expectedJson.MimeType, file.JsonApiData[0].JsonApiAttributes.MimeType)
-	assert.Equal(t, expectedJson.Name, file.JsonApiData[0].JsonApiAttributes.Filename)
+	assert.Equal(t, expectedJson.OriginalName, file.JsonApiData[0].JsonApiAttributes.Filename)
 }
 
 func Test_VerifyMediaVideo(t *testing.T) {
@@ -1665,11 +1667,11 @@ func Test_VerifyMediaVideo(t *testing.T) {
 	assert.Equal(t, expectedJson.MediaOf, mediaOf.JsonApiData[0].JsonApiAttributes.Title)
 
 	file := model.JsonApiFile{}
-	video.JsonApiRelationships.File.Data.Resolve(t, &file)
+	video.JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 	assert.EqualValues(t, expectedJson.Uri, file.JsonApiData[0].JsonApiAttributes.Uri)
 	assert.Equal(t, expectedJson.Size, file.JsonApiData[0].JsonApiAttributes.FileSize)
 	assert.Equal(t, expectedJson.MimeType, file.JsonApiData[0].JsonApiAttributes.MimeType)
-	assert.Equal(t, expectedJson.Name, file.JsonApiData[0].JsonApiAttributes.Filename)
+	assert.Equal(t, expectedJson.OriginalName, file.JsonApiData[0].JsonApiAttributes.Filename)
 }
 
 func Test_VerifyMediaRemoteVideo(t *testing.T) {
