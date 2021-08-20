@@ -1407,8 +1407,8 @@ func Test_VerifyMediaImage(t *testing.T) {
 
 	file := model.JsonApiFile{}
 	file2 := model.JsonApiFile{}
-	res.JsonApiData[0].JsonApiRelationships.File.Data.Resolve(t, &file)
-	res2.JsonApiData[0].JsonApiRelationships.File.Data.Resolve(t, &file2)
+	res.JsonApiData[0].JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
+	res2.JsonApiData[0].JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file2, drupalAdmin, drupalPass)
 
 	// check that the first file binary can be accessed where its media is restricted access == false
 	// TODO obtain from env
