@@ -77,13 +77,14 @@ process:
   field_media_document/target_id:
     plugin: file_import
     source: '@_download_filepath'
+    uid: constants/ADMIN
     move: true
     reuse: false
     rename: false
     id_only: true
     destination: '@_destination_drupalpath'
     mimetype: mime_type
-    filename: name
+    filename: '@_url_filename'
   field_mime_type: mime_type
   name/value: name
   field_media_of:
@@ -109,8 +110,10 @@ process:
       bundle: islandora_media_use
       bundle_key: vid
       value_key: name
+  field_restricted_access: restricted_access
   status: constants/STATUS
 destination:
   plugin: 'entity:media'
   default_bundle: document
+  validate: true
 migration_dependencies: null

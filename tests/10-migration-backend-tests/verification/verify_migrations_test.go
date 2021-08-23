@@ -4,18 +4,19 @@ import (
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"github.com/jhu-idc/idc-golang/drupal/env"
-	"github.com/jhu-idc/idc-golang/drupal/fs"
-	"github.com/jhu-idc/idc-golang/drupal/jsonapi"
-	"github.com/jhu-idc/idc-golang/drupal/model"
-	. "github.com/logrusorgru/aurora/v3"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/jhu-idc/idc-golang/drupal/env"
+	"github.com/jhu-idc/idc-golang/drupal/fs"
+	"github.com/jhu-idc/idc-golang/drupal/jsonapi"
+	"github.com/jhu-idc/idc-golang/drupal/model"
+	. "github.com/logrusorgru/aurora/v3"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -31,6 +32,11 @@ const (
 
 	// Env var name for the base URL to media assets
 	AssetsBaseUrl = "BASE_ASSETS_URL"
+)
+
+var (
+	drupalAdmin = env.GetEnvOr("DRUPAL_DEFAULT_ACCOUNT_NAME", "admin")
+	drupalPass  = env.GetEnvOr("DRUPAL_DEFAULT_ACCOUNT_PASSWORD", "password")
 )
 
 func TestMain(m *testing.M) {
@@ -99,6 +105,7 @@ func verifyTaxonomyTermPerson(t *testing.T, fileName string, restOfName string) 
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.PrimaryName, actual.JsonApiAttributes.PrimaryPartOfName)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.ElementsMatch(t, expectedJson.RestOfName, actual.JsonApiAttributes.PreferredNameRest)
 	assert.ElementsMatch(t, expectedJson.Prefix, actual.JsonApiAttributes.PreferredNamePrefix)
 	assert.ElementsMatch(t, expectedJson.Suffix, actual.JsonApiAttributes.PreferredNameSuffix)
@@ -164,6 +171,7 @@ func Test_VerifyTaxonomyTermLongNamePerson(t *testing.T) {
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.PrimaryName, actual.JsonApiAttributes.PrimaryPartOfName)
 	assert.ElementsMatch(t, expectedJson.RestOfName, actual.JsonApiAttributes.PreferredNameRest)
 	assert.ElementsMatch(t, expectedJson.AltName, actual.JsonApiAttributes.PersonAlternateName)
@@ -196,6 +204,7 @@ func Test_VerifyTaxonomyTermAccessRights(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -247,6 +256,7 @@ func verifyTaxonomyTermIslandoraAccessTerms(t *testing.T, fileName string) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -294,6 +304,7 @@ func Test_VerifyTaxonomyCopyrightAndUse(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -330,6 +341,7 @@ func Test_VerifyTaxonomyTermResourceType(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -368,6 +380,7 @@ func Test_VerifyTaxonomyTermFamily(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -431,6 +444,7 @@ func Test_VerifyTaxonomyTermGenre(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -467,6 +481,7 @@ func Test_VerifyTaxonomyTermGeolocation(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -511,6 +526,7 @@ func Test_VerifyTaxonomySubject(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -547,6 +563,7 @@ func Test_VerifyTaxonomyTermLanguage(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -584,6 +601,7 @@ func Test_VerifyTaxonomyTermCorporateBody(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Name, actual.JsonApiAttributes.Name)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.Description.Format, actual.JsonApiAttributes.Description.Format)
 	assert.Equal(t, expectedJson.Description.Value, actual.JsonApiAttributes.Description.Value)
 	assert.Equal(t, expectedJson.Description.Processed, actual.JsonApiAttributes.Description.Processed)
@@ -654,6 +672,7 @@ func Test_VerifyCollection(t *testing.T) {
 	assert.Equal(t, expectedJson.Type, actual.Type.Entity())
 	assert.Equal(t, expectedJson.Bundle, actual.Type.Bundle())
 	assert.Equal(t, expectedJson.Title, actual.JsonApiAttributes.Title)
+	assert.Equal(t, expectedJson.UniqueId, actual.JsonApiAttributes.UniqueId)
 	assert.Equal(t, expectedJson.ContactEmail, actual.JsonApiAttributes.ContactEmail)
 	assert.Equal(t, expectedJson.ContactName, actual.JsonApiAttributes.ContactName)
 	assert.ElementsMatch(t, expectedJson.CollectionNumber, actual.JsonApiAttributes.CollectionNumber)
@@ -793,6 +812,9 @@ func Test_VerifyRepositoryItem(t *testing.T) {
 
 	// Title
 	assert.Equal(t, expectedJson.Title, attributes.Title)
+
+	// Check unique id
+	assert.Equal(t, expectedJson.UniqueId, attributes.UniqueId)
 
 	// Collection Number
 	assert.Equal(t, 2, len(expectedJson.CollectionNumber))
@@ -1082,6 +1104,9 @@ func Test_VerifyRepositoryItemWithDelimitersInData(t *testing.T) {
 	// Title
 	assert.Equal(t, expectedJson.Title, attributes.Title)
 
+	// Unique Id
+	assert.Equal(t, expectedJson.UniqueId, attributes.UniqueId)
+
 	// Identifiers
 	assert.Equal(t, 2, len(expectedJson.DigitalIdentifier))
 	assert.EqualValues(t, expectedJson.DigitalIdentifier, attributes.DigitalIdentifier)
@@ -1182,6 +1207,8 @@ func Test_VerifyDuplicateMediaAndFile(t *testing.T) {
 		DrupalBundle: "document",
 		Filter:       "name",
 		Value:        name,
+		Username:     drupalAdmin,
+		Password:     drupalPass,
 	}
 
 	res := model.JsonApiDocumentMedia{}
@@ -1210,7 +1237,7 @@ func Test_VerifyDuplicateMediaAndFile(t *testing.T) {
 
 		// (while we're ranging over the response data, resolve the file entities)
 		file := model.JsonApiFile{}
-		res.JsonApiData[i].JsonApiRelationships.File.Data.Resolve(t, &file)
+		res.JsonApiData[i].JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 		resolvedFiles = append(resolvedFiles, file)
 	}
 
@@ -1279,6 +1306,8 @@ func Test_VerifyMediaDocument(t *testing.T) {
 	assert.Equal(t, expectedJson.MimeType, document.JsonApiAttributes.MimeType)
 	assert.Equal(t, expectedJson.OriginalName, document.JsonApiAttributes.OriginalName)
 	assert.Equal(t, expectedJson.Name, document.JsonApiAttributes.Name)
+	assert.NotEqual(t, expectedJson.RestrictedAccess, document.JsonApiAttributes.RestrictedAccess)
+	assert.Equal(t, expectedJson.UniqueId, document.JsonApiAttributes.UniqueId)
 
 	// Resolve relationships and verify
 	assert.Equal(t, 2, len(expectedJson.AccessTerms))
@@ -1333,6 +1362,8 @@ func Test_VerifyMediaImage(t *testing.T) {
 	assert.Equal(t, expectedJson.Name, image.JsonApiAttributes.Name)
 	assert.Equal(t, expectedJson.Height, image.JsonApiAttributes.Height)
 	assert.Equal(t, expectedJson.Width, image.JsonApiAttributes.Width)
+	assert.NotEqual(t, expectedJson.RestrictedAccess, image.JsonApiAttributes.RestrictedAccess)
+	assert.Equal(t, expectedJson.UniqueId, image.JsonApiAttributes.UniqueId)
 
 	// Resolve relationships and verify
 
@@ -1357,6 +1388,43 @@ func Test_VerifyMediaImage(t *testing.T) {
 	mediaOf := model.JsonApiIslandoraObj{}
 	image.JsonApiRelationships.MediaOf.Data.Resolve(t, &mediaOf)
 	assert.Equal(t, expectedJson.MediaOf, mediaOf.JsonApiData[0].JsonApiAttributes.Title)
+
+	u = &jsonapi.JsonApiUrl{
+		T:            t,
+		BaseUrl:      DrupalBaseurl,
+		DrupalEntity: "media",
+		DrupalBundle: "image",
+		Filter:       "name",
+		Value:        "Tiff Image",
+	}
+
+	res2 := model.JsonApiImageMedia{}
+	u.GetSingle(&res2)
+
+	image2 := res2.JsonApiData[0]
+
+	assert.Equal(t, expectedJson.RestrictedAccess, image2.JsonApiAttributes.RestrictedAccess)
+
+	file := model.JsonApiFile{}
+	file2 := model.JsonApiFile{}
+	res.JsonApiData[0].JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
+	res2.JsonApiData[0].JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file2, drupalAdmin, drupalPass)
+
+	// check that the first file binary can be accessed where its media is restricted access == false
+	// TODO obtain from env
+	baseUri := "https://islandora-idc.traefik.me/"
+	fileUrl := fmt.Sprintf("%s%s", baseUri, file.JsonApiData[0].JsonApiAttributes.Uri.Url)
+	fileRes, err := http.Get(fileUrl)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "200 OK", fileRes.Status)
+
+	// check that the second file binary cannot be accessed where its media is restricted access == true
+	fileUrl = fmt.Sprintf("%s%s", baseUri, file2.JsonApiData[0].JsonApiAttributes.Uri.Url)
+	fileRes, err = http.Get(fileUrl)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "403 Forbidden", fileRes.Status)
 }
 
 func Test_VerifyMediaExtractedText(t *testing.T) {
@@ -1387,6 +1455,8 @@ func Test_VerifyMediaExtractedText(t *testing.T) {
 	assert.Equal(t, expectedJson.Name, ext.JsonApiAttributes.Name)
 	assert.Equal(t, expectedJson.MimeType, ext.JsonApiAttributes.MimeType)
 	assert.EqualValues(t, expectedJson.ExtractedText, ext.JsonApiAttributes.EditedText)
+	assert.Equal(t, expectedJson.RestrictedAccess, ext.JsonApiAttributes.RestrictedAccess)
+	assert.Equal(t, expectedJson.UniqueId, ext.JsonApiAttributes.UniqueId)
 
 	// Resolve relationships and verify
 
@@ -1411,11 +1481,11 @@ func Test_VerifyMediaExtractedText(t *testing.T) {
 	assert.Equal(t, expectedJson.MediaOf, mediaOf.JsonApiData[0].JsonApiAttributes.Title)
 
 	file := model.JsonApiFile{}
-	ext.JsonApiRelationships.File.Data.Resolve(t, &file)
+	ext.JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 	assert.EqualValues(t, expectedJson.Uri, file.JsonApiData[0].JsonApiAttributes.Uri)
 	assert.Equal(t, expectedJson.Size, file.JsonApiData[0].JsonApiAttributes.FileSize)
 	assert.Equal(t, expectedJson.MimeType, file.JsonApiData[0].JsonApiAttributes.MimeType)
-	assert.Equal(t, expectedJson.Name, file.JsonApiData[0].JsonApiAttributes.Filename)
+	assert.Equal(t, expectedJson.OriginalName, file.JsonApiData[0].JsonApiAttributes.Filename)
 }
 
 func Test_VerifyMediaFile(t *testing.T) {
@@ -1447,6 +1517,8 @@ func Test_VerifyMediaFile(t *testing.T) {
 	assert.Equal(t, expectedJson.MimeType, genericFile.JsonApiAttributes.MimeType)
 	assert.EqualValues(t, expectedJson.OriginalName, genericFile.JsonApiAttributes.OriginalName)
 	assert.Equal(t, expectedJson.Size, genericFile.JsonApiAttributes.FileSize)
+	assert.Equal(t, expectedJson.RestrictedAccess, genericFile.JsonApiAttributes.RestrictedAccess)
+	assert.Equal(t, expectedJson.UniqueId, genericFile.JsonApiAttributes.UniqueId)
 
 	// Resolve relationships and verify
 
@@ -1471,11 +1543,11 @@ func Test_VerifyMediaFile(t *testing.T) {
 	assert.Equal(t, expectedJson.MediaOf, mediaOf.JsonApiData[0].JsonApiAttributes.Title)
 
 	file := model.JsonApiFile{}
-	genericFile.JsonApiRelationships.File.Data.Resolve(t, &file)
+	genericFile.JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 	assert.EqualValues(t, expectedJson.Uri, file.JsonApiData[0].JsonApiAttributes.Uri)
 	assert.Equal(t, expectedJson.Size, file.JsonApiData[0].JsonApiAttributes.FileSize)
 	assert.Equal(t, expectedJson.MimeType, file.JsonApiData[0].JsonApiAttributes.MimeType)
-	assert.Equal(t, expectedJson.Name, file.JsonApiData[0].JsonApiAttributes.Filename)
+	assert.Equal(t, expectedJson.OriginalName, file.JsonApiData[0].JsonApiAttributes.Filename)
 }
 
 func Test_VerifyMediaAudio(t *testing.T) {
@@ -1507,6 +1579,8 @@ func Test_VerifyMediaAudio(t *testing.T) {
 	assert.Equal(t, expectedJson.MimeType, audio.JsonApiAttributes.MimeType)
 	assert.EqualValues(t, expectedJson.OriginalName, audio.JsonApiAttributes.OriginalName)
 	assert.Equal(t, expectedJson.Size, audio.JsonApiAttributes.FileSize)
+	assert.Equal(t, expectedJson.RestrictedAccess, audio.JsonApiAttributes.RestrictedAccess)
+	assert.Equal(t, expectedJson.UniqueId, audio.JsonApiAttributes.UniqueId)
 
 	// Resolve relationships and verify
 
@@ -1531,11 +1605,11 @@ func Test_VerifyMediaAudio(t *testing.T) {
 	assert.Equal(t, expectedJson.MediaOf, mediaOf.JsonApiData[0].JsonApiAttributes.Title)
 
 	file := model.JsonApiFile{}
-	audio.JsonApiRelationships.File.Data.Resolve(t, &file)
+	audio.JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 	assert.EqualValues(t, expectedJson.Uri, file.JsonApiData[0].JsonApiAttributes.Uri)
 	assert.Equal(t, expectedJson.Size, file.JsonApiData[0].JsonApiAttributes.FileSize)
 	assert.Equal(t, expectedJson.MimeType, file.JsonApiData[0].JsonApiAttributes.MimeType)
-	assert.Equal(t, expectedJson.Name, file.JsonApiData[0].JsonApiAttributes.Filename)
+	assert.Equal(t, expectedJson.OriginalName, file.JsonApiData[0].JsonApiAttributes.Filename)
 }
 
 func Test_VerifyMediaVideo(t *testing.T) {
@@ -1567,6 +1641,8 @@ func Test_VerifyMediaVideo(t *testing.T) {
 	assert.Equal(t, expectedJson.MimeType, video.JsonApiAttributes.MimeType)
 	assert.EqualValues(t, expectedJson.OriginalName, video.JsonApiAttributes.OriginalName)
 	assert.Equal(t, expectedJson.Size, video.JsonApiAttributes.FileSize)
+	assert.Equal(t, expectedJson.RestrictedAccess, video.JsonApiAttributes.RestrictedAccess)
+	assert.Equal(t, expectedJson.UniqueId, video.JsonApiAttributes.UniqueId)
 
 	// Resolve relationships and verify
 
@@ -1591,11 +1667,11 @@ func Test_VerifyMediaVideo(t *testing.T) {
 	assert.Equal(t, expectedJson.MediaOf, mediaOf.JsonApiData[0].JsonApiAttributes.Title)
 
 	file := model.JsonApiFile{}
-	video.JsonApiRelationships.File.Data.Resolve(t, &file)
+	video.JsonApiRelationships.File.Data.ResolveWithBasicAuth(t, &file, drupalAdmin, drupalPass)
 	assert.EqualValues(t, expectedJson.Uri, file.JsonApiData[0].JsonApiAttributes.Uri)
 	assert.Equal(t, expectedJson.Size, file.JsonApiData[0].JsonApiAttributes.FileSize)
 	assert.Equal(t, expectedJson.MimeType, file.JsonApiData[0].JsonApiAttributes.MimeType)
-	assert.Equal(t, expectedJson.Name, file.JsonApiData[0].JsonApiAttributes.Filename)
+	assert.Equal(t, expectedJson.OriginalName, file.JsonApiData[0].JsonApiAttributes.Filename)
 }
 
 func Test_VerifyMediaRemoteVideo(t *testing.T) {
@@ -1625,6 +1701,8 @@ func Test_VerifyMediaRemoteVideo(t *testing.T) {
 
 	assert.Equal(t, expectedJson.Name, video.JsonApiAttributes.Name)
 	assert.Equal(t, expectedJson.EmbedUrl, video.JsonApiAttributes.EmbedUrl)
+	assert.Equal(t, expectedJson.RestrictedAccess, video.JsonApiAttributes.RestrictedAccess)
+	assert.Equal(t, expectedJson.UniqueId, video.JsonApiAttributes.UniqueId)
 
 	// Resolve relationships and verify
 

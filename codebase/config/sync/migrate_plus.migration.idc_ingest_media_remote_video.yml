@@ -48,8 +48,10 @@ process:
       bundle: islandora_object
       bundle_key: type
       value_key: field_unique_id
+  field_restricted_access: restricted_access
   status: constants/STATUS
 destination:
   plugin: 'entity:media'
   default_bundle: remote_video
+  validate: true
 migration_dependencies: null

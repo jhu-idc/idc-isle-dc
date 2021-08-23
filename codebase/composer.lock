@@ -2891,16 +2891,16 @@
         },
         {
             "name": "drupal/core",
-            "version": "8.9.17",
+            "version": "8.9.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "a1416f2cc6701acc0cc6725bfeac3715e633fd9c"
+                "reference": "e536176c45d9d75ec57f7a12c0e3c0aead856841"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/a1416f2cc6701acc0cc6725bfeac3715e633fd9c",
-                "reference": "a1416f2cc6701acc0cc6725bfeac3715e633fd9c",
+                "url": "https://api.github.com/repos/drupal/core/zipball/e536176c45d9d75ec57f7a12c0e3c0aead856841",
+                "reference": "e536176c45d9d75ec57f7a12c0e3c0aead856841",
                 "shasum": ""
             },
             "require": {
@@ -3121,11 +3121,11 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
-            "time": "2021-07-20T21:43:12+00:00"
+            "time": "2021-08-12T17:48:42+00:00"
         },
         {
             "name": "drupal/core-composer-scaffold",
-            "version": "8.9.17",
+            "version": "8.9.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-composer-scaffold.git",
@@ -3172,7 +3172,7 @@
         },
         {
             "name": "drupal/core-project-message",
-            "version": "8.9.17",
+            "version": "8.9.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-project-message.git",
@@ -3210,16 +3210,16 @@
         },
         {
             "name": "drupal/core-recommended",
-            "version": "8.9.17",
+            "version": "8.9.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-recommended.git",
-                "reference": "fcc40b85be8a37246965a276f1ae94a1dba971a6"
+                "reference": "71839bb9799b70f449b76294b461877ba1e9ff2c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core-recommended/zipball/fcc40b85be8a37246965a276f1ae94a1dba971a6",
-                "reference": "fcc40b85be8a37246965a276f1ae94a1dba971a6",
+                "url": "https://api.github.com/repos/drupal/core-recommended/zipball/71839bb9799b70f449b76294b461877ba1e9ff2c",
+                "reference": "71839bb9799b70f449b76294b461877ba1e9ff2c",
                 "shasum": ""
             },
             "require": {
@@ -3231,7 +3231,7 @@
                 "doctrine/common": "v2.7.3",
                 "doctrine/inflector": "v1.2.0",
                 "doctrine/lexer": "1.0.2",
-                "drupal/core": "8.9.17",
+                "drupal/core": "8.9.18",
                 "easyrdf/easyrdf": "0.9.1",
                 "egulias/email-validator": "2.1.17",
                 "guzzlehttp/guzzle": "6.5.4",
@@ -3288,11 +3288,11 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Locked core dependencies; require this project INSTEAD OF drupal/core.",
-            "time": "2021-07-20T21:43:12+00:00"
+            "time": "2021-08-12T17:48:42+00:00"
         },
         {
             "name": "drupal/core-vendor-hardening",
-            "version": "9.2.2",
+            "version": "9.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-vendor-hardening.git",
@@ -3762,16 +3762,8 @@
             ],
             "authors": [
                 {
-                    "name": "anruether",
-                    "homepage": "https://www.drupal.org/user/894458"
-                },
-                {
                     "name": "geek-merlin",
                     "homepage": "https://www.drupal.org/user/229048"
-                },
-                {
-                    "name": "heliogabal",
-                    "homepage": "https://www.drupal.org/user/998658"
                 }
             ],
             "description": "Prepopulate entity values via tokens.",
@@ -7404,12 +7396,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/idc-ui-theme.git",
-                "reference": "6399a13ce7384cce266c737072c5339af16268df"
+                "reference": "929823d199fec108c63584b9bdd25fd45939cf6c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/idc-ui-theme/zipball/6399a13ce7384cce266c737072c5339af16268df",
-                "reference": "6399a13ce7384cce266c737072c5339af16268df",
+                "url": "https://api.github.com/repos/jhu-idc/idc-ui-theme/zipball/929823d199fec108c63584b9bdd25fd45939cf6c",
+                "reference": "929823d199fec108c63584b9bdd25fd45939cf6c",
                 "shasum": ""
             },
             "type": "drupal-theme",
@@ -7418,7 +7410,7 @@
                 "source": "https://github.com/jhu-idc/idc-ui-theme/tree/develop",
                 "issues": "https://github.com/jhu-idc/idc-ui-theme/issues"
             },
-            "time": "2021-07-23T17:16:18+00:00"
+            "time": "2021-08-17T17:30:36+00:00"
         },
         {
             "name": "jhu-idc/idc_defaults",
@@ -7452,12 +7444,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/idc_export.git",
-                "reference": "61b5ef3115bf05c9aa6f851a56e65c4ac8e8d895"
+                "reference": "5aa97497ffe86402d3f4b946d7008b78c001bc1b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/idc_export/zipball/61b5ef3115bf05c9aa6f851a56e65c4ac8e8d895",
-                "reference": "61b5ef3115bf05c9aa6f851a56e65c4ac8e8d895",
+                "url": "https://api.github.com/repos/jhu-idc/idc_export/zipball/5aa97497ffe86402d3f4b946d7008b78c001bc1b",
+                "reference": "5aa97497ffe86402d3f4b946d7008b78c001bc1b",
                 "shasum": ""
             },
             "require": {
@@ -7477,7 +7469,7 @@
                 "source": "https://github.com/jhu-idc/idc_export/tree/main",
                 "issues": "https://github.com/jhu-idc/idc_export/issues"
             },
-            "time": "2021-05-25T21:48:27+00:00"
+            "time": "2021-08-17T17:54:37+00:00"
         },
         {
             "name": "jhu-idc/idc_ui_module",
@@ -7485,12 +7477,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/idc_ui_module.git",
-                "reference": "7194ac00b8749a89fbc4177f0092af3b0d4cf71e"
+                "reference": "42c8929f9139e8db81ebcacf7f72a1c5cb834208"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/idc_ui_module/zipball/7194ac00b8749a89fbc4177f0092af3b0d4cf71e",
-                "reference": "7194ac00b8749a89fbc4177f0092af3b0d4cf71e",
+                "url": "https://api.github.com/repos/jhu-idc/idc_ui_module/zipball/42c8929f9139e8db81ebcacf7f72a1c5cb834208",
+                "reference": "42c8929f9139e8db81ebcacf7f72a1c5cb834208",
                 "shasum": ""
             },
             "type": "drupal-module",
@@ -7499,7 +7491,7 @@
                 "source": "https://github.com/jhu-idc/idc_ui_module/tree/main",
                 "issues": "https://github.com/jhu-idc/idc_ui_module/issues"
             },
-            "time": "2021-07-23T17:15:39+00:00"
+            "time": "2021-08-05T19:20:22+00:00"
         },
         {
             "name": "jhu-idc/islandora_defaults",
@@ -15981,7 +15973,7 @@
         },
         {
             "name": "drupal/core-dev",
-            "version": "8.9.17",
+            "version": "8.9.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-dev.git",
@@ -16304,16 +16296,16 @@
         },
         {
             "name": "justinrainbow/json-schema",
-            "version": "5.2.10",
+            "version": "5.2.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/justinrainbow/json-schema.git",
-                "reference": "2ba9c8c862ecd5510ed16c6340aa9f6eadb4f31b"
+                "reference": "2ab6744b7296ded80f8cc4f9509abbff393399aa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/justinrainbow/json-schema/zipball/2ba9c8c862ecd5510ed16c6340aa9f6eadb4f31b",
-                "reference": "2ba9c8c862ecd5510ed16c6340aa9f6eadb4f31b",
+                "url": "https://api.github.com/repos/justinrainbow/json-schema/zipball/2ab6744b7296ded80f8cc4f9509abbff393399aa",
+                "reference": "2ab6744b7296ded80f8cc4f9509abbff393399aa",
                 "shasum": ""
             },
             "require": {
@@ -16366,7 +16358,7 @@
                 "json",
                 "schema"
             ],
-            "time": "2020-05-27T16:41:55+00:00"
+            "time": "2021-07-22T09:24:00+00:00"
         },
         {
             "name": "mikey179/vfsstream",
@@ -16996,16 +16988,16 @@
         },
         {
             "name": "phpunit/php-token-stream",
-            "version": "3.1.2",
+            "version": "3.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-token-stream.git",
-                "reference": "472b687829041c24b25f475e14c2f38a09edf1c2"
+                "reference": "9c1da83261628cb24b6a6df371b6e312b3954768"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/472b687829041c24b25f475e14c2f38a09edf1c2",
-                "reference": "472b687829041c24b25f475e14c2f38a09edf1c2",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/9c1da83261628cb24b6a6df371b6e312b3954768",
+                "reference": "9c1da83261628cb24b6a6df371b6e312b3954768",
                 "shasum": ""
             },
             "require": {
@@ -17048,7 +17040,7 @@
                 }
             ],
             "abandoned": true,
-            "time": "2020-11-30T08:38:46+00:00"
+            "time": "2021-07-26T12:15:06+00:00"
         },
         {
             "name": "phpunit/phpunit",
@@ -18216,16 +18208,16 @@
         },
         {
             "name": "theseer/tokenizer",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/theseer/tokenizer.git",
-                "reference": "75a63c33a8577608444246075ea0af0d052e452a"
+                "reference": "34a41e998c2183e22995f158c581e7b5e755ab9e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/theseer/tokenizer/zipball/75a63c33a8577608444246075ea0af0d052e452a",
-                "reference": "75a63c33a8577608444246075ea0af0d052e452a",
+                "url": "https://api.github.com/repos/theseer/tokenizer/zipball/34a41e998c2183e22995f158c581e7b5e755ab9e",
+                "reference": "34a41e998c2183e22995f158c581e7b5e755ab9e",
                 "shasum": ""
             },
             "require": {
@@ -18258,7 +18250,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-07-12T23:59:07+00:00"
+            "time": "2021-07-28T10:34:58+00:00"
         }
     ],
     "aliases": [],

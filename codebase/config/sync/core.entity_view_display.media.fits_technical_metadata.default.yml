@@ -9,6 +9,7 @@ dependencies:
     - field.field.media.fits_technical_metadata.field_media_of
     - field.field.media.fits_technical_metadata.field_media_use
     - field.field.media.fits_technical_metadata.field_mime_type
+    - field.field.media.fits_technical_metadata.field_restricted_access
     - field.field.media.fits_technical_metadata.fits_ois_file_information_md5che
     - media.type.fits_technical_metadata
   enforced:
@@ -53,6 +54,16 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
+    region: content
+  field_restricted_access:
+    weight: 4
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
     region: content
 hidden:
   created: true
