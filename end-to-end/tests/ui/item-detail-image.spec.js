@@ -18,7 +18,7 @@ test('Description', async (t) => {
 });
 
 test('Metadata', async (t) => {
-  await t.expect(ImagePage.metadata.count).eql(12);
+  await t.expect(ImagePage.metadata.count).eql(14);
 
   await hasMetadata(t, 'Alternative Title', 'Mallard Duck (English)');
   await hasMetadata(t, 'Alternative Title', 'Pato Mallard (Spanish)');

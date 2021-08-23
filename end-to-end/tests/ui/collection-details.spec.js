@@ -57,7 +57,7 @@ test('Shows both collections and repo items', async (t) => {
 });
 
 test('Facet toggle', async (t) => {
-  await t.expect(Page.facetCategories.count).eql(2);
+  await t.expect(Page.facetCategories.count).eql(3);
 
   const category = 'Year';
   const valueContainer = Page.facetValueContainer(category);

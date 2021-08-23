@@ -107,15 +107,15 @@ test('Date filter and basic search', async (t) => {
   await t
     .typeText(Page.dateInput1, '2000', { paste: true})
     .pressKey('enter')
-    .expect(Page.results.count).eql(4)
+    .expect(Page.results.count).eql(5)
     .typeText(Page.dateInput2, '2010', { paste: true})
     .pressKey('tab')
-    .expect(Page.results.count).eql(7)
+    .expect(Page.results.count).eql(8)
     .typeText(term.nonproxyTerm.term, 'item', { paste: true})
     .click(Page.submitBtn)
-    .expect(Page.results.count).eql(4)
+    .expect(Page.results.count).eql(5)
     .click(Page.clearTerms)
-    .expect(Page.results.count).eql(7)
+    .expect(Page.results.count).eql(8)
     .click(Page.clearFilters)
     .expect(Page.results.count).eql(10);
 });

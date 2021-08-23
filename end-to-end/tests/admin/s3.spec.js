@@ -23,12 +23,14 @@ fixture`S3 Tests`
 test('Verify original file and derivatives are in S3', async t => {
 
     // migrate the test objects into Drupal
+    await migrate(t, 'idc_ingest_taxonomy_islandora_accessterms', '../testdata/s3/access-terms.csv');
+    await migrate(t, 'idc_ingest_taxonomy_subject', '../testdata/s3/subject.csv');
     await migrate(t, migrate_new_collection, '../testdata/s3/s3-collection.csv');
     await migrate(t, migrate_new_items, '../testdata/s3/s3-islandora_object.csv');
     await migrate(t, migrate_media_image, '../testdata/s3/s3-file.csv');
 
     // verify the presence of the islandora object
-    const io_name = "S3 Repository Item One"
+    const io_name = "S3 Repository Item 1"
     await t.navigateTo(contentList)
     const io = Selector('div.view-content').find('a').withText(io_name)
     await t.expect(io.count).eql(1);
