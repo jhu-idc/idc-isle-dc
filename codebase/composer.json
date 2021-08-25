@@ -137,7 +137,8 @@
     },
     "require-dev": {
         "drupal/core-dev": "^9.2",
-        "mglaman/drupal-check": "^1.1"
+        "mglaman/drupal-check": "^1.1",
+        "phpspec/prophecy-phpunit": "^2"
     },
     "conflict": {
         "drupal/drupal": "*"

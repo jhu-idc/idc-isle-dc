@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aea6cfef343c1c71e19e6c328edbe3a1",
+    "content-hash": "faed35f7ffc11cd1ba0d9fcf6d779b07",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -124,16 +124,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.191.2",
+            "version": "3.191.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d659144bf8618c891fd01f0f375f1f0b4db21b05"
+                "reference": "6176504bc51ae5ac3a5276e05da0fa6abf71540b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d659144bf8618c891fd01f0f375f1f0b4db21b05",
-                "reference": "d659144bf8618c891fd01f0f375f1f0b4db21b05",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6176504bc51ae5ac3a5276e05da0fa6abf71540b",
+                "reference": "6176504bc51ae5ac3a5276e05da0fa6abf71540b",
                 "shasum": ""
             },
             "require": {
@@ -205,7 +205,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2021-08-23T18:17:20+00:00"
+            "time": "2021-08-24T18:18:22+00:00"
         },
         {
             "name": "chi-teck/drupal-code-generator",
@@ -2206,17 +2206,17 @@
         },
         {
             "name": "drupal/admin_toolbar",
-            "version": "2.4.0",
+            "version": "2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/admin_toolbar.git",
-                "reference": "8.x-2.4"
+                "reference": "8.x-2.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-8.x-2.4.zip",
-                "reference": "8.x-2.4",
-                "shasum": "6240047b8d91ac78f98d861ba8282af971fa0b38"
+                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-8.x-2.5.zip",
+                "reference": "8.x-2.5",
+                "shasum": "c71e58051b8d6818272df96d14cb11407d5e5ceb"
             },
             "require": {
                 "drupal/core": "^8.8.0 || ^9.0"
@@ -2224,8 +2224,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-2.4",
-                    "datestamp": "1601999178",
+                    "version": "8.x-2.5",
+                    "datestamp": "1629907119",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -7883,12 +7883,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/islandora_defaults.git",
-                "reference": "e0020c7373392a16fa13c465168bb8e91e116b2f"
+                "reference": "f172124ce04c97e26cb1de6c00e85a645951388c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/islandora_defaults/zipball/e0020c7373392a16fa13c465168bb8e91e116b2f",
-                "reference": "e0020c7373392a16fa13c465168bb8e91e116b2f",
+                "url": "https://api.github.com/repos/jhu-idc/islandora_defaults/zipball/f172124ce04c97e26cb1de6c00e85a645951388c",
+                "reference": "f172124ce04c97e26cb1de6c00e85a645951388c",
                 "shasum": ""
             },
             "require": {
@@ -7898,7 +7898,7 @@
                 "islandora/islandora": "dev-8.x-1.x",
                 "islandora/openseadragon": "dev-8.x-1.x",
                 "jhu-idc/controlled_access_terms": "dev-8.x-1.x",
-                "jhu-idc/reference_value_pair": "dev-main"
+                "jhu-idc/reference_value_pair": "dev-d9"
             },
             "type": "drupal-module",
             "license": [
@@ -7914,7 +7914,7 @@
                 "issues": "https://github.com/jhu-idc/islandora_defaults/issues",
                 "source": "https://github.com/jhu-idc/islandora_defaults/tree/d9"
             },
-            "time": "2021-08-24T17:56:18+00:00"
+            "time": "2021-08-25T17:13:42+00:00"
         },
         {
             "name": "jhu-idc/migrate_file",
@@ -7947,16 +7947,16 @@
         },
         {
             "name": "jhu-idc/reference_value_pair",
-            "version": "dev-main",
+            "version": "dev-d9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/reference_value_pair.git",
-                "reference": "192519a0dd8597634c3bf814289592d190c006e7"
+                "reference": "5aa62b3e4d21fa18d159fbd3a39b7c80a5a43793"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/reference_value_pair/zipball/192519a0dd8597634c3bf814289592d190c006e7",
-                "reference": "192519a0dd8597634c3bf814289592d190c006e7",
+                "url": "https://api.github.com/repos/jhu-idc/reference_value_pair/zipball/5aa62b3e4d21fa18d159fbd3a39b7c80a5a43793",
+                "reference": "5aa62b3e4d21fa18d159fbd3a39b7c80a5a43793",
                 "shasum": ""
             },
             "type": "drupal-module",
@@ -7972,7 +7972,7 @@
                 "issues": "http://github.com/jhu-idc/reference_value_pair",
                 "source": "http://github.com/jhu-idc/reference_value_pair"
             },
-            "time": "2021-01-20T21:54:36+00:00"
+            "time": "2021-08-25T16:42:44+00:00"
         },
         {
             "name": "jhu_idc/idc_migration",
@@ -16790,9 +16790,6 @@
                 "ext-zip": "Enabling the zip extension allows you to unzip archives",
                 "ext-zlib": "Allow gzip compression of HTTP requests"
             },
-            "bin": [
-                "bin/composer"
-            ],
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -16910,16 +16907,16 @@
         },
         {
             "name": "composer/package-versions-deprecated",
-            "version": "1.11.99.2",
+            "version": "1.11.99.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/package-versions-deprecated.git",
-                "reference": "c6522afe5540d5fc46675043d3ed5a45a740b27c"
+                "reference": "fff576ac850c045158a250e7e27666e146e78d18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/package-versions-deprecated/zipball/c6522afe5540d5fc46675043d3ed5a45a740b27c",
-                "reference": "c6522afe5540d5fc46675043d3ed5a45a740b27c",
+                "url": "https://api.github.com/repos/composer/package-versions-deprecated/zipball/fff576ac850c045158a250e7e27666e146e78d18",
+                "reference": "fff576ac850c045158a250e7e27666e146e78d18",
                 "shasum": ""
             },
             "require": {
@@ -16975,7 +16972,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-24T07:46:03+00:00"
+            "time": "2021-08-17T13:49:14+00:00"
         },
         {
             "name": "composer/spdx-licenses",
@@ -18337,6 +18334,54 @@
                 "stub"
             ],
             "time": "2021-03-17T13:42:18+00:00"
+        },
+        {
+            "name": "phpspec/prophecy-phpunit",
+            "version": "v2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpspec/prophecy-phpunit.git",
+                "reference": "2d7a9df55f257d2cba9b1d0c0963a54960657177"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpspec/prophecy-phpunit/zipball/2d7a9df55f257d2cba9b1d0c0963a54960657177",
+                "reference": "2d7a9df55f257d2cba9b1d0c0963a54960657177",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3 || ^8",
+                "phpspec/prophecy": "^1.3",
+                "phpunit/phpunit": "^9.1"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Prophecy\\PhpUnit\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Christophe Coevoet",
+                    "email": "stof@notk.org"
+                }
+            ],
+            "description": "Integrating the Prophecy mocking library in PHPUnit test cases",
+            "homepage": "http://phpspec.net",
+            "keywords": [
+                "phpunit",
+                "prophecy"
+            ],
+            "time": "2020-07-09T08:33:42+00:00"
         },
         {
             "name": "phpstan/phpstan",
