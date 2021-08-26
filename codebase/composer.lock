@@ -7922,12 +7922,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/migrate_file.git",
-                "reference": "7b96f622086b763db2257b8369199f5d158e8235"
+                "reference": "3900beb32517e352d2700b296dac7429507a698b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/migrate_file/zipball/7b96f622086b763db2257b8369199f5d158e8235",
-                "reference": "7b96f622086b763db2257b8369199f5d158e8235",
+                "url": "https://api.github.com/repos/jhu-idc/migrate_file/zipball/3900beb32517e352d2700b296dac7429507a698b",
+                "reference": "3900beb32517e352d2700b296dac7429507a698b",
                 "shasum": ""
             },
             "type": "drupal-module",
@@ -7943,7 +7943,7 @@
                 "issues": "https://www.drupal.org/project/issues/migrate_file",
                 "source": "http://cgit.drupalcode.org/migrate_file"
             },
-            "time": "2021-08-24T17:07:25+00:00"
+            "time": "2021-08-26T13:58:29+00:00"
         },
         {
             "name": "jhu-idc/reference_value_pair",
