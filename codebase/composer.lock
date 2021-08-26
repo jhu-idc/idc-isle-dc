@@ -7951,12 +7951,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/reference_value_pair.git",
-                "reference": "2ed75f2640892c76afc4acdcb8a6fb7c539bbb0c"
+                "reference": "5d2699bc7921591802b8d2bacbdd2fc6cb7b3145"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/reference_value_pair/zipball/2ed75f2640892c76afc4acdcb8a6fb7c539bbb0c",
-                "reference": "2ed75f2640892c76afc4acdcb8a6fb7c539bbb0c",
+                "url": "https://api.github.com/repos/jhu-idc/reference_value_pair/zipball/5d2699bc7921591802b8d2bacbdd2fc6cb7b3145",
+                "reference": "5d2699bc7921591802b8d2bacbdd2fc6cb7b3145",
                 "shasum": ""
             },
             "type": "drupal-module",
@@ -7972,7 +7972,7 @@
                 "issues": "http://github.com/jhu-idc/reference_value_pair",
                 "source": "http://github.com/jhu-idc/reference_value_pair"
             },
-            "time": "2021-08-25T19:40:26+00:00"
+            "time": "2021-08-26T15:02:03+00:00"
         },
         {
             "name": "jhu_idc/idc_migration",
