@@ -124,16 +124,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.191.3",
+            "version": "3.191.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "6176504bc51ae5ac3a5276e05da0fa6abf71540b"
+                "reference": "63f015b49346cda8e4ac57cc33174744cc116654"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6176504bc51ae5ac3a5276e05da0fa6abf71540b",
-                "reference": "6176504bc51ae5ac3a5276e05da0fa6abf71540b",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/63f015b49346cda8e4ac57cc33174744cc116654",
+                "reference": "63f015b49346cda8e4ac57cc33174744cc116654",
                 "shasum": ""
             },
             "require": {
@@ -205,7 +205,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2021-08-24T18:18:22+00:00"
+            "time": "2021-08-25T18:15:26+00:00"
         },
         {
             "name": "chi-teck/drupal-code-generator",
@@ -5752,17 +5752,17 @@
         },
         {
             "name": "drupal/s3fs",
-            "version": "3.0.0-beta2",
+            "version": "3.0.0-beta3",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/s3fs.git",
-                "reference": "8.x-3.0-beta2"
+                "reference": "8.x-3.0-beta3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/s3fs-8.x-3.0-beta2.zip",
-                "reference": "8.x-3.0-beta2",
-                "shasum": "54ad5d01942ee3304966defe272bea8a329a0e17"
+                "url": "https://ftp.drupal.org/files/projects/s3fs-8.x-3.0-beta3.zip",
+                "reference": "8.x-3.0-beta3",
+                "shasum": "47b096438202633b07261b76d93c958a150a3159"
             },
             "require": {
                 "aws/aws-sdk-php": "^3.18",
@@ -5777,8 +5777,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-3.0-beta2",
-                    "datestamp": "1626392098",
+                    "version": "8.x-3.0-beta3",
+                    "datestamp": "1629922175",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "Beta releases are not covered by Drupal security advisories."
@@ -7951,12 +7951,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/reference_value_pair.git",
-                "reference": "5aa62b3e4d21fa18d159fbd3a39b7c80a5a43793"
+                "reference": "2ed75f2640892c76afc4acdcb8a6fb7c539bbb0c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/reference_value_pair/zipball/5aa62b3e4d21fa18d159fbd3a39b7c80a5a43793",
-                "reference": "5aa62b3e4d21fa18d159fbd3a39b7c80a5a43793",
+                "url": "https://api.github.com/repos/jhu-idc/reference_value_pair/zipball/2ed75f2640892c76afc4acdcb8a6fb7c539bbb0c",
+                "reference": "2ed75f2640892c76afc4acdcb8a6fb7c539bbb0c",
                 "shasum": ""
             },
             "type": "drupal-module",
@@ -7972,7 +7972,7 @@
                 "issues": "http://github.com/jhu-idc/reference_value_pair",
                 "source": "http://github.com/jhu-idc/reference_value_pair"
             },
-            "time": "2021-08-25T16:42:44+00:00"
+            "time": "2021-08-25T19:40:26+00:00"
         },
         {
             "name": "jhu_idc/idc_migration",
