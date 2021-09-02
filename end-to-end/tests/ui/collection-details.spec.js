@@ -1,4 +1,5 @@
 import Page from './pages/collection-details';
+import HeaderFooter from './pages/header-footer';
 
 /**
  * Duck Collection page
@@ -96,4 +97,12 @@ test('Featured repo items display correctly', async (t) => {
     // // Mallard item has a Tiff image, which should never be displayed on the page
     .expect(Page.featuredItems.items.nth(0).find('img').withAttribute('src', /\.jpg$/).exists).ok()
     .expect(Page.featuredItems.items.nth(1).withText('No image available').exists).ok();
+});
+
+test('Breadcrumbs are present', async (t) => {
+  await t
+    .expect(HeaderFooter.breadcrumbContainer.exists).ok()
+    .expect(HeaderFooter.breadcrumbs.count).eql(2)
+    .expect(HeaderFooter.breadcrumbs.withText('Home').exists).ok()
+    .expect(HeaderFooter.breadcrumbs.withText('Farm Animals').exists).ok();
 });
