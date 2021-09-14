@@ -224,8 +224,8 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          order: ASC
-          exposed: true
+          order: DESC
+          exposed: false
           expose:
             label: 'Content type'
           plugin_id: search_api
