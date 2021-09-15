@@ -1,3 +1,4 @@
+import { anon, localAdmin } from '../roles';
 import Page from './pages/collection-details';
 import HeaderFooter from './pages/header-footer';
 
@@ -106,3 +107,15 @@ test('Breadcrumbs are present', async (t) => {
     .expect(HeaderFooter.breadcrumbs.withText('Home').exists).ok()
     .expect(HeaderFooter.breadcrumbs.withText('Farm Animals').exists).ok();
 });
+
+test('Export links look good', async (t) => {
+  await t
+    .useRole(localAdmin)
+    .expect(Page.exportColBtn.exists).ok()
+    .expect(Page.exportColBtn.getAttribute('href'))
+      .contains('/export_collections?query=itm_field_member_of:42 AND (ss_type:collection_object OR ss_type:islandora_object)&nodeId=42')
+    .expect(Page.exportItmBtn.exists).ok()
+    .expect(Page.exportItmBtn.getAttribute('href'))
+      .contains('/export_items?query=itm_field_member_of:42 AND (ss_type:collection_object OR ss_type:islandora_object)&nodeId=42')
+    .useRole(anon);
+})

@@ -54,5 +54,21 @@ test('Breadcrumbs are present', async (t) => {
     .expect(HeaderFooter.breadcrumbs.withText('Duck Collection').exists).ok();
 });
 
-test.skip('Download', async (t) => {});
-test.skip('Export metadata', async (t) => {});
+test('Download', async (t) => {
+  await t
+    .expect(ImagePage.downloadBtn.exists).ok()
+    .expect(ImagePage.downloadModal.visibility().exists).notOk()
+    .click(ImagePage.downloadBtn)
+    .expect(ImagePage.downloadModal.visibility().exists).ok()
+    .expect(ImagePage.downloadModal.content.count).eql(3)
+    .expect(ImagePage.downloadModal.content.find('a[download]').count).eql(3);
+});
+
+test('Export metadata', async (t) => {
+  await t
+    .expect(ImagePage.citationsModal.visibility().exists).notOk()
+    .expect(ImagePage.citationsBtn.exists).ok()
+    .click(ImagePage.citationsBtn)
+    .expect(ImagePage.citationsModal.visibility().exists).ok()
+    .expect(ImagePage.citationsModal.citations.count).eql(3);
+});
