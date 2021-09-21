@@ -1,14 +1,11 @@
-import {Selector} from 'testcafe';
-import {adminUser} from './roles.js';
+import { RequestLogger, Selector} from 'testcafe';
+import { adminUser } from './roles.js';
 import { t } from 'testcafe';
-import fs from 'fs';
+import { readFile, readFileSync } from 'fs';
+import { parse } from 'papaparse';
 import { join as joinPath } from 'path';
 import os from 'os';
-import {contentList, findNodeIdForTitle, getResponseData, doMigration} from "./util";
-
-
-//const fs   = require('fs');
-//const path = require('path');
+import { contentList, findNodeIdForTitle, getResponseData, doMigration } from "./util";
 
 fixture`Export Test Migrations`
   .page`https://islandora-idc.traefik.me/migrate_source_ui`
@@ -146,24 +143,185 @@ test('Test Citations for Caching', async t => {
 });
 
 
-// SKIP FOR NOW - not working.
-fixture.skip `Export Tests`
 
-/*
-  Element we want to grab:
-
-  <a download="" href="http://islandora-idc.traefik.me/system/files/views_data_export/export_metadata_data_export_1/1-1621620562/idc-data-export-repo-items.csv" data-download-enabled="true" id="vde-automatic-download">here</a>
-
- */
 const fileDownloadSelector = Selector('#vde-automatic-download');
 
-// TODO -- is this location for the tmp file even remotely accurate?
+fixture`Export Tests`
+ .beforeEach(async t => {
+    await t
+      .useRole(adminUser);
+  });
+
+test('Export Tests - Repository Item Page', async t => {
+
+  await t.navigateTo(contentList);
+
+  // find the item
+  const item = Selector('div.view-content').find('a').withText('Zoo Animal A');
+  await t.expect(item.count).eql(1);
+  await t.click(item);
+
+  // click on Export Button
+  const metadataExportButton = Selector('#item-container').find('a').withText('Export Item Metadata');
+  await t.expect(metadataExportButton.count).eql(1);
+  await t.click(metadataExportButton);
+  // check the files, comparing data
+  const fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
+  // fileName is not right here.....
+  const href = await fileLink.getAttribute("href");
+  const fileName = href.substring(href.lastIndexOf('/') + 1);
+  const path = "~/Downloads/";
+  console.log("filename is: " + path + fileName);
+  await t.expect(fileLink.count).eql(1);
+
+  const logger = RequestLogger({ href, method: 'GET' }, {
+    logResponseHeaders:    true,
+    logResponseBody:       true,
+    stringifyResponseBody: true
+  });
+
+  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/single_repo_item.json'), 'utf-8');
+  const expectedData = JSON.parse(expectedDataStr);
+
+  let downloadedFileContent = '';
+  // download it
+  await t.addRequestHooks(logger);
+  await t.click(fileLink)
+    .expect(logger.contains(r => {
+      console.log(r);
+      if (r.response.statusCode !== 200)
+          return false;
+
+      const requestInfo = logger.requests[0];
+
+      if (!requestInfo)
+          return false;
+
+      downloadedFileContent = logger.requests[1].response.body;
+      console.log("Contents: " + downloadedFileContent);
+      return true;
+    })).ok();
+
+    const itemRows = parse(downloadedFileContent, { header: true });
+
+    // only expecting one
+    await t.expect(itemRows.data.length).eql(1);
+    const itemRow = itemRows.data[0];
+
+    for (const [field, fieldVal] of Object.entries(expectedData)) {
+      let exportVal = itemRow[field];
+      const expectedVal = fieldVal;
+
+      // we are expecting a value in this field, so the exported field can't be empty
+      await t.expect(exportVal != undefined).ok();
+
+      const splitVal = exportVal.split('||');
+      if (splitVal.length > 1) {
+        exportVal = splitVal;
+      }
+
+      if (Array.isArray(expectedVal)) {
+        await t.expect(Array.isArray(exportVal)).ok();
+        for (const x of exportVal) {
+          await t.expect(expectedVal.includes(x)).ok();
+        }
+      } else {
+        await t.expect(exportVal).eql(expectedVal);
+      }
+    }
+});
+
+
+test('Export Tests - Collection Object Page', async t => {
+  await t.navigateTo(contentList);
+
+  // find the item
+  const item = Selector('td.views-field-title').find('a').withText('Collection A (Animals)');
+  await t.expect(item.count).eql(1);
+  await t.click(item);
+
+  // click on Export Button
+  const metadataExportButton = Selector('#about-collection-button-group').find('a').withText('Export Collection Metadata');
+  await t.expect(metadataExportButton.count).eql(1);
+  await t.click(metadataExportButton);
+  // check the files, comparing data
+  const fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
+  const href = await fileLink.getAttribute("href");
+  const fileName = href.substring(href.lastIndexOf('/') + 1);
+  const path = "~/Downloads/";
+  console.log("filename is: " + path + fileName);
+  await t.expect(fileLink.count).eql(1);
+
+  const logger = RequestLogger({ href, method: 'GET' }, {
+    logResponseHeaders:    true,
+    logResponseBody:       true,
+    stringifyResponseBody: true
+  });
+
+  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/single_collection_item.json'), 'utf-8');
+  const expectedData = JSON.parse(expectedDataStr);
+
+  let downloadedFileContent = '';
+  // download it
+  await t.addRequestHooks(logger);
+  await t.click(fileLink)
+    .expect(logger.contains(r => {
+      console.log(r);
+      if (r.response.statusCode !== 200)
+          return false;
+
+      const requestInfo = logger.requests[0];
+
+      if (!requestInfo)
+          return false;
+
+      downloadedFileContent = logger.requests[1].response.body;
+      console.log("Contents: " + downloadedFileContent);
+      return true;
+    })).ok();
+
+    const itemRows = parse(downloadedFileContent, { header: true });
+
+    // only expecting one
+    await t.expect(itemRows.data.length).eql(1);
+    const itemRow = itemRows.data[0];
+
+    for (const [field, fieldVal] of Object.entries(expectedData)) {
+      let exportVal = itemRow[field];
+      const expectedVal = fieldVal;
+
+      // we are expecting a value in this field, so the exported field can't be empty
+      await t.expect(exportVal != undefined).ok();
+
+      const splitVal = exportVal.split('||');
+      if (splitVal.length > 1) {
+        exportVal = splitVal;
+      }
+
+      if (Array.isArray(expectedVal)) {
+        await t.expect(Array.isArray(exportVal)).ok();
+        for (const x of exportVal) {
+          await t.expect(expectedVal.includes(x)).ok();
+        }
+      } else {
+        await t.expect(exportVal).eql(expectedVal);
+      }
+    }
+});
+
+test('Export Tests - Search Results Repository Items', async t => {
+
+});
+
+test('Export Tests - Search Results Collection Objects', async t => {});
+
+
+// OLD STUFF - DELETE EVENTUALLY ---------------
+
 const DOWNLOAD_DIR = joinPath(process.env.HOME || process.env.USERPROFILE, 'downloads/');
-
-test
-    .page`https://islandora-idc.traefik.me/export_items?query=zoo`
-    ('Export Tests - Repository Item', async () => {
-
+test.skip
+.page`https://islandora-idc.traefik.me/export_items?query=zoo`
+('Export Tests - Repository Item', async () => {
         //console.log("waiting for 60s");
         //await t.wait(60000);
         //console.log("done waiting");
