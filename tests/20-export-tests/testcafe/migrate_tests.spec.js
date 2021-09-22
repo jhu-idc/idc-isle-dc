@@ -86,7 +86,7 @@ test('Get Citations for Item', async t => {
     'nid': nid,
     'field_citable_url': 'https://islandora-idc.traefik.me/node/' + nid,
     'citation_apa': '<div class=\"csl-bib-body\">\n  <div class=\"csl-entry\">Weston, E. , 2 Preferred Name Suffix, &#38; Adams, A. E. , 1 Preferred Name Suffix. (2020). <i>Zoo Animal B</i>. Knoxville Zoo. https://islandora-idc.traefik.me/node/' + nid + '</div>\n</div>',
-    'citation_chicago': '<div class=\"csl-bib-body\">\n  <div class=\"csl-entry\">Edward Weston 2 Preferred Name Suffix, and Ansel Easton Adams 1 Preferred Name Suffix. 2020. <i>Zoo Animal B</i>. 1. Knoxville Zoo. https://islandora-idc.traefik.me/node/' + nid + '.</div>\n</div>',
+    'citation_chicago': '<div class=\"csl-bib-body\">\n  <div class=\"csl-entry\">Edward Weston 2 Preferred Name Suffix, and Ansel Easton Adams 1 Preferred Name Suffix. 2020. “Zoo Animal B”. 1. Knoxville Zoo. https://islandora-idc.traefik.me/node/' + nid + '.</div>\n</div>',
     'citation_mla': '<div class=\"csl-bib-body\">\n  <div class=\"csl-entry\">E. Weston 2 Preferred Name Suffix, and A. E. Adams 1 Preferred Name Suffix. <i>Zoo Animal B</i>. Knoxville Zoo, 1 Jan. 2020, https://islandora-idc.traefik.me/node/' + nid + '.</div>\n</div>'
   };
 
@@ -131,7 +131,7 @@ test('Test Citations for Caching', async t => {
     'nid': nid,
     'field_citable_url': 'https://islandora-idc.traefik.me/node/' + nid,
     'citation_apa': '<div class=\"csl-bib-body\">\n  <div class=\"csl-entry\">Weston, E. , 2 Preferred Name Suffix, &#38; Adams, A. E. , 1 Preferred Name Suffix. (2020). <i>Zoo Animal B - New Title</i>. Knoxville Zoo. https://islandora-idc.traefik.me/node/' + nid + '</div>\n</div>',
-    'citation_chicago': '<div class=\"csl-bib-body\">\n  <div class=\"csl-entry\">Edward Weston 2 Preferred Name Suffix, and Ansel Easton Adams 1 Preferred Name Suffix. 2020. <i>Zoo Animal B - New Title</i>. 1. Knoxville Zoo. https://islandora-idc.traefik.me/node/' + nid + '.</div>\n</div>',
+    'citation_chicago': '<div class=\"csl-bib-body\">\n  <div class=\"csl-entry\">Edward Weston 2 Preferred Name Suffix, and Ansel Easton Adams 1 Preferred Name Suffix. 2020. “Zoo Animal B - New Title”. 1. Knoxville Zoo. https://islandora-idc.traefik.me/node/' + nid + '.</div>\n</div>',
     'citation_mla': '<div class=\"csl-bib-body\">\n  <div class=\"csl-entry\">E. Weston 2 Preferred Name Suffix, and A. E. Adams 1 Preferred Name Suffix. <i>Zoo Animal B - New Title</i>. Knoxville Zoo, 1 Jan. 2020, https://islandora-idc.traefik.me/node/' + nid + '.</div>\n</div>'
   };
 
@@ -142,10 +142,6 @@ test('Test Citations for Caching', async t => {
   await t.expect(data.citation_mla).eql(expected.citation_mla);
 });
 
-
-
-const fileDownloadSelector = Selector('#vde-automatic-download');
-
 fixture`Export Tests`
  .beforeEach(async t => {
     await t
@@ -153,7 +149,6 @@ fixture`Export Tests`
   });
 
 test('Export Tests - Repository Item Page', async t => {
-
   await t.navigateTo(contentList);
 
   // find the item
@@ -171,7 +166,6 @@ test('Export Tests - Repository Item Page', async t => {
   const href = await fileLink.getAttribute("href");
   const fileName = href.substring(href.lastIndexOf('/') + 1);
   const path = "~/Downloads/";
-  console.log("filename is: " + path + fileName);
   await t.expect(fileLink.count).eql(1);
 
   const logger = RequestLogger({ href, method: 'GET' }, {
@@ -188,7 +182,6 @@ test('Export Tests - Repository Item Page', async t => {
   await t.addRequestHooks(logger);
   await t.click(fileLink)
     .expect(logger.contains(r => {
-      console.log(r);
       if (r.response.statusCode !== 200)
           return false;
 
@@ -198,7 +191,6 @@ test('Export Tests - Repository Item Page', async t => {
           return false;
 
       downloadedFileContent = logger.requests[1].response.body;
-      console.log("Contents: " + downloadedFileContent);
       return true;
     })).ok();
 
@@ -208,27 +200,7 @@ test('Export Tests - Repository Item Page', async t => {
     await t.expect(itemRows.data.length).eql(1);
     const itemRow = itemRows.data[0];
 
-    for (const [field, fieldVal] of Object.entries(expectedData)) {
-      let exportVal = itemRow[field];
-      const expectedVal = fieldVal;
-
-      // we are expecting a value in this field, so the exported field can't be empty
-      await t.expect(exportVal != undefined).ok();
-
-      const splitVal = exportVal.split('||');
-      if (splitVal.length > 1) {
-        exportVal = splitVal;
-      }
-
-      if (Array.isArray(expectedVal)) {
-        await t.expect(Array.isArray(exportVal)).ok();
-        for (const x of exportVal) {
-          await t.expect(expectedVal.includes(x)).ok();
-        }
-      } else {
-        await t.expect(exportVal).eql(expectedVal);
-      }
-    }
+    await checkRow(t, expectedData, itemRow);
 });
 
 
@@ -249,7 +221,6 @@ test('Export Tests - Collection Object Page', async t => {
   const href = await fileLink.getAttribute("href");
   const fileName = href.substring(href.lastIndexOf('/') + 1);
   const path = "~/Downloads/";
-  console.log("filename is: " + path + fileName);
   await t.expect(fileLink.count).eql(1);
 
   const logger = RequestLogger({ href, method: 'GET' }, {
@@ -266,7 +237,6 @@ test('Export Tests - Collection Object Page', async t => {
   await t.addRequestHooks(logger);
   await t.click(fileLink)
     .expect(logger.contains(r => {
-      console.log(r);
       if (r.response.statusCode !== 200)
           return false;
 
@@ -276,7 +246,6 @@ test('Export Tests - Collection Object Page', async t => {
           return false;
 
       downloadedFileContent = logger.requests[1].response.body;
-      console.log("Contents: " + downloadedFileContent);
       return true;
     })).ok();
 
@@ -286,209 +255,144 @@ test('Export Tests - Collection Object Page', async t => {
     await t.expect(itemRows.data.length).eql(1);
     const itemRow = itemRows.data[0];
 
-    for (const [field, fieldVal] of Object.entries(expectedData)) {
-      let exportVal = itemRow[field];
-      const expectedVal = fieldVal;
-
-      // we are expecting a value in this field, so the exported field can't be empty
-      await t.expect(exportVal != undefined).ok();
-
-      const splitVal = exportVal.split('||');
-      if (splitVal.length > 1) {
-        exportVal = splitVal;
-      }
-
-      if (Array.isArray(expectedVal)) {
-        await t.expect(Array.isArray(exportVal)).ok();
-        for (const x of exportVal) {
-          await t.expect(expectedVal.includes(x)).ok();
-        }
-      } else {
-        await t.expect(exportVal).eql(expectedVal);
-      }
-    }
+    await checkRow(t, expectedData, itemRow);
 });
 
 test('Export Tests - Search Results Repository Items', async t => {
+  await t.navigateTo('https://islandora-idc.traefik.me/search?query=animal');
 
-});
+  // click on metadata export link for repository items
+  const metadataExportButton = Selector('#idc-search').find('a').withText('Export Metadata – Items');
+  await t.expect(metadataExportButton.count).eql(1);
+  await t.click(metadataExportButton);
 
-test('Export Tests - Search Results Collection Objects', async t => {});
+  // check the files, comparing data
+  const fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
+  const href = await fileLink.getAttribute("href");
+  const fileName = href.substring(href.lastIndexOf('/') + 1);
+  const path = "~/Downloads/";
+  await t.expect(fileLink.count).eql(1);
 
-
-// OLD STUFF - DELETE EVENTUALLY ---------------
-
-const DOWNLOAD_DIR = joinPath(process.env.HOME || process.env.USERPROFILE, 'downloads/');
-test.skip
-.page`https://islandora-idc.traefik.me/export_items?query=zoo`
-('Export Tests - Repository Item', async () => {
-        //console.log("waiting for 60s");
-        //await t.wait(60000);
-        //console.log("done waiting");
-        // Run this test only with the Google Chrome browser to simplify the searching of the downloaded file.
-        if (t.browser.name !== 'Chrome')
-            return;
-
-        var filename = fileDownloadSelector.getAttribute('href');
-        console.log("filename is " + filename);
-        filename.textContent().replace(/^.*\//g,"");
-
-        const file_path = joinPath(DOWNLOAD_DIR, filename);
-        await t.expect(fs.existsSync(file_path)).ok();
-
-        await t.click(fileDownloadSelector);
-
-        await waitForFileDownload(downloadedFilePath);
-
-        console.log("in theory we have the file");
-/*
-        var rawFile = new XMLHttpRequest();
-        var allText = null;
-        rawFile.open("GET",filename,false);
-        rawFile.onreadystatechange = function() {
-            if(rawFile.readyState === 4) {
-                if(rawFile.status === 200 || rawFile.status === 0)
-                {
-                    allText = rawFile.responseText;
-                    console.log(allText);
-                }
-            }
-        }
-        rawFile.send(null);
-        // now we have the file, read it in and test it out.
- */
-    });
-
-async function readCsvFile(file) {
-  var text = null;
-  var csvFile = fs.readFileSync(file, { encoding: "utf8" });
-  var theData = parser.parse(csvFile, { header: true });
-
-  // returns json formatted data
-  return theData;
-}
-
-
-//
-// Old attempts below - kept in (for now) in case it's helpful to someone
-//
-/*
-import http from 'http';
-
-const runExport = (url) => new Promise((resolve, reject) => {
-    console.log("running export: " + url);
-    http.get(url, res => {
-        const { statusCode } = res;
-        const contentType = res.headers['content-type'];
-
-        res.setEncoding('utf8');
-        let rawData = '';
-        res.on('data', (chunk) => { rawData += chunk; });
-        res.on('end', () => resolve({ statusCode, contentType, rawData }));
-    }).on('error', e => reject(e));
-});
-
-test('Export Tests - Repository Item Export', async t => {
-    const response = await runExport('https://islandora-idc.traefik.me/export_items?query=zoo')
-    await t
-        .expect(response.statusCode).eql(200);
-
-        var filename = fileDownloadSelector.getAttribute('href');
-        console.log("filename is " + filename);
-        filename.textContent().replace(/^.*\//g,"");
-
-        const file_path = joinPath(DOWNLOAD_DIR, filename);
-        await t.expect(fs.existsSync(file_path)).ok();
-
-        await t.click(fileDownloadSelector);
-
-        await waitForFileDownload(downloadedFilePath);
-
-        console.log("in theory we have the file");
-}); */
-
-
-/*
- *
- *
- *  document.querySelector("#myLink").addEventListener("click", function(event){
-        event.preventDefault();
-        var file = document.getElementById("myLink").getAttribute("href");
-        console.log(file)
-        var rawFile = new XMLHttpRequest();
-        rawFile.open("GET",file,false);
-          rawFile.onreadystatechange = function() {
-              if(rawFile.readyState === 4) {
-                  if(rawFile.status === 200 || rawFile.status === 0)
-                  {
-                      var allText = rawFile.responseText;
-                      console.log(allText);
-                  }
-              }
-          }
-          rawFile.send(null);
-    .before(async () => {
-        downloadedFilePath = joinPath(os.homedir(), 'Downloads', 'exported-data-items.csv');
-
-        if (fs.existsSync(downloadedFilePath))
-            fs.unlinkSync(downloadedFilePath);
-*/
-/*
-async function waitForFileDownload (path) {
-    for (let i = 0; i < 10; i++) {
-        if (fs.existsSync(path))
-            return true;
-
-        await t.wait(500);
-    }
-
-    return fs.existsSync(path);
-}
-*/
-/*
-import { RequestLogger } from 'testcafe';
-
-const url = 'http://localhost:3000/download-file';
-
-const logger = RequestLogger({ url, method: 'GET' }, {
+  const logger = RequestLogger({ href, method: 'GET' }, {
     logResponseHeaders:    true,
     logResponseBody:       true,
     stringifyResponseBody: true
+  });
+
+  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/search_items.json'), 'utf-8');
+  const expectedData = JSON.parse(expectedDataStr);
+
+  let downloadedFileContent = '';
+  // download it
+  await t.addRequestHooks(logger);
+  await t.click(fileLink)
+    .expect(logger.contains(r => {
+      if (r.response.statusCode !== 200)
+          return false;
+
+      const requestInfo = logger.requests[0];
+
+      if (!requestInfo)
+          return false;
+
+      downloadedFileContent = logger.requests[1].response.body;
+      return true;
+    })).ok();
+
+    const itemRows = parse(downloadedFileContent, { header: true });
+
+    // expecting 4 values
+    await t.expect(itemRows.data.length).eql(4, `Expect 4 rows in csv, but only received ${itemRows.data.length}`);
+
+    for (const row of itemRows.data) {
+        const expectedItemArray = expectedData.items[row.unique_id];
+        //const expectedItemArray = Object.entries(expectedData.items[row.unique_id]);
+        await checkRow(t, expectedItemArray, row);
+    }
+
 });
-fixture `Download file`
-    .page('./index.html')
-    .requestHooks(logger);
 
-test('Check file name and content', async t => {
+test('Export Tests - Search Results Collection Objects', async t => {
+  await t.navigateTo('https://islandora-idc.traefik.me/search?query=animal');
 
-    const fileNameRegEx = /attachment; filename=.*.txt/;
+  // click on metadata export link for repository items
+  const metadataExportButton = Selector('#idc-search').find('a').withText('Export Metadata – Collections');
+  await t.expect(metadataExportButton.count).eql(1);
+  await t.click(metadataExportButton);
 
-    const downloadSelector = Selector('#vde-automatic-download')
-    await t
-        .click(downloadSelector)
-        .expect(logger.contains(r => {
-            if (r.response.statusCode !== 200)
-                return false;
+  // check the files, comparing data
+  const fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
+  const href = await fileLink.getAttribute("href");
+  const fileName = href.substring(href.lastIndexOf('/') + 1);
+  const path = "~/Downloads/";
+  await t.expect(fileLink.count).eql(1);
 
-            const requestInfo = logger.requests[0];
+  const logger = RequestLogger({ href, method: 'GET' }, {
+    logResponseHeaders:    true,
+    logResponseBody:       true,
+    stringifyResponseBody: true
+  });
 
-            if (!requestInfo)
-                return false;
+  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/search_collections.json'), 'utf-8');
+  const expectedData = JSON.parse(expectedDataStr);
 
-            const downloadedFileName = requestInfo.response.headers['content-disposition'];
+  let downloadedFileContent = '';
+  // download it
+  await t.addRequestHooks(logger);
+  await t.click(fileLink)
+    .expect(logger.contains(r => {
+      if (r.response.statusCode !== 200)
+          return false;
 
-            if (!downloadedFileName)
-                false;
+      const requestInfo = logger.requests[0];
 
-            if (!fileNameRegEx.test(downloadedFileName))
-                return false;
+      if (!requestInfo)
+          return false;
 
-            const downloadedFileContent = logger.requests[0].response.body;
+      downloadedFileContent = logger.requests[1].response.body;
+      return true;
+    })).ok();
 
-            return downloadedFileContent === 'Test content';
-        })).ok();
+    const itemRows = parse(downloadedFileContent, { header: true });
+
+    // expecting 4 values
+    await t.expect(itemRows.data.length).eql(5, `Expect 5 rows in csv, but only received ${itemRows.data.length}`);
+
+    for (const row of itemRows.data) {
+        const expectedItemArray = expectedData.collections[row.unique_id];
+        //const expectedItemArray = Object.entries(expectedData.items[row.unique_id]);
+        await checkRow(t, expectedItemArray, row);
+    }
 });
-*/
 
+/** 
+ * Compares the two objects passed in, field by field.  The comparison will be 
+ * drive by the fields in the first object (expectedObj).
+ *
+ * @param {Object} expectedObj Object that is the foundObj is expected to look like
+ * @param {Object} foundObj Object being compared to expected object
+ */
+async function checkRow(t, expectedObj, foundObj) {
 
+  for (const [field, fieldVal] of Object.entries(expectedObj)) {
+    let exportVal = foundObj[field];
+    const expectedVal = fieldVal;
 
+    // we are expecting a value in this field, so the exported field can't be empty
+    await t.expect(exportVal != undefined).ok(`Value for ${field} in exported data row ${expectedObj.unique_id} not set`);
+
+    const splitVal = exportVal.split('||');
+    if (splitVal.length > 1) {
+      exportVal = splitVal;
+    }
+
+    if (Array.isArray(expectedVal)) {
+      await t.expect(Array.isArray(exportVal)).ok(`Expected value for field ${field} in exported data row to be an array and it was not: ${exportVal}`);
+      for (const x of exportVal) {
+        await t.expect(expectedVal.includes(x)).ok(`Exported value for field ${field}'s value of ${x} was not found in expected data array`);
+      }
+    } else {
+      await t.expect(exportVal).eql(expectedVal, `Values for ${field} did not match. Expected ${expectedVal}, Exported: ${exportVal}`);
+    }
+  }
+}
