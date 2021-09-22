@@ -1,8 +1,8 @@
 import { RequestLogger, Selector} from 'testcafe';
 import { adminUser } from './roles.js';
 import { t } from 'testcafe';
-import { readFile, readFileSync } from 'fs';
-import { parse } from 'papaparse';
+import { readFileSync, writeFileSync } from 'fs';
+import { parse, unparse } from 'papaparse';
 import { join as joinPath } from 'path';
 import os from 'os';
 import { contentList, findNodeIdForTitle, getResponseData, doMigration } from "./util";
@@ -149,6 +149,9 @@ fixture`Export Tests`
   });
 
 test('Export Tests - Repository Item Page', async t => {
+  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/single_repo_item.json'), 'utf-8');
+  const expectedData = JSON.parse(expectedDataStr);
+
   await t.navigateTo(contentList);
 
   // find the item
@@ -160,51 +163,24 @@ test('Export Tests - Repository Item Page', async t => {
   const metadataExportButton = Selector('#item-container').find('a').withText('Export Item Metadata');
   await t.expect(metadataExportButton.count).eql(1);
   await t.click(metadataExportButton);
+
   // check the files, comparing data
   const fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
-  // fileName is not right here.....
-  const href = await fileLink.getAttribute("href");
-  const fileName = href.substring(href.lastIndexOf('/') + 1);
-  const path = "~/Downloads/";
-  await t.expect(fileLink.count).eql(1);
+  const downloadedFileContent = await getRemoteFileContents(t, fileLink);
+  const itemRows = parse(downloadedFileContent, { header: true });
 
-  const logger = RequestLogger({ href, method: 'GET' }, {
-    logResponseHeaders:    true,
-    logResponseBody:       true,
-    stringifyResponseBody: true
-  });
+  // only expecting one
+  await t.expect(itemRows.data.length).eql(1);
+  const itemRow = itemRows.data[0];
 
-  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/single_repo_item.json'), 'utf-8');
-  const expectedData = JSON.parse(expectedDataStr);
-
-  let downloadedFileContent = '';
-  // download it
-  await t.addRequestHooks(logger);
-  await t.click(fileLink)
-    .expect(logger.contains(r => {
-      if (r.response.statusCode !== 200)
-          return false;
-
-      const requestInfo = logger.requests[0];
-
-      if (!requestInfo)
-          return false;
-
-      downloadedFileContent = logger.requests[1].response.body;
-      return true;
-    })).ok();
-
-    const itemRows = parse(downloadedFileContent, { header: true });
-
-    // only expecting one
-    await t.expect(itemRows.data.length).eql(1);
-    const itemRow = itemRows.data[0];
-
-    await checkRow(t, expectedData, itemRow);
+  await checkRow(t, expectedData, itemRow);
 });
 
 
 test('Export Tests - Collection Object Page', async t => {
+  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/single_collection_item.json'), 'utf-8');
+  const expectedData = JSON.parse(expectedDataStr);
+
   await t.navigateTo(contentList);
 
   // find the item
@@ -216,49 +192,24 @@ test('Export Tests - Collection Object Page', async t => {
   const metadataExportButton = Selector('#about-collection-button-group').find('a').withText('Export Collection Metadata');
   await t.expect(metadataExportButton.count).eql(1);
   await t.click(metadataExportButton);
+
   // check the files, comparing data
   const fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
-  const href = await fileLink.getAttribute("href");
-  const fileName = href.substring(href.lastIndexOf('/') + 1);
-  const path = "~/Downloads/";
-  await t.expect(fileLink.count).eql(1);
 
-  const logger = RequestLogger({ href, method: 'GET' }, {
-    logResponseHeaders:    true,
-    logResponseBody:       true,
-    stringifyResponseBody: true
-  });
+  const downloadedFileContent = await getRemoteFileContents(t, fileLink);
+  const itemRows = parse(downloadedFileContent, { header: true });
 
-  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/single_collection_item.json'), 'utf-8');
-  const expectedData = JSON.parse(expectedDataStr);
+  // only expecting one
+  await t.expect(itemRows.data.length).eql(1);
+  const itemRow = itemRows.data[0];
 
-  let downloadedFileContent = '';
-  // download it
-  await t.addRequestHooks(logger);
-  await t.click(fileLink)
-    .expect(logger.contains(r => {
-      if (r.response.statusCode !== 200)
-          return false;
-
-      const requestInfo = logger.requests[0];
-
-      if (!requestInfo)
-          return false;
-
-      downloadedFileContent = logger.requests[1].response.body;
-      return true;
-    })).ok();
-
-    const itemRows = parse(downloadedFileContent, { header: true });
-
-    // only expecting one
-    await t.expect(itemRows.data.length).eql(1);
-    const itemRow = itemRows.data[0];
-
-    await checkRow(t, expectedData, itemRow);
+  await checkRow(t, expectedData, itemRow);
 });
 
 test('Export Tests - Search Results Repository Items', async t => {
+  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/search_items.json'), 'utf-8');
+  const expectedData = JSON.parse(expectedDataStr);
+
   await t.navigateTo('https://islandora-idc.traefik.me/search?query=animal');
 
   // click on metadata export link for repository items
@@ -268,51 +219,25 @@ test('Export Tests - Search Results Repository Items', async t => {
 
   // check the files, comparing data
   const fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
-  const href = await fileLink.getAttribute("href");
-  const fileName = href.substring(href.lastIndexOf('/') + 1);
-  const path = "~/Downloads/";
-  await t.expect(fileLink.count).eql(1);
 
-  const logger = RequestLogger({ href, method: 'GET' }, {
-    logResponseHeaders:    true,
-    logResponseBody:       true,
-    stringifyResponseBody: true
-  });
-
-  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/search_items.json'), 'utf-8');
-  const expectedData = JSON.parse(expectedDataStr);
-
-  let downloadedFileContent = '';
   // download it
-  await t.addRequestHooks(logger);
-  await t.click(fileLink)
-    .expect(logger.contains(r => {
-      if (r.response.statusCode !== 200)
-          return false;
+  const downloadedFileContent = await getRemoteFileContents(t, fileLink);
+  const itemRows = parse(downloadedFileContent, { header: true });
 
-      const requestInfo = logger.requests[0];
+  // expecting 4 values
+  await t.expect(itemRows.data.length).eql(4, `Expect 4 rows in csv, but only received ${itemRows.data.length}`);
 
-      if (!requestInfo)
-          return false;
-
-      downloadedFileContent = logger.requests[1].response.body;
-      return true;
-    })).ok();
-
-    const itemRows = parse(downloadedFileContent, { header: true });
-
-    // expecting 4 values
-    await t.expect(itemRows.data.length).eql(4, `Expect 4 rows in csv, but only received ${itemRows.data.length}`);
-
-    for (const row of itemRows.data) {
-        const expectedItemArray = expectedData.items[row.unique_id];
-        //const expectedItemArray = Object.entries(expectedData.items[row.unique_id]);
-        await checkRow(t, expectedItemArray, row);
-    }
-
+  for (const row of itemRows.data) {
+      const expectedItemArray = expectedData.items[row.unique_id];
+      //const expectedItemArray = Object.entries(expectedData.items[row.unique_id]);
+      await checkRow(t, expectedItemArray, row);
+  }
 });
 
 test('Export Tests - Search Results Collection Objects', async t => {
+  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/search_collections.json'), 'utf-8');
+  const expectedData = JSON.parse(expectedDataStr);
+
   await t.navigateTo('https://islandora-idc.traefik.me/search?query=animal');
 
   // click on metadata export link for repository items
@@ -322,53 +247,87 @@ test('Export Tests - Search Results Collection Objects', async t => {
 
   // check the files, comparing data
   const fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
-  const href = await fileLink.getAttribute("href");
-  const fileName = href.substring(href.lastIndexOf('/') + 1);
-  const path = "~/Downloads/";
-  await t.expect(fileLink.count).eql(1);
 
-  const logger = RequestLogger({ href, method: 'GET' }, {
-    logResponseHeaders:    true,
-    logResponseBody:       true,
-    stringifyResponseBody: true
-  });
+  const downloadedFileContent = await getRemoteFileContents(t, fileLink);
+  const itemRows = parse(downloadedFileContent, { header: true });
 
-  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/search_collections.json'), 'utf-8');
+  // expecting 4 values
+  await t.expect(itemRows.data.length).eql(5, `Expect 5 rows in csv, but only received ${itemRows.data.length}`);
+
+  for (const row of itemRows.data) {
+      const expectedItemArray = expectedData.collections[row.unique_id];
+      //const expectedItemArray = Object.entries(expectedData.items[row.unique_id]);
+      await checkRow(t, expectedItemArray, row);
+  }
+});
+
+test('Export Tests - Round trip a Repository Item', async t => {
+  await t.navigateTo(contentList);
+
+  // find the item
+  let item = Selector('div.view-content').find('a').withText('Zoo Animal A');
+  await t.expect(item.count).eql(1);
+  await t.click(item);
+
+  // click on Export Button
+  let metadataExportButton = Selector('#item-container').find('a').withText('Export Item Metadata');
+  await t.expect(metadataExportButton.count).eql(1);
+  await t.click(metadataExportButton);
+
+  // check the files, comparing data
+  let fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
+
+  // download the csv file
+  let downloadedFileContent = await getRemoteFileContents(t, fileLink);
+  const itemRows = parse(downloadedFileContent, { header: true });
+
+  itemRows.data[0].title = "Zoo Animal ABC";
+  itemRows.data[0].date_available = "2021-10-10";
+
+  // reformat to CVS and save a new file for migration to use
+  const changedCSV = unparse(itemRows.data);
+  try {
+    const data = await writeFileSync(joinPath(__dirname, 'migrations/single_item_migration.csv'), changedCSV);
+    //file written successfully
+  } catch (err) {
+    console.error(err)
+  }
+
+  // run the new migration (update, really, since we are changing an object)
+  await doMigration(t, migrate_new_items, './migrations/single_item_migration.csv');
+
+  // find the item, again, to ensure it's changed
+  await t.navigateTo(contentList);
+  item = Selector('div.view-content').find('a').withText('Zoo Animal ABC');
+  await t.expect(item.count).eql(1);
+  await t.click(item);
+
+  // click on Export Button
+  metadataExportButton = Selector('#item-container').find('a').withText('Export Item Metadata');
+  await t.expect(metadataExportButton.count).eql(1);
+  await t.click(metadataExportButton);
+  // check the files, comparing data
+  fileLink = await Selector(".messages--status", { timeout: 10000}).find('a').withText('here');
+
+  // Export it and check again
+  downloadedFileContent = await getRemoteFileContents(t, fileLink);
+  const changedItemRows = parse(downloadedFileContent, { header: true });
+  const expectedDataStr = await readFileSync(joinPath(__dirname, 'expected/single_repo_item_changed.json'), 'utf-8');
   const expectedData = JSON.parse(expectedDataStr);
 
-  let downloadedFileContent = '';
-  // download it
-  await t.addRequestHooks(logger);
-  await t.click(fileLink)
-    .expect(logger.contains(r => {
-      if (r.response.statusCode !== 200)
-          return false;
+  // only expecting one
+  await t.expect(changedItemRows.data.length).eql(1);
+  const cItemRow = changedItemRows.data[0];
 
-      const requestInfo = logger.requests[0];
-
-      if (!requestInfo)
-          return false;
-
-      downloadedFileContent = logger.requests[1].response.body;
-      return true;
-    })).ok();
-
-    const itemRows = parse(downloadedFileContent, { header: true });
-
-    // expecting 4 values
-    await t.expect(itemRows.data.length).eql(5, `Expect 5 rows in csv, but only received ${itemRows.data.length}`);
-
-    for (const row of itemRows.data) {
-        const expectedItemArray = expectedData.collections[row.unique_id];
-        //const expectedItemArray = Object.entries(expectedData.items[row.unique_id]);
-        await checkRow(t, expectedItemArray, row);
-    }
+  await checkRow(t, expectedData, cItemRow);
 });
+
 
 /** 
  * Compares the two objects passed in, field by field.  The comparison will be 
  * drive by the fields in the first object (expectedObj).
  *
+ * @param {TestCafe} t
  * @param {Object} expectedObj Object that is the foundObj is expected to look like
  * @param {Object} foundObj Object being compared to expected object
  */
@@ -395,4 +354,42 @@ async function checkRow(t, expectedObj, foundObj) {
       await t.expect(exportVal).eql(expectedVal, `Values for ${field} did not match. Expected ${expectedVal}, Exported: ${exportVal}`);
     }
   }
+}
+
+/**
+ * Fetches the content of a remote file
+ * 
+ * @param {Testcafe} t 
+ * @param {A href link} fileLink 
+ * @returns String of remote file content
+ */
+async function getRemoteFileContents(t, fileLink) {
+
+  let fileContents = "";
+  const href = await fileLink.getAttribute("href");
+  const fileName = href.substring(href.lastIndexOf('/') + 1);
+  await t.expect(fileLink.count).eql(1);
+
+  const logger = RequestLogger({ href, method: 'GET' }, {
+    logResponseHeaders:    true,
+    logResponseBody:       true,
+    stringifyResponseBody: true
+  });
+
+  await t.addRequestHooks(logger);
+  await t.click(fileLink)
+    .expect(logger.contains(r => {
+      if (r.response.statusCode !== 200)
+          return false;
+
+      const requestInfo = logger.requests[0];
+
+      if (!requestInfo)
+          return false;
+
+      fileContents = logger.requests[1].response.body;
+      return true;
+    })).ok();
+
+    return fileContents;
 }
