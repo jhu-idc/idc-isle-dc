@@ -287,14 +287,16 @@ test('Export Tests - Round trip a Repository Item', async t => {
   // reformat to CVS and save a new file for migration to use
   const changedCSV = unparse(itemRows.data);
   try {
-    const data = await writeFileSync(joinPath(__dirname, 'migrations/single_item_migration.csv'), changedCSV);
+    //const data = await writeFileSync(joinPath(__dirname, 'migrations/single_item_migration.csv'), changedCSV);
+    const data = await writeFileSync('/tmp/single_item_migration.csv', changedCSV);
     //file written successfully
   } catch (err) {
     console.error(err)
   }
 
   // run the new migration (update, really, since we are changing an object)
-  await doMigration(t, migrate_new_items, joinPath(__dirname,'migrations/single_item_migration.csv'));
+  //await doMigration(t, migrate_new_items, joinPath(__dirname,'migrations/single_item_migration.csv'));
+  await doMigration(t, migrate_new_items, '/tmp/single_item_migration.csv');
 
   // find the item, again, to ensure it's changed
   await t.navigateTo(contentList);
