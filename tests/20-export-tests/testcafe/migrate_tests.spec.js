@@ -1,8 +1,8 @@
 import { RequestLogger, Selector} from 'testcafe';
-import { adminUser } from './roles.js';
+import { adminUser } from './roles';
 import { t } from 'testcafe';
 import { readFileSync, writeFileSync } from 'fs';
-import { parse, unparse } from 'papaparse';
+import { parse, unparse } from './papaparse.min';
 import { join as joinPath } from 'path';
 import os from 'os';
 import { contentList, findNodeIdForTitle, getResponseData, doMigration } from "./util";
@@ -323,8 +323,8 @@ test('Export Tests - Round trip a Repository Item', async t => {
 });
 
 
-/** 
- * Compares the two objects passed in, field by field.  The comparison will be 
+/**
+ * Compares the two objects passed in, field by field.  The comparison will be
  * drive by the fields in the first object (expectedObj).
  *
  * @param {TestCafe} t
@@ -358,9 +358,9 @@ async function checkRow(t, expectedObj, foundObj) {
 
 /**
  * Fetches the content of a remote file
- * 
- * @param {Testcafe} t 
- * @param {A href link} fileLink 
+ *
+ * @param {Testcafe} t
+ * @param {A href link} fileLink
  * @returns String of remote file content
  */
 async function getRemoteFileContents(t, fileLink) {
