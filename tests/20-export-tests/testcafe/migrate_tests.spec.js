@@ -294,7 +294,7 @@ test('Export Tests - Round trip a Repository Item', async t => {
   }
 
   // run the new migration (update, really, since we are changing an object)
-  await doMigration(t, migrate_new_items, './migrations/single_item_migration.csv');
+  await doMigration(t, migrate_new_items, joinPath(__dirname,'migrations/single_item_migration.csv'));
 
   // find the item, again, to ensure it's changed
   await t.navigateTo(contentList);
