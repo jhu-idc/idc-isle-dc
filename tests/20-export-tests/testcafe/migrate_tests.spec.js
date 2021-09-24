@@ -284,6 +284,10 @@ test('Export Tests - Round trip a Repository Item', async t => {
   itemRows.data[0].title = "Zoo Animal ABC";
   itemRows.data[0].date_available = "2021-10-10";
 
+  // note the nid so that we can verify that the migration does
+  // an update and does not create a new node
+  const origNodeId = itemRows.data[0].node_id;
+
   // reformat to CVS and save a new file for migration to use
   const changedCSV = unparse(itemRows.data);
   try {
@@ -302,6 +306,10 @@ test('Export Tests - Round trip a Repository Item', async t => {
   await t.navigateTo(contentList);
   item = Selector('div.view-content').find('a').withText('Zoo Animal ABC');
   await t.expect(item.count).eql(1);
+  // check the nid so we know we are examining the same node as before.
+  const href = await item.getAttribute("href");
+  await t.expect(origNodeId).eql(href.substring(href.lastIndexOf('/') + 1),
+      "The node id on the object does not match the original node id");
   await t.click(item);
 
   // click on Export Button
