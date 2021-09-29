@@ -87,7 +87,7 @@ test('List option: sort by', async (t) => {
 
   await t
     .expect(page.results.count).eql(4)
-    .expect(page.results.nth(0).withText('Moo').exists).ok();
+    .expect(page.results.nth(0).withText('Duck Collection').exists).ok();
 
   await page.listOptions.sortBy.setValue(`&${value}`);
 
