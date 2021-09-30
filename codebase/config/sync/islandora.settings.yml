@@ -1,5 +1,5 @@
 broker_url: 'tcp://activemq:61613'
-jwt_expiry: '+2 hour'
+jwt_expiry: '+168 hour'
 gemini_url: 'http://gemini:8000'
 gemini_pseudo_bundles:
   - 'islandora_object:node'
