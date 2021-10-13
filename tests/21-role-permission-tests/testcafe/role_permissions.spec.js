@@ -92,8 +92,7 @@ fixture`Role Permissions: Run CLA Role Migration Tests`
   // try to create object, via migration, in Collection B (Farm Animals) (has access to)
   // try to create object, via migration, in Collection C (Zoo Animals) (doesn't have access to)
   //
-  // WIP -- skipping for now until validate:true is enabled.
-test.skip('Via Migration: Create object user has proper access for', async t => {
+test('Via Migration: Create object user has proper access for', async t => {
 
   await t.navigateTo(`https://islandora-idc.traefik.me/migrate_source_ui`);
 
