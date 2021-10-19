@@ -1,10 +1,16 @@
-import {Selector} from 'testcafe';
-import {staff1AdminSSO, adminUser, createCLA,pageUserList,usernameCLA} from "./roles";
+import { Selector } from 'testcafe';
+import { staff1AdminSSO, adminUser, createCLA,pageUserList,usernameCLA } from './roles';
+import { runMigrations } from './util';
 
 fixture`Role Permissions: SSO Tests`
-  .page`https://islandora-idc.traefik.me/admin/people`;
 
-test('Ensure SSO login does not re-evaluate roles upon login', async t => {
+test
+  .before( async t => {
+    await t
+      .useRole(adminUser);
+    await runMigrations(t);
+  })
+('Ensure SSO login does not re-evaluate roles upon login', async t => {
 
   // log in and out as staff1 for the first time to establish an account
   await t.useRole(staff1AdminSSO);
