@@ -1,10 +1,11 @@
-import { Selector } from 'testcafe';
-import { adminUser,claAdminUser,createCLA,pageUserList } from './roles';
+import { Role, Selector } from 'testcafe';
+import { adminUser,claAdminUser,createCLA,pageUserList,staff1AdminSSO } from './roles';
 import { migrateItems, runMigrations } from './util';
 
 fixture`Role Permissions: test users and data`
 
 test
+  .page('https://islandora-idc.traefik.me/migrate_source_ui`')
   .before( async t => {
     await t
       .useRole(adminUser);
@@ -24,11 +25,12 @@ test
   await t.click(Selector('label').withText("--- Collection B (Farm Animals)"));
   await t.click("#edit-submit");
 
-  // .expect(Selector('label > input[type=checkbox]').nth(0).checked)
   // check that section access was set.
   await t
     .expect(Selector('label').withText("--- Collection B (Farm Animals)").parent().find('input').checked)
     .ok();
+
+  await t.useRole(Role.anonymous());
 });
 
 // try to create object, via migration, in Collection B (Farm Animals) (has access to)
@@ -69,5 +71,57 @@ test
   const msg = await Selector('.migrate_message_idc_ingest_new_items').find('td').withText('io_cla_02');
   await t.expect(msg.count).eql(1);
   await t.expect(msg.parent('tr').child('td').nth(2).innerText).contains('[node]: field_member_of=The user does not have access to ingest into this object.');
+
+  await t.useRole(Role.anonymous());
 });
 
+test('Ensure SSO login does not re-evaluate roles upon login', async t => {
+
+  // log in and out as staff1 for the first time to establish an account
+  await t.useRole(staff1AdminSSO);
+  await t.useRole(Role.anonymous());
+
+  // log in as admin and check out roles.
+  await t.useRole(adminUser);
+  await t.navigateTo(pageUserList);
+
+  // see that staff1 has no roles right now
+  let user = Selector('div.view-content').find('a').withText('staff1@johnsho…');
+  await t.expect(user.count).eql(1);
+  await t.expect(user.parent('tr').child('td').nth(3).innerText).eql("");
+
+  // let's give staff1 global admin privileges
+  await t.click(user);
+  await t.click(Selector('#block-idcui-local-tasks').find('a').withText('Roles'))
+  await t.click(Selector('label').withText("Global Admin"));
+  await t.click("#edit-submit");
+
+  const status = Selector('.messages--status').withText("The roles have been updated.");
+  await t.expect(status.count).eql(1);
+
+  await t.navigateTo(pageUserList);
+
+  // confirm that it stuck
+  user = Selector('div.view-content').find('a').withText('staff1@johnsho…');
+  await t.expect(user.count).eql(1);
+  await t.expect(user.parent('tr').child('td').nth(3).innerText).eql("Global Admin");
+
+  // log out - we're done with Admin
+  await t.useRole(Role.anonymous());
+
+  // log back in as staff1 an ensure they still have global admin perms
+  await t.navigateTo("https://islandora-idc.traefik.me/saml_login");
+  await t.typeText('#username', 'staff1')
+    .typeText('#password', 'moo')
+    .click('.form-button');
+
+  await t.navigateTo(pageUserList);
+  // let the user check their own perms; since they are a global admin this will work.
+  user = Selector('div.view-content').find('a').withText('staff1@johnsho…');
+  await t.expect(user.count).eql(1);
+  await t.expect(user.parent('tr').child('td').nth(3).innerText)
+    .eql("Global Admin");
+
+  // log out
+  await t.useRole(Role.anonymous());
+});
