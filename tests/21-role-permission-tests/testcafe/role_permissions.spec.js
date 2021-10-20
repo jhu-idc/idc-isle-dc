@@ -5,7 +5,7 @@ import { migrateItems, runMigrations } from './util';
 fixture`Role Permissions: test users and data`
 
 test
-  .page('https://islandora-idc.traefik.me/migrate_source_ui`')
+  .page 'https://islandora-idc.traefik.me/migrate_source_ui`
   .before( async t => {
     await t
       .useRole(adminUser);
