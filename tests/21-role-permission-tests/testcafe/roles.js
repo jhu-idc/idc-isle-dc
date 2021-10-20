@@ -32,7 +32,7 @@ export const userRole = async (t, username, password) => {
       await t
           .typeText('#edit-name', username)
           .typeText('#edit-pass', password)
-        .click('.edit-submit');
+          .click('#edit-submit');
     });
 }
 /*
