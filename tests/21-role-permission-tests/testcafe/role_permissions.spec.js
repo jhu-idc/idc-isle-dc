@@ -114,10 +114,7 @@ test('Ensure SSO login does not re-evaluate roles upon login', async t => {
   await t.useRole(Role.anonymous());
 
   // log back in as staff1 an ensure they still have global admin perms
-  await t.navigateTo("https://islandora-idc.traefik.me/saml_login");
-  await t.typeText('#username', 'staff1')
-    .typeText('#password', 'moo')
-    .click('.form-button');
+  await t.useRole(staff1AdminSSO);
 
   await t.navigateTo(pageUserList);
   // let the user check their own perms; since they are a global admin this will work.
