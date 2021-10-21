@@ -49,11 +49,12 @@ test
   await migrateItems(t, './migrations/cla_islandora_objects.csv');
   await t.wait(5000);
   // stop here and check the status message.
-  const fileLinkA = await Selector(".messages--status", { timeout: 10000})
-    .find('li').withText('Processed');
-  console.log('text is: ', fileLinkA.innerText);
+  //const fileLinkA = await Selector(".messages--status", { timeout: 10000})
+  //  .find('.messages__list').withText('Processed');
+  //const text = await fileLinkA.innerText;
+  //console.log('text is: ', text);
   const fileLink = await Selector(".messages--status", { timeout: 10000})
-    .find('li').withText('Processed 2 items (1 created, 0 updated, 1 failed, 0 ignored)');
+    .find('.messages__list').withText('Processed 2 items (1 created, 0 updated, 1 failed, 0 ignored)');
   await t.expect(fileLink.count).eql(1);
 
   await t.navigateTo('https://islandora-idc.traefik.me/admin/workbench/content/all');
