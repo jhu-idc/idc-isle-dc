@@ -66,7 +66,7 @@ var expectedCount = struct {
 	expectedOriginalVideoCount,
 	expectedOriginalImageCount,
 	expectedDerivativeThumbCount,
-	expectedDerivativeFitsCount,
+	expectedDerivativeFitsCount - 1,   // TODO: the first image doesn't have a FITS file
 	expectedDerivativeExtractedTxtCount,
 	expectedDerivativeServiceCount,
 }
