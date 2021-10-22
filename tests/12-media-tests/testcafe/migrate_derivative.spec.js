@@ -357,14 +357,17 @@ test('Migrate PDF for Derivative Generation', async t => {
     // no service files are generated for PDFs
     const thumb_derivative = Selector('div.view-content').find('a').withText('Thumbnail Image.png');
     const fits_derivative = Selector('div.view-content').find('a').withText('FITS File.xml');
+    const ocr_derivative = Selector('div.view-content').find('a').withText('Extracted Text.txt');
 
     console.log("Checking for derivatives ...")
 
     await t.expect(await tryUntilTrue(async () => {
         const thumb_count = await thumb_derivative.count
         const fits_count = await fits_derivative.count
-        console.log("thumb count: ", thumb_count, ", fits count:", fits_count);
-        if (thumb_count < 1 || fits_count < 1) {
+        const ocr_count = await ocr_derivative.count
+        console.log('thumb count: ', thumb_count, ', fits count: ', fits_count,
+          ', extracted text count: ', ocr_count);
+        if (thumb_count < 1 || fits_count < 1 || ocr_count < 1) {
             await t.eval(() => location.reload(true));
             return false;
         }
@@ -373,6 +376,7 @@ test('Migrate PDF for Derivative Generation', async t => {
 
     await t.expect(thumb_derivative.count).eql(1);
     await t.expect(fits_derivative.count).eql(1);
+    await t.expect(ocr_derivative.count).eql(1);
 });
 
 
