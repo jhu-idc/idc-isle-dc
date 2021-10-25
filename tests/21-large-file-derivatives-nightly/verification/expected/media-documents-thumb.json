@@ -1,0 +1,9 @@
+{
+  "type": "media",
+  "bundle": "document",
+  "name": "41-Thumbnail Image.jpg",
+  "use": [
+    "Thumbnail Image"
+  ],
+  "media_of": "Derivative Documents"
+}
