@@ -285,7 +285,7 @@ func Test_Derivative_Thumbnail_Media(t *testing.T) {
 func Test_Derivative_Fits_Media(t *testing.T) {
 	// Run derivative tests in parallel to avoid long wait times
 	t.Parallel()
-
+	log.Printf("Running Test_Derivative_Fits_Media")
 	// Collect the filenames of the expected fits media
 	// TODO: media-image-fits-01 won't have one
 	filenames := filenamesMatching(t, "fits")
@@ -296,10 +296,12 @@ func Test_Derivative_Fits_Media(t *testing.T) {
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(filenames))
+	log.Printf("initialized wait groups. Added %d", len(filenames))
 	for _, filename := range filenames {
 		expectedMedia := &model.ExpectedMediaGeneric{}
 		unmarshalErr := unmarshal(filename, expectedMedia)
 		assert.Nil(t, unmarshalErr, "error unmarshaling '%s': %s", filename, unmarshalErr)
+		log.Printf("now looking at filename: %s", filename)
 
 		var filteredMedia filterable
 		filteredMedia = applyDerivedMediaFilter(expectedMedia, expectedMedia.MediaOf)
@@ -320,19 +322,21 @@ func Test_Derivative_Fits_Media(t *testing.T) {
 				})
 
 				if len(actual.JsonApiData) > 1 {
+					log.Printf("too many results!")
 					err = errors.New(fmt.Sprintf("too many results retrieving JSONAPI entity %s, bundle %s, %s %s",
 						expectedMedia.EntityType(), expectedMedia.EntityBundle(), expectedMedia.Field(), expectedMedia.NameOrTitle()))
 				}
-
+				log.Printf("Return an error")
 				return err
 			}, time.Now().Add(defaultTimeout*time.Millisecond), 1000, 2.0)
 
 			assert.Equal(t, done, err, "Failed retrieving '%s': %s", expectedMedia.NameOrTitle(), err)
 
+			log.Printf("one is done; things are good")
 			wg.Done()
 		}()
 	}
-
+	log.Printf("Hitting the final Wait")
 	wg.Wait()
 }
 
