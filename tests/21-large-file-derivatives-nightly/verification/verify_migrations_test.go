@@ -35,7 +35,7 @@ const (
 	expectedOriginalVideoCount          = 2
 	expectedOriginalImageCount          = 5
 	expectedDerivativeThumbCount        = expectedRepoObjectCount
-	expectedDerivativeFitsCount         = expectedRepoObjectCount
+	expectedDerivativeFitsCount         = expectedRepoObjectCount - 1                                   // TODO: the first image doesn't have a FITS file
 	expectedDerivativeExtractedTxtCount = expectedOriginalDocumentsMediaCount                           // Only the PDF has extracted text
 	expectedDerivativeServiceCount      = expectedRepoObjectCount - expectedOriginalDocumentsMediaCount // The PDF doesn't have a service file; TODO: Missing service files for the large and small video
 )
@@ -66,7 +66,7 @@ var expectedCount = struct {
 	expectedOriginalVideoCount,
 	expectedOriginalImageCount,
 	expectedDerivativeThumbCount,
-	expectedDerivativeFitsCount - 1,   // TODO: the first image doesn't have a FITS file
+	expectedDerivativeFitsCount,
 	expectedDerivativeExtractedTxtCount,
 	expectedDerivativeServiceCount,
 }
