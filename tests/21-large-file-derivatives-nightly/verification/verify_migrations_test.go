@@ -285,6 +285,7 @@ func Test_Derivative_Thumbnail_Media(t *testing.T) {
 func Test_Derivative_Fits_Media(t *testing.T) {
 	// Run derivative tests in parallel to avoid long wait times
 	t.Parallel()
+
 	// Collect the filenames of the expected fits media
 	// TODO: media-image-fits-01 won't have one
 	filenames := filenamesMatching(t, "fits")
@@ -322,6 +323,7 @@ func Test_Derivative_Fits_Media(t *testing.T) {
 					err = errors.New(fmt.Sprintf("too many results retrieving JSONAPI entity %s, bundle %s, %s %s",
 						expectedMedia.EntityType(), expectedMedia.EntityBundle(), expectedMedia.Field(), expectedMedia.NameOrTitle()))
 				}
+
 				return err
 			}, time.Now().Add(defaultTimeout*time.Millisecond), 1000, 2.0)
 
@@ -330,6 +332,7 @@ func Test_Derivative_Fits_Media(t *testing.T) {
 			wg.Done()
 		}()
 	}
+
 	wg.Wait()
 }
 
