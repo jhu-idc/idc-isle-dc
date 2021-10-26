@@ -1,7 +1,7 @@
 {
   "type": "media",
-  "bundle": "document",
-  "name": "41-Thumbnail Image.jpg",
+  "bundle": "image",
+  "name": "41-Thumbnail Image.png",
   "use": [
     "Thumbnail Image"
   ],
