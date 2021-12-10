@@ -14,7 +14,7 @@ services:
   dlq:
     image: ${REPOSITORY:-islandora}/dlq:${TAG:-latest}
     environment:
-      DERIVATIVE_DIAL_TIMEOUT_SECONDS: 120
+      DERIVATIVE_DIAL_TIMEOUT_SECONDS: ${DLQ_CONNECT_TIMEOUT_SEC}
     command: -queue ${ACTIVEMQ_DLQ_NAME} -host activemq -pass ${ACTIVEMQ_PASSWORD} -config ${DLQ_HANDLER_CONFIG_LOCATION}
     depends_on:
       - activemq
