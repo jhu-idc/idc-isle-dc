@@ -387,17 +387,6 @@ test('Perform Media Migrations', async t => {
 
 });
 
-// This test just runs the same migrations as the above test.
-// The GO code was already checking the media files to ensure that
-// they were ingested correct and that the data was fine.
-// What the below proves is that running a media ingest more than once
-// does not change the data, providing the GO code test for
-// the data still passes.
-// Admittedly the flow is a little awkward, because I can't depend on the
-// last test being run first, so I put two migrations for each media type in here
-// By the time the GO code runs, the media migrations will have been run 3 times.
-// Should there be any issues with re-running ingests, it will show up when the GO
-// code checks the data.
 test('Duplicate Media Migrations', async t => {
 
   // Migrate Islandora Access Terms for media tests
@@ -434,90 +423,87 @@ test('Duplicate Media Migrations', async t => {
     './migrations/media-islandora_object.csv'
   );
 
-  // just run the media migrations twice, we will check the results in the verifcation step. 
   // audio
   await doMigration(
     t,
     migrate_media_audio,
-    './migrations/media-audio.csv'
+    './migrations/media-audio-multi.csv'
   );
-
   await doMigration(
     t,
     migrate_media_audio,
-    './migrations/media-audio.csv'
+    './migrations/media-audio-multi.csv'
   );
 
   // document
   await doMigration(
     t,
     migrate_media_document,
-    './migrations/media-document.csv'
+    './migrations/media-document-multi.csv'
   );
   await doMigration(
     t,
     migrate_media_document,
-    './migrations/media-document.csv'
+    './migrations/media-document-multi.csv'
   );
 
   // extracted text
   await doMigration(
     t,
     migrate_media_extracted_text,
-    './migrations/media-extracted_text.csv'
+    './migrations/media-extracted_text-multi.csv'
   );
   await doMigration(
     t,
     migrate_media_extracted_text,
-    './migrations/media-extracted_text.csv'
+    './migrations/media-extracted_text-multi.csv'
   );
 
   // file
   await doMigration(
     t,
     migrate_media_file,
-    './migrations/media-file.csv'
+    './migrations/media-file-multi.csv'
   );
   await doMigration(
     t,
     migrate_media_file,
-    './migrations/media-file.csv'
+    './migrations/media-file-multi.csv'
   );
 
   // image
   await doMigration(
     t,
     migrate_media_image,
-    './migrations/media-image.csv'
+    './migrations/media-image-multi.csv'
   );
   await doMigration(
     t,
     migrate_media_image,
-    './migrations/media-image.csv'
+    './migrations/media-image-multi.csv'
   );
 
   // video
   await doMigration(
     t,
     migrate_media_video,
-    './migrations/media-video.csv'
+    './migrations/media-video-multi.csv'
   );
   await doMigration(
     t,
     migrate_media_video,
-    './migrations/media-video.csv'
+    './migrations/media-video-multi.csv'
   );
 
-  // remote video
   await doMigration(
     t,
     migrate_media_remote_video,
-    './migrations/media-remote_video.csv'
+    './migrations/media-remote_video-multi.csv'
   );
   await doMigration(
     t,
     migrate_media_remote_video,
-    './migrations/media-remote_video.csv'
+    './migrations/media-remote_video-multi.csv'
   );
 });
 
