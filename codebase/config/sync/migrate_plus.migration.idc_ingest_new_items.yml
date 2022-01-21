@@ -667,9 +667,6 @@ process:
       delimiter: '||'
       strict: false
   field_weight: weight
-    # plugin: skip_on_empty
-    # source: weight
-    # method: process
 destination:
   plugin: 'entity:node'
   default_bundle: islandora_object
