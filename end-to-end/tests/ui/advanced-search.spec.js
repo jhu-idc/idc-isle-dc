@@ -119,27 +119,26 @@ test('Collection filter', async (t) => {
 });
 
 /**
+ * Enter basic keyword search: 'item'
  * Enter date 1: 2000
  * Enter Date 2: 2010
- * Enter basic keyword search: 'item'
  * Hit Clear (search term) button
- *      Clearing terms will clear the search, but will not clear the date filter!
- * Hit the Clear (filters) button
+ * Hit the Clear (filters) button (no effect, because he first Clear will clear filters)
  */
 test('Date filter and basic search', async (t) => {
   const term = Page.queryTerm(0);
   await t
-    .typeText(Page.dateInput1, '2000', { paste: true})
-    .pressKey('enter')
-    .expect(Page.results.count).eql(5)
-    .typeText(Page.dateInput2, '2010', { paste: true})
-    .pressKey('tab')
-    .expect(Page.results.count).eql(8)
     .typeText(term.nonproxyTerm.term, 'item', { paste: true})
     .click(Page.submitBtn)
+    .expect(Page.results.count).eql(7)
+    .typeText(Page.dateInput1, '2000', { paste: true})
+    .pressKey('enter')
+    .expect(Page.results.count).eql(2)
+    .typeText(Page.dateInput2, '2010', { paste: true})
+    .pressKey('tab')
     .expect(Page.results.count).eql(5)
     .click(Page.clearTerms)
-    .expect(Page.results.count).eql(8)
+    .expect(Page.results.count).eql(10)
     .click(Page.clearFilters)
     .expect(Page.results.count).eql(10);
 });
