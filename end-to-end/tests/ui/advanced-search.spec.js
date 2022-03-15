@@ -10,7 +10,7 @@ fixture `Advanced Search page`
  * Clear button press (10 results)
  */
 test('Proximity search and Clear button', async (t) => {
-  await t.expect(Page.results.count).eql(10);
+  await t.expect(Page.results.count).eql(24);
 
   const term1 = Page.queryTerm(0);
 
@@ -56,7 +56,7 @@ test('Proximity search and Clear button', async (t) => {
  * Normal search 'animal' OR 'page' (5 results)
  */
 test('Normal search', async (t) => {
-  await t.expect(Page.results.count).eql(10);
+  await t.expect(Page.results.count).eql(24);
 
   await Page.pagers[0].goToPage(3);
 
@@ -95,8 +95,6 @@ test('Can initiate search with Enter key', async (t) => {
 test('Collection filter', async (t) => {
   const pager = Page.pagers[0];
 
-  await pager.goToPage(3);
-
   await t
     .expect(Page.results.count).eql(4)
     .expect(pager.pager.withText('24 of 24 items').exists).ok();
@@ -115,7 +113,7 @@ test('Collection filter', async (t) => {
     .expect(Page.collectionsFilter.suggestions.exists).notOk()
     .click(Page.collectionsFilter.selectedCollections.withText('Duck Collection'))
     .expect(Page.collectionsFilter.selectedCollections.exists).notOk()
-    .expect(Page.results.count).eql(10);
+    .expect(Page.results.count).eql(24);
 });
 
 /**
@@ -138,13 +136,13 @@ test('Date filter and basic search', async (t) => {
     .pressKey('tab')
     .expect(Page.results.count).eql(5)
     .click(Page.clearTerms)
-    .expect(Page.results.count).eql(10)
-    .click(Page.clearFilters)
-    .expect(Page.results.count).eql(10);
+    .expect(Page.results.count).eql(24);
 });
 
 test('Date filter will reset current page', async (t) => {
   const pager = Page.pagers[0];
+
+  await Page.listOptions.itemsPerPage.setValue('10');
 
   await t.expect(Page.results.count).eql(10);
   await pager.goToPage(3);
