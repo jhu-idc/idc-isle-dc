@@ -30,7 +30,7 @@ destroy-state:
 .SILENT: composer-install
 composer-install:
 	echo "Installing via composer"
-	docker-compose exec drupal with-contenv bash -lc 'COMPOSER_MEMORY_LIMIT=-1 composer install'
+	docker-compose exec drupal with-contenv bash -lc 'composer clearcache; COMPOSER_MEMORY_LIMIT=-1 composer install'
 
 .PHONY: snapshot-image
 .SILENT: snapshot-image
@@ -145,6 +145,9 @@ start:
 		${MAKE} db_restore; \
 		${MAKE} _docker-up-and-wait; \
 		${MAKE} config-import; \
+		$(MAKE) composer-install; \
+		docker-compose exec -T drupal /bin/sh -c "drush updatedb --yes" ; \
+		docker-compose exec -T drupal /bin/sh -c "drush cron ; drush cr" ; \
 	else echo "Pre-existing Drupal state found, not loading db from snapshot"; \
 		${MAKE} _docker-up-and-wait; \
 	fi;
@@ -155,7 +158,6 @@ _docker-up-and-wait:
 	docker-compose up -d
 	sleep 5
 	docker-compose exec -T drupal /bin/sh -c "while true ; do echo \"Waiting for Drupal to start ...\" ; if [ -d \"/var/run/s6/services/nginx\" ] ; then s6-svwait -u /var/run/s6/services/nginx && exit 0 ; else sleep 5 ; fi done"
-
 
 # Static drupal image, with codebase baked in.  This image
 # is tagged based on the current git hash/tag.  If the image is not present
