@@ -20,16 +20,34 @@
             "url": "git@github.com:Islandora/islandora.git"
         },
         {
-            "type": "vcs",
-            "url": "git@github.com:jhu-idc/islandora_defaults.git"
+            "type": "package",
+            "package": {
+                "name": "jhu-idc/islandora_defaults",
+                "version": "dev-8.x-1.x",
+                "type": "drupal-module",
+                "source": {
+                    "url": "https://github.com/jhu-idc/islandora_defaults.git",
+                    "type": "git",
+                    "reference": "8.x-1.x"
+                }
+            }
         },
         {
             "type": "vcs",
             "url": "git@github.com:jhu-idc/controlled_access_terms.git"
         },
         {
-            "type": "vcs",
-            "url": "git@github.com:jhu-idc/reference_value_pair.git"
+            "type": "package",
+            "package": {
+                "name": "jhu-idc/reference_value_pair",
+                "version": "dev-8.x-1.x",
+                "type": "drupal-module",
+                "source": {
+                    "url": "https://github.com/jhu-idc/reference_value_pair.git",
+                    "type": "git",
+                    "reference": "9x_test"
+                }
+            }
         },
         {
             "type": "vcs",
@@ -49,7 +67,8 @@
         },
         {
             "type": "vcs",
-            "url": "https://github.com/jhu-idc/idc_defaults.git"
+            "url": "https://github.com/jhu-idc/idc_defaults.git",
+            "reference": "upstream"
         },
         {
             "type": "vcs",
@@ -82,6 +101,31 @@
                     "reference": "master"
                 }
             }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "masonry/masonry",
+                "version": "4.2.2",
+                "type": "drupal-library",
+                "source": {
+                    "url": "https://github.com/desandro/masonry.git",
+                    "type": "git",
+                    "reference": "3b0883cf4a4a046896719b9cf282ea74be7ffecd"
+                }
+            }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "imagesloaded/imagesloaded",
+                "version": "4.1.4",
+                "type": "drupal-library",
+                "dist": {
+                    "url": "https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js",
+                    "type": "file"
+                }
+            }
         }
     ],
     "require": {
@@ -105,30 +149,40 @@
         "drupal/embed": "^1.4",
         "drupal/entity_reference_unpublished": "^1.2",
         "drupal/epp": "^1.0",
-        "drupal/facets": "^1.3",
+        "drupal/facets": "^2.0",
+        "drupal/field_group": "^3.2",
+        "drupal/field_permissions": "^1.1",
+        "drupal/file_mdm": "^2.4",
         "drupal/google_analytics": "^4.0",
         "drupal/google_tag": "^1.4",
-        "drupal/imagemagick": "^3",
+        "drupal/imagemagick": "^3.3",
+        "drupal/jquery_ui_accordion": "^1.1",
         "drupal/libraries": "3.x-dev@dev",
+        "drupal/masonry": "^1.2",
         "drupal/migrate_source_ui": "^1.0@RC",
         "drupal/pager_serializer": "^1.0",
         "drupal/pdf": "1.x-dev",
+        "drupal/permissions_by_term": "^3.1",
         "drupal/rdfui": "^1.0-beta1",
         "drupal/rest_oai_pmh": "^1.0",
         "drupal/restui": "^1.16",
         "drupal/role_delegation": "^1.1",
         "drupal/role_hierarchy": "^2.2",
         "drupal/s3fs": "^3.0@alpha",
-        "drupal/search_api_solr": "^4.1",
+        "drupal/search_api_solr": "^4.2",
         "drupal/simplesamlphp_auth": "^3.2",
+        "drupal/sophron": "^1.2",
         "drupal/title_length": "^1.1",
         "drupal/transliterate_filenames": "^1.3",
         "drupal/views_data_export": "^1.0",
         "drupal/workbench": "^1.3",
         "drupal/workbench_access": "^1.0@beta",
         "drush/drush": "^10.0",
-        "islandora-rdm/islandora_fits": "dev-master",
+        "fabpot/goutte": "^4.0",
+        "imagesloaded/imagesloaded": "^4.1",
+        "islandora-rdm/islandora_fits": "dev-8.x-1.x",
         "islandora/carapace": "dev-8.x-3.x",
+        "islandora/openseadragon": "^2.0",
         "jhu-idc/idc-ui-theme": "dev-main",
         "jhu-idc/idc_defaults": "dev-main",
         "jhu-idc/idc_export": "dev-main",
@@ -136,16 +190,20 @@
         "jhu-idc/islandora_defaults": "dev-8.x-1.x",
         "jhu-idc/islandora_repository_reports": "dev-main",
         "jhu-idc/migrate_file": "dev-8.x-1.x",
+        "jhu-idc/reference_value_pair": "dev-8.x-1.x",
         "jhu_idc/idc_migration": "^2.0",
+        "laminas/laminas-zendframework-bridge": "^1.5",
         "maennchen/zipstream-php": "^2.1",
+        "masonry/masonry": "^4.2",
         "seboettg/citeproc-php": "v2.2.5",
         "symfony/string": "^5.4",
         "vlucas/phpdotenv": "^4.0",
         "webflo/drupal-finder": "^1.0.0",
+        "wikimedia/composer-merge-plugin": "^2.0",
         "zaporylie/composer-drupal-optimizations": "^1.0"
     },
     "require-dev": {
-        "drupal/core-dev": "^9.2",
+        "drupal/core-dev": "9.3.13",
         "mglaman/drupal-check": "^1.1",
         "phpspec/prophecy-phpunit": "^2"
     },
@@ -166,7 +224,8 @@
             "drupal/core-project-message": true,
             "drupal/core-vendor-hardening": true,
             "zaporylie/composer-drupal-optimizations": true,
-            "wikimedia/composer-merge-plugin": true
+            "wikimedia/composer-merge-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     },
     "autoload": {
@@ -228,7 +287,6 @@
                 "SimpleSAMLphp config": "patches/simplesaml_config.patch"
             },
             "drupal/title_length": {
-                "Node title length 1: Apply user config override": "patches/node_title_length_fix-hook-install.patch",
                 "Node title length 2: Taxonomy name length": "patches/node_title_length_termNameCharLength-3041979-8.patch"
             },
             "islandora/islandora": {

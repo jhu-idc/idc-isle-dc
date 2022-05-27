@@ -1,0 +1,31 @@
+uuid: e15ee8d9-af87-494e-8f41-617b40b4c9d9
+langcode: en
+status: true
+dependencies:
+  config:
+    - facets.facet.physical_form
+  module:
+    - facets
+    - system
+  theme:
+    - bartik
+_core:
+  default_config_hash: Gb14JbPGc1IX6-hfhZr_EVEg-AUiYnV50EJcfUIIgHc
+id: physicalform
+theme: bartik
+region: sidebar_second
+weight: 0
+provider: null
+plugin: 'facet_block:physical_form'
+settings:
+  id: 'facet_block:physical_form'
+  label: 'Physical Form'
+  label_display: visible
+  provider: facets
+  block_id: physicalform
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    context_mapping: {  }
+    pages: /solr-search/content
