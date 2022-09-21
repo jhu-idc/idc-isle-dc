@@ -184,7 +184,6 @@ start:
 	docker-compose exec -T drupal /bin/sh -c "drush updatedb -y"
 	$(MAKE) set-codebase-owner
 	if [ ! -f codebase/web/sites/default/files/generic.png ] ; then cp "codebase/web/core/modules/media/images/icons/generic.png" "codebase/web/sites/default/files/generic.png" ; fi
-	$(MAKE) cache-rebuild
 
 .PHONY: _docker-up-and-wait
 .SILENT: _docker-up-and-wait
