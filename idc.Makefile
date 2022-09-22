@@ -119,9 +119,9 @@ set-tmp:
 	docker-compose exec -T drupal /bin/sh -c "if [[ ! \$$(stat -c \"%u:%G\" /var/www/drupal/web/sites/default/files/tmp) == \"nginx:nginx\" ]] ; then chown -R nginx: /var/www/drupal/web/sites/default/files ; fi ; "
 	docker-compose exec -T drupal /bin/sh -c "if [[ ! \$$(stat -c \"%a\" /var/www/drupal/web/sites/default/files/tmp) == \"755\" ]] ; then chmod -R 775 /var/www/drupal/web/sites/default/files/tmp ; fi ; "
 	# Set private directory to /var/www/drupal/web/sites/default/files/private
-	docker-compose exec -T drupal /bin/sh -c "mkdir -p /var/www/drupal/web/sites/default/files/private"
-	docker-compose exec -T drupal /bin/sh -c "if [[ ! \$$(stat -c \"%u:%G\" /var/www/drupal/web/sites/default/files/private) == \"nginx:nginx\" ]] ; then chown -R nginx: /var/www/drupal/web/sites/default/files/private ; fi ; "
-	docker-compose exec -T drupal /bin/sh -c "if [[ ! \$$(stat -c \"%a\" /var/www/drupal/web/sites/default/files/private) == \"755\" ]] ; then chmod -R 775 /var/www/drupal/web/sites/default/files/private ; fi ; "
+	docker-compose exec -T drupal /bin/sh -c "mkdir -p /tmp/private"
+	docker-compose exec -T drupal /bin/sh -c "if [[ ! \$$(stat -c \"%u:%G\" /tmp/private) == \"nginx:nginx\" ]] ; then chown -R nginx: /tmp/private ; fi ; "
+	docker-compose exec -T drupal /bin/sh -c "if [[ ! \$$(stat -c \"%a\" /tmp/private) == \"755\" ]] ; then chmod -R 775 /tmp/private ; fi ; "
 
 .PHONY: dev-up
 .SILENT: dev-up

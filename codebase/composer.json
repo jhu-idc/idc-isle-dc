@@ -279,11 +279,15 @@
         ],
         "post-install-cmd": [
             "@composer drupal:scaffold",
-            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
+            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles",
+            "find ./vendor/ -not -user 1000 -exec chown 1000:101 {} + ",
+            "find ./vendor/ -not -group 101 -exec chown 1000:101 {} + "
         ],
         "post-update-cmd": [
             "@composer drupal:scaffold",
-            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
+            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles",
+            "find ./vendor/ -not -user 1000 -exec chown 1000:101 {} + ",
+            "find ./vendor/ -not -group 101 -exec chown 1000:101 {} + "
         ]
     },
     "extra": {
