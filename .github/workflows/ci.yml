@@ -28,10 +28,6 @@ jobs:
               run: |
                   echo '{"experimental": "enabled"}' > ~/.docker/config.json
 
-            # Temp fix for 9.4 switch to working tag
-            - name: Temp fix for 9.4 switch to working tag
-              run: git fetch --all --tags && git checkout cf17931c2bc5f8562ff8d26a7e642b3ca49cb92c codebase/
-
             # Build and run the static environment
             - name: Build Static
               run: make static-docker-compose.yml up
@@ -40,21 +36,9 @@ jobs:
             - name: Temp fix for 9.4 Add github token to composer
               run: docker-compose exec -T drupal with-contenv bash -lc "composer config -g github-oauth.github.com ${{ secrets.GH_TOKEN }}"
 
-            # Temp fix for 9.4 run incremental_version_updater.sh
-            - name: Temp fix for 9.4 run incremental_version_updater.sh
-              run: docker-compose exec -T drupal bash -lc "cd /var/www/drupal && bash /var/www/drupal/incremental_version_updater.sh ${{ secrets.GH_TOKEN }}"
-
-            # Temp fix for 9.4 remove incremental_version_updater.sh in codebase
-            - name: Temp fix for 9.4 remove incremental_version_updater.sh in codebase
-              run: rm -f codebase/incremental_version_updater.sh
-
             # Temp fix for 9.4 reset file permissions of codebase
             - name: Temp fix for 9.4 reset file permissions of codebase
               run: make set-codebase-owner
-
-            # Temp fix for 9.4 reset codebase
-            - name: Temp fix for 9.4 reset codebase
-              run: git checkout codebase/
 
             # Temp fix for 9.4 run composer install
             - name: Temp fix for 9.4 run composer install
