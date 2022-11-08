@@ -32,10 +32,6 @@ jobs:
             - name: Temp fix for 9.4 switch to working tag
               run: git fetch --all --tags && git checkout cf17931c2bc5f8562ff8d26a7e642b3ca49cb92c codebase/
 
-            # Temp fix for 9.4 copy incremental_version_updater.sh to codebase
-            - name: Temp fix for 9.4 copy incremental_version_updater.sh to codebase
-              run: cp scripts/incremental_version_updater.sh codebase/incremental_version_updater.sh
-
             # Build and run the static environment
             - name: Build Static
               run: make static-docker-compose.yml up
