@@ -391,8 +391,8 @@ clean:
 	echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, codebase, islandora_workbench, certs, secrets, and all untracked/ignored files (including .env)."
 	$(MAKE) confirm
 	-docker-compose down -v
-	sudo rm -fr codebase islandora_workbench certs secrets/live/*
-	git clean -xffd .
+	sudo rm -fr islandora_workbench certs secrets/live/*
+	# git clean -xffd .
 
 .PHONY: up
 .SILENT: up
@@ -540,7 +540,7 @@ starter_dev: QUOTED_CURDIR = "$(CURDIR)"
 starter_dev: generate-secrets
 	$(MAKE) starter-init ENVIRONMENT=starter_dev
 	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
-		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/Islandora/islandora-starter-site /home/root;'; \
+		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /home/root;'; \
 	fi
 	$(MAKE) set-files-owner SRC=$(CURDIR)/codebase ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
