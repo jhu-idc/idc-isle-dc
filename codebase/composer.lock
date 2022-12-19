@@ -8382,12 +8382,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/idc_ui_module.git",
-                "reference": "5f4b02aebb65ee03e268704f9c57d080eff9d3c9"
+                "reference": "b9a08d3bc252ebad9d07fec2fc1c883e17d7f593"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/idc_ui_module/zipball/5f4b02aebb65ee03e268704f9c57d080eff9d3c9",
-                "reference": "5f4b02aebb65ee03e268704f9c57d080eff9d3c9",
+                "url": "https://api.github.com/repos/jhu-idc/idc_ui_module/zipball/b9a08d3bc252ebad9d07fec2fc1c883e17d7f593",
+                "reference": "b9a08d3bc252ebad9d07fec2fc1c883e17d7f593",
                 "shasum": ""
             },
             "default-branch": true,

@@ -385,6 +385,7 @@ dev:
 	$(MAKE) install ENVIRONMENT=local
 	$(MAKE) hydrate ENVIRONMENT=local
 
+
 .phony: confirm
 confirm:
 	@echo "\n\n"
@@ -399,6 +400,11 @@ clean:
 	$(MAKE) confirm
 	-docker-compose down -v --remove-orphans
 	# $(MAKE) set-codebase-owner
+	echo "Preparing to forcibly remove 'codebase/' and certs/ directories"
+	echo "Note: elevating to root permissions via sudo to remove possible codebase/ with changed ownership"
+	echo "you might be prompted for local password for sudo permissions:"
 	sudo rm -fr codebase certs
 	# git clean -xffd .
 	git checkout codebase
+	echo "Clean completed successfully."
+

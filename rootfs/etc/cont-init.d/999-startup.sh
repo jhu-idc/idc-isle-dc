@@ -14,16 +14,12 @@ MKDIR="/bin/mkdir"
 
 set +e
 
-$CHMOD 0750 $DRUPAL_DIR/fix_permissions.sh
-
 echo "Creating tmp and private directories"
 for d in $DRUPAL_DIR/web/sites/default/files/tmp /tmp/private ; do
   echo " directory: '$d'"
   $MKDIR -m 0775 -p "$d"
   $CHOWN -R nginx:nginx "$d"
 done
-
-$DRUPAL_DIR/fix_permissions.sh $DRUPAL_DIR/web nginx
 
 # This is a workaround for a bug.
 drush cdel core.extension module.search_api_solr_defaults || true

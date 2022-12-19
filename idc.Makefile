@@ -1,4 +1,6 @@
 .DEFAULT_GOAL := default
+# Establish "GIT_TAG" as the the current commit reference for the repo;
+# this will be used later to establish container image tags:
 GIT_TAG := $(shell git describe --tags --always)
 
 # Bootstrap a new instance without Fedora.  Assumes there is a Drupal site in ./codebase.
@@ -169,7 +171,11 @@ start:
 	fi;
 	$(MAKE) solr-cores
 	$(MAKE) config-import
-	docker-compose exec -T drupal with-contenv bash -lc 'cmp -s /var/www/drupal/assets/solr/solrconfig_extra.xml /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml || cp /var/www/drupal/assets/solr/solrconfig_extra.xml /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml'
+	docker ps -a 
+	for i in $$( docker ps -a | grep drupal | awk '{print $$1}' ) ; do echo $$i ; docker inspect "$$i" | grep Image ; done
+	echo "Force solr ISLANDORA config"
+	docker-compose exec -T drupal bash -c '/bin/rm -f /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml ; /bin/cp -f /var/www/drupal/assets/solr/solrconfig_extra.xml /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml'
+	echo "Restarting solr"
 	docker-compose restart solr
 
 .PHONY: _docker-up-and-wait
@@ -179,7 +185,7 @@ _docker-up-and-wait:
 	sleep 5
 	if [ "${GH_TOKEN}" ]; then \
 		echo "Installing github token"; \
-		docker-compose exec -T drupal bash -lc "composer config -g github-oauth.github.com ${GH_TOKEN}" & echo '' ; \
+		docker-compose exec -T drupal bash -lc "composer config -g github-oauth.github.com ${GH_TOKEN}" && echo '' ; \
 	fi;
 	docker-compose exec -T drupal /bin/sh -c "while true ; do echo \"Waiting for Drupal to start ...\" ; if [ -d \"/var/run/s6/services/nginx\" ] ; then s6-svwait -u /var/run/s6/services/nginx && exit 0 ; else sleep 5 ; fi done"
 
@@ -194,12 +200,12 @@ static-drupal-image:
 	EXISTING=`docker images -q $$IMAGE` ; \
 	if test -z "$$EXISTING" ; then \
 		echo "Building Drupal image with base:  $${REPOSITORY}/drupal:$${TAG} " ; \
-		docker pull $${IMAGE} 2>/dev/null || \
 		docker build --build-arg REPOSITORY=$${REPOSITORY} --build-arg TAG=$${TAG} -t $${IMAGE} .; \
+		docker tag $${IMAGE}  ${REPOSITORY}/drupal-static:static ; \
 	else \
 		echo "Using existing Drupal image $${EXISTING}" ; \
+		docker tag $${EXISTING}  ${REPOSITORY}/drupal-static:static ; \
 	fi
-	docker tag ${REPOSITORY}/drupal-static:${GIT_TAG} ${REPOSITORY}/drupal-static:static
 
 # Export a tar of the static drupal image
 .PHONY: static-drupal-image-export
@@ -226,8 +232,8 @@ static-docker-compose.yml: static-drupal-image
 			echo $$line >> .env_static ; \
 		fi \
 		done < $${ENV_FILE} && \
-				echo setting xxDRUPAL_STATIC_TAG && \
-		echo xxDRUPAL_STATIC_TAG=static >> .env_static
+				echo setting DRUPAL_STATIC_TAG && \
+		echo DRUPAL_STATIC_TAG=static >> .env_static
 	mv ${ENV_FILE} .env.bak
 	mv .env_static ${ENV_FILE}
 	echo Building static drupal configuration
