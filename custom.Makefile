@@ -67,3 +67,10 @@ jhu_clean:
 ## JHU: Brings the local site down without destroying data.
 jhu_down:
 	-docker-compose down
+
+.PHONY: jhu_config-export
+.SILENT: jhu_config-export
+## JHU: Exports the sites configuration.
+jhu_config-export:
+	docker-compose exec drupal with-contenv bash -lc "chown -R nginx: /var/www/drupal/config/sync/"
+	docker-compose exec -T drupal drush -l $(SITE) config:export -y
