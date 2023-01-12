@@ -174,7 +174,7 @@ start:
 	docker ps -a 
 	for i in $$( docker ps -a | grep drupal | awk '{print $$1}' ) ; do echo $$i ; docker inspect "$$i" | grep Image ; done
 	echo "Force solr ISLANDORA config"
-	docker-compose exec -T drupal bash -c '/bin/rm -f /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml ; /bin/cp -f /var/www/drupal/assets/solr/solrconfig_extra.xml /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml'
+	docker-compose exec -T drupal bash -c '/bin/rm -rf /opt/solr/server/solr/ISLANDORA/conf/* ; /bin/cp -f /var/www/drupal/assets/solr/*.* /opt/solr/server/solr/ISLANDORA/conf/'
 	echo "Restarting solr"
 	docker-compose restart solr
 
