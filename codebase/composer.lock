@@ -8618,12 +8618,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jhu-idc/idc-ui-theme.git",
-                "reference": "6c2d3a7e5713650fe847353693984c045b77b3cd"
+                "reference": "b38658bad8488c5f2eb51105958d53cb21acefa0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jhu-idc/idc-ui-theme/zipball/6c2d3a7e5713650fe847353693984c045b77b3cd",
-                "reference": "6c2d3a7e5713650fe847353693984c045b77b3cd",
+                "url": "https://api.github.com/repos/jhu-idc/idc-ui-theme/zipball/b38658bad8488c5f2eb51105958d53cb21acefa0",
+                "reference": "b38658bad8488c5f2eb51105958d53cb21acefa0",
                 "shasum": ""
             },
             "default-branch": true,
@@ -8633,7 +8633,7 @@
                 "source": "https://github.com/jhu-idc/idc-ui-theme/tree/main",
                 "issues": "https://github.com/jhu-idc/idc-ui-theme/issues"
             },
-            "time": "2022-12-23T17:48:27+00:00"
+            "time": "2023-01-13T17:54:55+00:00"
         },
         {
             "name": "jhu-idc/idc_defaults",
