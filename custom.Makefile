@@ -128,12 +128,13 @@ jhu_enable_dev_tools:
 .SILENT: jhu_export_repos
 ## JHU: This copies the codebase directory and theme directory to a parent directory.
 jhu_export_repos:
-	rsync -avz --update --exclude '.git' codebase/ ../idc-codebase/ --delete
-	rsync -avz --update --exclude '.git' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
+	$(MAKE) jhu_config_export
+	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/ ../idc-codebase/ --delete
+	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
 
 .PHONY: jhu_sync_repos
 .SILENT: jhu_sync_repos
 ## JHU: This copies the codebase repo and the theme directory from the parent directory.
 jhu_sync_repos:
-	[ -d "../idc-codebase/" ] && rsync -avz --update --exclude '.git' codebase/ ../idc-codebase/ --delete
-	[ -d "../idc_ui_theme_boots/" ] && rsync -avz --exclude '.git' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
+	[ -d "../idc-codebase/" ] && rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/ ../idc-codebase/ --delete
+	[ -d "../idc_ui_theme_boots/" ] && rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
