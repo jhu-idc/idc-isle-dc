@@ -22,6 +22,10 @@ set-codebase-owner:
 ## JHU: Make a local site with codebase directory bind mounted, using cloned starter site.
 jhu_up: QUOTED_CURDIR = "$(CURDIR)"
 jhu_up: generate-secrets
+	if [ -z "$(QUOTED_CURDIR)/docker-compose.yml" ]; then \
+		docker-compose up -d \
+		exit 1; \
+	fi
 	$(MAKE) starter-init ENVIRONMENT=starter_dev
 	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
 		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /tmp/codebase; mv /tmp/codebase/* /home/root;'; \
@@ -29,21 +33,22 @@ jhu_up: generate-secrets
 	$(MAKE) set-files-owner SRC=$(CURDIR)/codebase ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
 	docker-compose exec -T drupal with-contenv bash -lc 'composer install'
-	$(MAKE) starter-finalize ENVIRONMENT=starter_dev
 	$(MAKE) set-codebase-owner
-	# docker-compose exec drupal with-contenv bash -lc "echo \"alias drupal='vendor/drupal/console/bin/drupal'\" > ~/.bashrc"
-	$(MAKE) jhu_demo_content
+	$(MAKE) jhu_starter-finalize ENVIRONMENT=starter_dev
 
 .PHONY: jhu_demo_content
 #.SILENT: jhu_demo_content
 ## JHU: Helper function for demo sites: do a workbench import of sample objects
-jhu_demo_content:
+jhu_demo_content: QUOTED_CURDIR = "$(CURDIR)"
+jhu_demo_content: 
 	# fetch repo that has csv and binaries to data/samples
 	# if prod do this by default
 	-docker-compose exec -T drupal with-contenv bash -lc "composer require mjordan/islandora_workbench_integration"
 	-docker-compose exec -T drupal with-contenv bash -lc "drush en -y islandora_workbench_integration"
 	# if [ -d "islandora_workbench" ]; then rm -rf islandora_workbench; fi
 	[ -d "islandora_workbench" ] || (git clone -b new_staging --single-branch https://github.com/DonRichards/islandora_workbench)
+	# Just in case your shell autmomatically CDs into the cloned directory like mine does
+	if [ ! $(CURDIR) = $(shell pwd) ]; then cd $(CURDIR) ; fi
 	$(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/demoBDcreate*
 	$(SED_DASH_I) 's/http:/https:/g' islandora_workbench/demoBDcreate*
 	$(SED_DASH_I) 's/author_email\="mjordan@sfu"\,$$/author_email="mjordan@sfu", packages=["i7Import", "i8demo_BD", "input_data"],/g' islandora_workbench/setup.py
@@ -55,11 +60,24 @@ jhu_demo_content:
 .SILENT: jhu_clean
 ## JHU: Destroys all local data, including codebase, docker volumes, and untracked/ignored files.
 jhu_clean:
+	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, codebase/, and all untracked/ignored files (including .env)."
+	$(MAKE) confirm
+	-docker-compose down -v --remove-orphans
+	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml codebase
+	-git clean -xffd .
+	-git checkout .
+	@echo "Codebase/ was completely removed."
+	@echo "  └─ Done"
+
+.PHONY: jhu_reset
+.SILENT: jhu_reset
+## JHU: Destroys all local data, docker volumes, and untracked/ignored files.
+jhu_reset:
 	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, and all untracked/ignored files (including .env)."
 	$(MAKE) confirm
-	-docker-compose down -v
-	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml codebase
-	@echo "Codebase/ was not reset."
+	-docker-compose down -v --remove-orphans
+	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml
+	@echo "Codebase/ was completely removed."
 	@echo "  └─ Done"
 
 .PHONY: jhu_down
@@ -68,9 +86,54 @@ jhu_clean:
 jhu_down:
 	-docker-compose down
 
-.PHONY: jhu_config-export
-.SILENT: jhu_config-export
+.PHONY: jhu_config_export
+.SILENT: jhu_config_export
 ## JHU: Exports the sites configuration.
-jhu_config-export:
+jhu_config_export:
 	docker-compose exec drupal with-contenv bash -lc "chown -R nginx: /var/www/drupal/config/sync/"
 	docker-compose exec -T drupal drush -l $(SITE) config:export -y
+	$(MAKE) set-codebase-owner
+
+.PHONY: jhu_config_import
+.SILENT: jhu_config_import
+## JHU: Imports the sites configuration.
+jhu_config_import:
+	docker-compose exec drupal with-contenv bash -lc "chown -R nginx: /var/www/drupal/config/sync/"
+	docker-compose exec -T drupal drush -l $(SITE) config:import -y
+	$(MAKE) set-codebase-owner
+
+.PHONY: jhu_starter-finalize
+jhu_starter-finbalize:
+	docker-compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx .'
+	$(MAKE) drupal-database update-settings-php
+	sudo rm codebase/config/sync/matomo.settings.yml
+	docker-compose exec -T drupal with-contenv bash -lc "composer remove matomo"
+	docker-compose exec -T drupal with-contenv bash -lc "drush si -y --existing-config minimal --account-pass $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)"
+	docker-compose exec -T drupal with-contenv bash -lc "drush -l $(SITE) user:role:add fedoraadmin admin"
+	MIGRATE_IMPORT_USER_OPTION=--userid=1 $(MAKE) hydrate
+	docker-compose exec -T drupal with-contenv bash -lc 'drush -l $(SITE) migrate:import --userid=1 islandora_fits_tags'
+	$(MAKE) set-codebase-owner
+	#docker-compose exec -T drupal with-contenv bash -lc 'drush migrate:rollback islandora_defaults_tags,islandora_tags'
+
+.PHONY: jhu_enable_dev_tools
+.SILENT: jhu_enable_dev_tools
+## JHU: Enables devel and devel_generate modules.
+jhu_enable_dev_tools:
+	$(MAKE) set-codebase-owner
+	docker-compose exec drupal with-contenv bash -lc "echo \"alias drupal='vendor/drupal/console/bin/drupal'\" > ~/.bashrc"
+	cp scripts/services.yml codebase/web/sites/default/services.yml
+	docker-compose exec drupal with-contenv bash -lc "drush en devel -y && drush cr"
+
+.PHONY: jhu_export_repos
+.SILENT: jhu_export_repos
+## JHU: This copies the codebase directory and theme directory to a parent directory.
+jhu_export_repos:
+	rsync -avz --update --exclude '.git' codebase/ ../idc-codebase/ --delete
+	rsync -avz --update --exclude '.git' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
+
+.PHONY: jhu_sync_repos
+.SILENT: jhu_sync_repos
+## JHU: This copies the codebase repo and the theme directory from the parent directory.
+jhu_sync_repos:
+	[ -d "../idc-codebase/" ] && rsync -avz --update --exclude '.git' codebase/ ../idc-codebase/ --delete
+	[ -d "../idc_ui_theme_boots/" ] && rsync -avz --exclude '.git' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
