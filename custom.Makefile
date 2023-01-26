@@ -6,6 +6,21 @@
 #  function_name:
 #  ⟼ Tab (not space characters) and each line is executed as part of this function.
 #
+DOCKCOMPOSE_FILE = $(CURDIR)/docker-compose.yml
+ifneq ("$(wildcard $(DOCKCOMPOSE_FILE))","")
+    DF_FILE_EXISTS = 1
+else
+    DF_FILE_EXISTS = 0
+endif
+
+.PHONY: jhu_generate-secrets
+.SILENT: jhu_generate-secrets
+jhu_generate-secrets: QUOTED_CURDIR = "$(CURDIR)"
+jhu_generate-secrets:
+	@echo ""
+	cp -r secrets/template/* secrets/live
+	@echo " jhu_generate-secrets └─ Done"
+	@echo ""
 
 .PHONY: set-codebase-owner
 .SILENT: set-codebase-owner
@@ -21,15 +36,25 @@ set-codebase-owner:
 .PHONY: jhu_up
 ## JHU: Make a local site with codebase directory bind mounted, using cloned starter site.
 jhu_up: QUOTED_CURDIR = "$(CURDIR)"
-jhu_up: generate-secrets
-	if [ -z "$(QUOTED_CURDIR)/docker-compose.yml" ]; then \
-		docker-compose up -d \
+jhu_up: jhu_generate-secrets generate-secrets
+	@echo ""
+	if [ $(DF_FILE_EXISTS) -eq 1 ]; then \
+		echo "docker-compose.yml already exists, skipping starter site creation"; \
+		docker-compose up -d --remove-orphans ; \
+		echo "  └─ Done"; \
+		echo ""; \
+		echo " Forcing an exit to prevent running creation steps again."; \
+		echo ""; \
 		exit 1; \
 	fi
+	@echo "docker-compose.yml does not exist, creating starter site"
 	$(MAKE) starter-init ENVIRONMENT=starter_dev
 	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
 		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /tmp/codebase; mv /tmp/codebase/* /home/root;'; \
+		# $(MAKE) jhu_sync_repos ; \
+		$(MAKE) set-codebase-owner; \
 	fi
+	cp scripts/services.yml codebase/web/sites/default/services.yml
 	$(MAKE) set-files-owner SRC=$(CURDIR)/codebase ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
 	docker-compose exec -T drupal with-contenv bash -lc 'composer install'
@@ -64,8 +89,8 @@ jhu_clean:
 	$(MAKE) confirm
 	-docker-compose down -v --remove-orphans
 	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml codebase
-	-git clean -xffd .
-	-git checkout .
+	# -git clean -xffd .
+	# -git checkout .
 	@echo "Codebase/ was completely removed."
 	@echo "  └─ Done"
 
@@ -99,7 +124,7 @@ jhu_config_export:
 ## JHU: Imports the sites configuration.
 jhu_config_import:
 	docker-compose exec drupal with-contenv bash -lc "chown -R nginx: /var/www/drupal/config/sync/"
-	docker-compose exec -T drupal drush -l $(SITE) config:import -y
+	docker-compose exec -T drupal drush -l $(SITE) config:import -y --debug
 	$(MAKE) set-codebase-owner
 
 .PHONY: jhu_starter-finalize
@@ -121,6 +146,8 @@ jhu_starter-finbalize:
 jhu_enable_dev_tools:
 	$(MAKE) set-codebase-owner
 	docker-compose exec drupal with-contenv bash -lc "echo \"alias drupal='vendor/drupal/console/bin/drupal'\" > ~/.bashrc"
+	docker-compose exec drupal with-contenv bash -lc "echo \"alias phpcs='vendor/squizlabs/php_codesniffer/bin/phpcs'\" > ~/.bashrc"
+	# phpcs --config-set installed_paths vendor/slevomat/coding-standard vendor/phpcompatibility/php-compatibility vendor/drupal/coder/coder_sniffer && phpcs --config-set default_standard Drupal
 	cp scripts/services.yml codebase/web/sites/default/services.yml
 	docker-compose exec drupal with-contenv bash -lc "drush en devel -y && drush cr"
 
@@ -128,13 +155,18 @@ jhu_enable_dev_tools:
 .SILENT: jhu_export_repos
 ## JHU: This copies the codebase directory and theme directory to a parent directory.
 jhu_export_repos:
+	docker-compose exec drupal with-contenv bash -lc "drush pm:uninstall devel -y && drush cr"
 	$(MAKE) jhu_config_export
-	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/ ../idc-codebase/ --delete
-	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
+	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/ ../idc-codebase/
+	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../
+	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/modules/contrib/idc_default_migration ../
 
 .PHONY: jhu_sync_repos
 .SILENT: jhu_sync_repos
 ## JHU: This copies the codebase repo and the theme directory from the parent directory.
 jhu_sync_repos:
-	[ -d "../idc-codebase/" ] && rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/ ../idc-codebase/ --delete
-	[ -d "../idc_ui_theme_boots/" ] && rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
+	$(MAKE) set-codebase-owner
+	[ -d "../idc-codebase/" ] && rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' ../idc-codebase/ codebase
+	[ -d "../idc_ui_theme_boots/" ] && rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' ../idc_ui_theme_boots/ codebase/web/themes/contrib/idc_ui_theme_boots
+	[ -d "../idc_default_migration/" ] && rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' ../idc_default_migration codebase/web/modules/contrib/idc_default_migration
+	$(MAKE) set-codebase-owner
