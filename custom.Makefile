@@ -45,16 +45,15 @@ jhu_up: jhu_generate-secrets generate-secrets
 		echo ""; \
 		echo " Forcing an exit to prevent running creation steps again."; \
 		echo ""; \
-		exit 1; \
 	fi
 	@echo "docker-compose.yml does not exist, creating starter site"
 	$(MAKE) starter-init ENVIRONMENT=starter_dev
 	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
+		echo "codebase/ directory is empty, cloning it"; \
 		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /tmp/codebase; mv /tmp/codebase/* /home/root;'; \
-		# $(MAKE) jhu_sync_repos ; \
 		$(MAKE) set-codebase-owner; \
 	fi
-	cp scripts/services.yml codebase/web/sites/default/services.yml
+	-cp scripts/services.yml codebase/web/sites/default/services.yml
 	$(MAKE) set-files-owner SRC=$(CURDIR)/codebase ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
 	docker-compose exec -T drupal with-contenv bash -lc 'composer install'
@@ -88,7 +87,7 @@ jhu_clean:
 	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, codebase/, and all untracked/ignored files (including .env)."
 	$(MAKE) confirm
 	-docker-compose down -v --remove-orphans
-	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml codebase
+	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml
 	# -git clean -xffd .
 	# -git checkout .
 	@echo "Codebase/ was completely removed."
@@ -123,6 +122,8 @@ jhu_config_export:
 .SILENT: jhu_config_import
 ## JHU: Imports the sites configuration.
 jhu_config_import:
+	$(MAKE) set-codebase-owner
+	docker-compose exec drupal with-contenv bash -lc "composer install"
 	docker-compose exec drupal with-contenv bash -lc "chown -R nginx: /var/www/drupal/config/sync/"
 	docker-compose exec -T drupal drush -l $(SITE) config:import -y --debug
 	$(MAKE) set-codebase-owner
@@ -138,7 +139,8 @@ jhu_starter-finbalize:
 	MIGRATE_IMPORT_USER_OPTION=--userid=1 $(MAKE) hydrate
 	docker-compose exec -T drupal with-contenv bash -lc 'drush -l $(SITE) migrate:import --userid=1 islandora_fits_tags'
 	$(MAKE) set-codebase-owner
-	#docker-compose exec -T drupal with-contenv bash -lc 'drush migrate:rollback islandora_defaults_tags,islandora_tags'
+	docker-compose exec -T drupal with-contenv bash -lc 'composer require drupal/migrate_tools ; drush pm:enable -y migrate_tools,idc_default_migration && drush migrate:import idc_default_migration_menu_link_main'
+	$(MAKE) jhu_demo_content
 
 .PHONY: jhu_enable_dev_tools
 .SILENT: jhu_enable_dev_tools
@@ -146,7 +148,7 @@ jhu_starter-finbalize:
 jhu_enable_dev_tools:
 	$(MAKE) set-codebase-owner
 	docker-compose exec drupal with-contenv bash -lc "echo \"alias drupal='vendor/drupal/console/bin/drupal'\" > ~/.bashrc"
-	docker-compose exec drupal with-contenv bash -lc "echo \"alias phpcs='vendor/squizlabs/php_codesniffer/bin/phpcs'\" > ~/.bashrc"
+	docker-compose exec drupal with-contenv bash -lc "echo \"alias phpcs='vendor/squizlabs/php_codesniffer/bin/phpcs'\" >> ~/.bashrc"
 	# phpcs --config-set installed_paths vendor/slevomat/coding-standard vendor/phpcompatibility/php-compatibility vendor/drupal/coder/coder_sniffer && phpcs --config-set default_standard Drupal
 	cp scripts/services.yml codebase/web/sites/default/services.yml
 	docker-compose exec drupal with-contenv bash -lc "drush en devel -y && drush cr"
@@ -155,11 +157,11 @@ jhu_enable_dev_tools:
 .SILENT: jhu_export_repos
 ## JHU: This copies the codebase directory and theme directory to a parent directory.
 jhu_export_repos:
-	docker-compose exec drupal with-contenv bash -lc "drush pm:uninstall devel -y && drush cr"
 	$(MAKE) jhu_config_export
-	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/ ../idc-codebase/
-	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../
-	rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/modules/contrib/idc_default_migration ../
+	-rsync -avz codebase/ ../idc-codebase --delete
+	-rsync -avz codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
+	-rsync -avz codebase/web/modules/contrib/idc_default_migration ../
+	-rsync -avz islandora_workbench ../ --delete
 
 .PHONY: jhu_sync_repos
 .SILENT: jhu_sync_repos
