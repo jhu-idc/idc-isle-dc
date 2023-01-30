@@ -42,19 +42,19 @@ dependencies:
     - field.field.node.islandora_object.field_publisher
     - field.field.node.islandora_object.field_publisher_country
     - field.field.node.islandora_object.field_resource_type
+    - field.field.node.islandora_object.field_sort_date
     - field.field.node.islandora_object.field_spatial_coverage
     - field.field.node.islandora_object.field_subject
     - field.field.node.islandora_object.field_table_of_contents
     - field.field.node.islandora_object.field_title_language
     - field.field.node.islandora_object.field_unique_id
     - field.field.node.islandora_object.field_weight
-    - field.field.node.islandora_object.field_years
     - node.type.islandora_object
-  module:
-    - user
   enforced:
     module:
       - islandora_defaults
+  module:
+    - user
 _core:
   default_config_hash: zae03KDpB7clOXLmA52wfN-pGOrpH7xV1Y2nQcbSl-Q
 id: node.islandora_object.teaser
@@ -63,15 +63,15 @@ bundle: islandora_object
 mode: teaser
 content:
   display_media_thumbnail:
-    settings: {  }
-    third_party_settings: {  }
     weight: 0
     region: content
-  links:
     settings: {  }
     third_party_settings: {  }
+  links:
     weight: 2
     region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   display_media_entity_view_1: true
   display_media_entity_view_2: true
@@ -115,13 +115,13 @@ hidden:
   field_publisher: true
   field_publisher_country: true
   field_resource_type: true
+  field_sort_date: true
   field_spatial_coverage: true
   field_subject: true
   field_table_of_contents: true
   field_title_language: true
   field_unique_id: true
   field_weight: true
-  field_years: true
   islandora_fits_checksum: true
   langcode: true
   members_eva_entity_view_1: true

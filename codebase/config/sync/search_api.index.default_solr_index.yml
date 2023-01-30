@@ -2,6 +2,15 @@ uuid: 613242bb-243f-493d-9ad3-b1628800a99b
 langcode: en
 status: true
 dependencies:
+  module:
+    - search_api_solr
+    - node
+    - user
+    - taxonomy
+    - token
+    - content_translation
+    - search_api
+    - idc_ui_module
   config:
     - field.storage.node.field_abstract
     - field.storage.node.field_access_rights
@@ -58,33 +67,26 @@ dependencies:
     - field.storage.node.field_title_language
     - field.storage.taxonomy_term.field_language_code
     - field.storage.node.field_unique_id
-    - field.storage.node.field_years
     - search_api.server.default_solr_server
     - core.entity_view_mode.node.search_index
-  module:
-    - search_api_solr
-    - node
-    - user
-    - taxonomy
-    - token
-    - content_translation
-    - search_api
-    - idc_ui_module
 third_party_settings:
   search_api_solr:
     finalize: false
     commit_before_finalize: false
     commit_after_finalize: false
+    multilingual:
+      limit_to_content_language: false
+      include_language_independent: true
     highlighter:
       maxAnalyzedChars: 51200
       fragmenter: regex
-      usePhraseHighlighter: true
-      highlightMultiTerm: true
-      preserveMulti: false
       regex:
         slop: 0.5
         pattern: blank
         maxAnalyzedChars: 10000
+      usePhraseHighlighter: true
+      highlightMultiTerm: true
+      preserveMulti: false
       highlight:
         mergeContiguous: false
         requireFieldMatch: false
@@ -105,9 +107,6 @@ third_party_settings:
       index_prefix: ''
       collection: ''
       timezone: ''
-    multilingual:
-      limit_to_content_language: false
-      include_language_independent: true
 _core:
   default_config_hash: 9NS32xEWLmE2eVbgkqP-GrftHgq2tD-y6sFz_vWCQkc
 id: default_solr_index
@@ -701,14 +700,6 @@ field_settings:
     dependencies:
       config:
         - field.storage.node.field_unique_id
-  field_years:
-    label: Years
-    datasource_id: 'entity:node'
-    property_path: field_years
-    type: string
-    dependencies:
-      config:
-        - field.storage.node.field_years
   idc_reverse_reference_parent_of_page:
     label: 'Page metadata'
     property_path: idc_reverse_reference_parent_of_page
@@ -817,6 +808,14 @@ field_settings:
     dependencies:
       module:
         - node
+  solr_years:
+    label: 'Solr Years'
+    property_path: solr_years
+    type: string
+  sort_date:
+    label: 'Sort Date'
+    property_path: sort_date
+    type: date
   status:
     label: 'Publishing status'
     datasource_id: 'entity:node'
@@ -913,25 +912,22 @@ processor_settings:
     weights:
       preprocess_index: -10
   hierarchy:
-    weights:
-      preprocess_index: -45
     fields:
       field_member_of: node-field_member_of
-  highlight:
     weights:
-      postprocess_query: 0
-    prefix: '<strong>'
-    suffix: '</strong>'
+      preprocess_index: -45
+  highlight:
+    highlight: always
+    highlight_partial: true
     excerpt: true
     excerpt_length: 256
     exclude_fields:
       - rendered_item
-    highlight: always
-    highlight_partial: true
-  html_filter:
+    prefix: '<strong>'
+    suffix: '</strong>'
     weights:
-      preprocess_index: -3
-      preprocess_query: -6
+      postprocess_query: 0
+  html_filter:
     all_fields: false
     fields:
       - rendered_item
@@ -943,6 +939,9 @@ processor_settings:
       h2: 3
       h3: 2
       string: 2
+    weights:
+      preprocess_index: -3
+      preprocess_query: -6
   language_with_fallback: {  }
   rendered_item:
     weights:
@@ -952,10 +951,12 @@ processor_settings:
   solr_date_range:
     weights:
       preprocess_index: 0
+  solr_years: {  }
+  sort_date: {  }
 tracker_settings:
   default:
     indexing_order: fifo
 options:
-  cron_limit: 50
   index_directly: true
+  cron_limit: 50
 server: default_solr_server
