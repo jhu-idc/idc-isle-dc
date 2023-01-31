@@ -87,7 +87,7 @@ jhu_clean:
 	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, codebase/, and all untracked/ignored files (including .env)."
 	$(MAKE) confirm
 	-docker-compose down -v --remove-orphans
-	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml
+	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml codebase
 	# -git clean -xffd .
 	# -git checkout .
 	@echo "Codebase/ was completely removed."
