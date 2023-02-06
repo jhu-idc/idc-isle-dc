@@ -50,7 +50,7 @@ jhu_up: jhu_generate-secrets generate-secrets
 	$(MAKE) starter-init ENVIRONMENT=starter_dev
 	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
 		echo "codebase/ directory is empty, cloning it"; \
-		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /tmp/codebase; mv /tmp/codebase/* /home/root;'; \
+		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /home/root;'; \
 		$(MAKE) set-codebase-owner; \
 	fi
 	-cp scripts/services.yml codebase/web/sites/default/services.yml
@@ -69,15 +69,11 @@ jhu_demo_content:
 	# if prod do this by default
 	-docker-compose exec -T drupal with-contenv bash -lc "composer require mjordan/islandora_workbench_integration"
 	-docker-compose exec -T drupal with-contenv bash -lc "drush en -y islandora_workbench_integration"
-	# if [ -d "islandora_workbench" ]; then rm -rf islandora_workbench; fi
-	[ -d "islandora_workbench" ] || (git clone -b new_staging --single-branch https://github.com/DonRichards/islandora_workbench)
-	# Just in case your shell autmomatically CDs into the cloned directory like mine does
-	if [ ! $(CURDIR) = $(shell pwd) ]; then cd $(CURDIR) ; fi
-	$(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/demoBDcreate*
-	$(SED_DASH_I) 's/http:/https:/g' islandora_workbench/demoBDcreate*
-	$(SED_DASH_I) 's/author_email\="mjordan@sfu"\,$$/author_email="mjordan@sfu", packages=["i7Import", "i8demo_BD", "input_data"],/g' islandora_workbench/setup.py
+	[ -d "islandora_workbench" ] || (git clone https://github.com/mjordan/islandora_workbench)
+	cd islandora_workbench ; cd islandora_workbench_demo_content || git clone https://github.com/DonRichards/islandora_workbench_demo_content
+	$(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
 	cd islandora_workbench && docker build -t workbench-docker .
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(shell pwd)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "(cd /workbench && python setup.py install 2>&1 && ./workbench --config demoBDcreate_all_localhost.yml)"
+	cd islandora_workbench && docker run -it --rm --network="host" -v $(shell pwd):/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/example_content.yml"
 	$(MAKE) reindex-solr
 
 .PHONY: jhu_clean
