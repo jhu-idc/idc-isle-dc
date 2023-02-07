@@ -154,9 +154,9 @@ jhu_enable_dev_tools:
 ## JHU: This copies the codebase directory and theme directory to a parent directory.
 jhu_export_repos:
 	$(MAKE) jhu_config_export
-	-sudo rsync -avz  --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/ ../idc-codebase --delete
-	-sudo rsync -avz  --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
-	-sudo rsync -avz  --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/modules/contrib/idc_default_migration ../ --delete
+	-sudo rsync -avz codebase/ ../idc-codebase --delete
+	-sudo rsync -avz codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
+	-sudo rsync -avz codebase/web/modules/contrib/idc_default_migration ../ --delete
 
 .PHONY: jhu_sync_repos
 .SILENT: jhu_sync_repos
