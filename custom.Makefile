@@ -51,8 +51,8 @@ jhu_up: jhu_generate-secrets generate-secrets
 	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
 		echo "codebase/ directory is empty, cloning it"; \
 		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /home/root;'; \
-		$(MAKE) set-codebase-owner; \
 	fi
+	$(MAKE) set-codebase-owner
 	-cp scripts/services.yml codebase/web/sites/default/services.yml
 	$(MAKE) set-files-owner SRC=$(CURDIR)/codebase ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
@@ -83,7 +83,7 @@ jhu_demo_content:
 	cd islandora_workbench ; cd islandora_workbench_demo_content || git clone https://github.com/DonRichards/islandora_workbench_demo_content
 	$(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
 	cd islandora_workbench && docker build -t workbench-docker .
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(shell pwd):/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/example_content.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR):/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/example_content.yml"
 	$(MAKE) reindex-solr
 
 .PHONY: jhu_clean
