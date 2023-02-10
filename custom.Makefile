@@ -71,14 +71,24 @@ jhu_up: jhu_generate-secrets generate-secrets
 	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
 		echo "codebase/ directory is empty, cloning it"; \
 		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /home/root;'; \
-		$(MAKE) set-codebase-owner; \
 	fi
+	$(MAKE) set-codebase-owner
 	-cp scripts/services.yml codebase/web/sites/default/services.yml
 	$(MAKE) set-files-owner SRC=$(CURDIR)/codebase ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
-	docker-compose exec -T drupal with-contenv bash -lc 'composer install'
+	# The rest of this should be moved into another function.
+	docker-compose exec -T drupal with-contenv bash -lc 'rm -rf vendor/ web/modules/contrib/* web/themes/contrib/* ; composer install'
 	$(MAKE) set-codebase-owner
-	$(MAKE) jhu_starter-finalize ENVIRONMENT=starter_dev
+	docker-compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx .'
+	$(MAKE) drupal-database update-settings-php
+	# -sudo rm codebase/config/sync/matomo.settings.yml
+	# -docker-compose exec -T drupal with-contenv bash -lc "composer remove matomo"
+	docker-compose exec -T drupal with-contenv bash -lc "drush si -y --existing-config minimal --account-pass $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)"
+	docker-compose exec -T drupal with-contenv bash -lc "drush -l $(SITE) user:role:add fedoraadmin admin"
+	MIGRATE_IMPORT_USER_OPTION=--userid=1 $(MAKE) hydrate
+	docker-compose exec -T drupal with-contenv bash -lc 'drush -l $(SITE) migrate:import --userid=1 islandora_fits_tags'
+	$(MAKE) jhu_config_import
+	docker-compose exec -T drupal with-contenv bash -lc 'composer require drupal/migrate_tools ; drush pm:enable -y migrate_tools,idc_default_migration && drush migrate:import idc_default_migration_menu_link_main'
 
 .PHONY: jhu_demo_content
 #.SILENT: jhu_demo_content
@@ -93,7 +103,7 @@ jhu_demo_content:
 	cd islandora_workbench ; cd islandora_workbench_demo_content || git clone https://github.com/DonRichards/islandora_workbench_demo_content
 	$(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
 	cd islandora_workbench && docker build -t workbench-docker .
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(shell pwd):/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/example_content.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR):/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/example_content.yml"
 	$(MAKE) reindex-solr
 
 .PHONY: jhu_clean
@@ -143,20 +153,6 @@ jhu_config_import:
 	docker-compose exec drupal with-contenv bash -lc "chown -R nginx: /var/www/drupal/config/sync/"
 	docker-compose exec -T drupal drush -l $(SITE) config:import -y --debug
 	$(MAKE) set-codebase-owner
-
-.PHONY: jhu_starter-finalize
-jhu_starter-finbalize:
-	docker-compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx .'
-	$(MAKE) drupal-database update-settings-php
-	sudo rm codebase/config/sync/matomo.settings.yml
-	docker-compose exec -T drupal with-contenv bash -lc "composer remove matomo"
-	docker-compose exec -T drupal with-contenv bash -lc "drush si -y --existing-config minimal --account-pass $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)"
-	docker-compose exec -T drupal with-contenv bash -lc "drush -l $(SITE) user:role:add fedoraadmin admin"
-	MIGRATE_IMPORT_USER_OPTION=--userid=1 $(MAKE) hydrate
-	docker-compose exec -T drupal with-contenv bash -lc 'drush -l $(SITE) migrate:import --userid=1 islandora_fits_tags'
-	$(MAKE) set-codebase-owner
-	docker-compose exec -T drupal with-contenv bash -lc 'composer require drupal/migrate_tools ; drush pm:enable -y migrate_tools,idc_default_migration && drush migrate:import idc_default_migration_menu_link_main'
-	$(MAKE) jhu_demo_content
 
 .PHONY: jhu_enable_dev_tools
 .SILENT: jhu_enable_dev_tools
