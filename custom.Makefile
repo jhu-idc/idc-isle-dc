@@ -28,10 +28,30 @@ jhu_generate-secrets:
 set-codebase-owner:
 	@echo ""
 	@echo "Setting codebase/ folder owner back to $(shell id -u):101"
-	sudo find ./codebase -not -user $(shell id -u) -not -path '*/sites/default/files/*' -exec chown $(shell id -u):101 {} \;
-	sudo find ./codebase -not -group 101 -not -path '*/sites/default/files/*' -exec chown $(shell id -u):101 {} \;
-	@echo "  └─ Done"
+	if [ -n "$$(docker ps -q -f name=drupal)" ]; then \
+		echo "  └─ Using docker-compose codebase/ directory"; \
+		docker-compose exec -T drupal with-contenv bash -lc "find . -not -user $(shell id -u) -not -path '*/sites/default/files/*' -exec chown $(shell id -u):101 {} \;" ; \
+		docker-compose exec -T drupal with-contenv bash -lc "find . -not -group 101 -not -path '*/sites/default/files/*' -exec chown $(shell id -u):101 {} \;" ; \
+	elif [ -d "codebase" ]; then \
+		echo "  └─ Using local codebase/ directory"; \
+		sudo find ./codebase -not -user $(shell id -u) -not -path '*/sites/default/files/*' -exec chown $(shell id -u):101 {} \; ; \
+		sudo find ./codebase -not -group 101 -not -path '*/sites/default/files/*' -exec chown $(shell id -u):101 {} \; ; \
+	else \
+		echo "  └─ No codebase/ directory found, skipping"; \
+	fi
+	@echo "    └─ Done"
 	@echo ""
+
+.PHONY: jhu_up_without_rebuilding
+## JHU: Make a local site with codebase directory bind mounted, using cloned starter site but without rebuilding the build process.
+jhu_up_without_rebuilding:
+	@echo ""
+	if [ $(DF_FILE_EXISTS) -eq 0 ]; then \
+		echo "docker-compose.yml does not exist, creating starter site"; \
+		$(MAKE) docker-compose.yml ENVIRONMENT=starter_dev; \
+	fi
+	docker-compose up -d --remove-orphans
+	@echo "  └─ Done"
 
 .PHONY: jhu_up
 ## JHU: Make a local site with codebase directory bind mounted, using cloned starter site.
