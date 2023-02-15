@@ -189,3 +189,4 @@ jhu_sync_repos:
 ## JHU: This test should import the demo content.
 test:
 	$(MAKE) jhu_demo_content
+	@echo "  └─ Done"
