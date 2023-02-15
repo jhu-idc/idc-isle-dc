@@ -94,7 +94,7 @@ jhu_up: jhu_generate-secrets generate-secrets
 #.SILENT: jhu_demo_content
 ## JHU: Helper function for demo sites: do a workbench import of sample objects
 jhu_demo_content: QUOTED_CURDIR = "$(CURDIR)"
-jhu_demo_content: 
+jhu_demo_content:
 	# fetch repo that has csv and binaries to data/samples
 	# if prod do this by default
 	-docker-compose exec -T drupal with-contenv bash -lc "composer require mjordan/islandora_workbench_integration"
@@ -183,3 +183,9 @@ jhu_sync_repos:
 	[ -d "../idc_ui_theme_boots/" ] && rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' ../idc_ui_theme_boots/ codebase/web/themes/contrib/idc_ui_theme_boots
 	[ -d "../idc_default_migration/" ] && rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' ../idc_default_migration codebase/web/modules/contrib/idc_default_migration
 	$(MAKE) set-codebase-owner
+
+.PHONY: test
+.SILENT: test
+## JHU: This test should import the demo content.
+test:
+	$(MAKE) jhu_demo_content
