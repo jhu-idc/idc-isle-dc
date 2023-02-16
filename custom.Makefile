@@ -19,6 +19,7 @@ jhu_generate-secrets: QUOTED_CURDIR = "$(CURDIR)"
 jhu_generate-secrets:
 	@echo ""
 	cp -r secrets/template/* secrets/live
+	$(MAKE) generate-secrets
 	@echo " jhu_generate-secrets └─ Done"
 	@echo ""
 
@@ -48,15 +49,16 @@ jhu_up_without_rebuilding:
 	@echo ""
 	if [ $(DF_FILE_EXISTS) -eq 0 ]; then \
 		echo "docker-compose.yml does not exist, creating starter site"; \
-		$(MAKE) docker-compose.yml ENVIRONMENT=starter_dev; \
 	fi
-	docker-compose up -d --remove-orphans
+	docker-compose up -d --build
+	$(MAKE) set-codebase-owner
+	$(MAKE) jhu_config_import
 	@echo "  └─ Done"
 
 .PHONY: jhu_up
 ## JHU: Make a local site with codebase directory bind mounted, using cloned starter site.
 jhu_up: QUOTED_CURDIR = "$(CURDIR)"
-jhu_up: jhu_generate-secrets generate-secrets
+jhu_up: jhu_generate-secrets
 	@echo ""
 	if [ $(DF_FILE_EXISTS) -eq 1 ]; then \
 		echo "docker-compose.yml already exists, skipping starter site creation"; \
@@ -81,8 +83,6 @@ jhu_up: jhu_generate-secrets generate-secrets
 	$(MAKE) set-codebase-owner
 	docker-compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx .'
 	$(MAKE) drupal-database update-settings-php
-	# -sudo rm codebase/config/sync/matomo.settings.yml
-	# -docker-compose exec -T drupal with-contenv bash -lc "composer remove matomo"
 	docker-compose exec -T drupal with-contenv bash -lc "drush si -y --existing-config minimal --account-pass $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)"
 	docker-compose exec -T drupal with-contenv bash -lc "drush -l $(SITE) user:role:add fedoraadmin admin"
 	MIGRATE_IMPORT_USER_OPTION=--userid=1 $(MAKE) hydrate
@@ -112,8 +112,9 @@ jhu_demo_content:
 jhu_clean:
 	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, codebase/, and all untracked/ignored files (including .env)."
 	$(MAKE) confirm
-	-docker-compose down -v --remove-orphans
-	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml codebase
+	docker-compose down -v --remove-orphans || true
+	sudo rm -fr certs secrets/live/* docker-compose.yml 
+	# codebase islandora_workbench
 	# -git clean -xffd .
 	# -git checkout .
 	@echo "Codebase/ was completely removed."
@@ -121,13 +122,12 @@ jhu_clean:
 
 .PHONY: jhu_reset
 .SILENT: jhu_reset
-## JHU: Destroys all local data, docker volumes, and untracked/ignored files.
+## JHU: Destroys all local data, docker volumes, without removing codebase or workbench.
 jhu_reset:
 	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, and all untracked/ignored files (including .env)."
 	$(MAKE) confirm
-	-docker-compose down -v --remove-orphans
-	sudo rm -fr islandora_workbench certs secrets/live/* docker-compose.yml
-	@echo "Codebase/ was completely removed."
+	docker-compose down -v --remove-orphans || true
+	$(MAKE) jhu_up_without_rebuilding
 	@echo "  └─ Done"
 
 .PHONY: jhu_down
