@@ -43,6 +43,34 @@ set-codebase-owner:
 	@echo "    └─ Done"
 	@echo ""
 
+.PHONY: jhu_solr
+.SILENT: jhu_solr
+## JHU: This pulls the Solr config from Drupal and puts it in the Solr container.
+jhu_solr:
+	@echo ""
+	@echo "Installing missing field types"
+	docker-compose exec -T drupal with-contenv bash -lc "drush  search-api-solr:install-missing-fieldtypes"
+	# docker-compose exec -T drupal bash -c '/bin/rm -f /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml ; /bin/cp -f web/modules/contrib/search_api_solr/jump-start/solr7/config-set/solrconfig_extra.xml /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml'
+	@echo "Removing solrconfig_extra.xml"
+	docker-compose exec -T drupal bash -c '/bin/rm -rf /opt/solr/server/solr/ISLANDORA/conf/'
+	@echo "Pulling Solr config from Drupal"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-solr:get-server-config default_solr_server /var/www/drupal/solrconfig.zip"
+	docker-compose exec -T drupal with-contenv bash -lc "unzip /var/www/drupal/solrconfig.zip -d /opt/solr/server/solr/ISLANDORA/conf/ -o"
+	@echo "Restarting solr"
+	docker-compose restart solr
+	# Check if Solr is up
+	@echo "Checking if Solr's healthy"
+	sleep 5
+	docker-compose exec -T solr bash -c 'curl -s http://localhost:8983/solr/admin/info/system?wt=json' | jq -r .lucene || (echo "Solr is not healthy, waiting 10 seconds." && sleep 10)
+	docker-compose exec -T drupal with-contenv bash -lc "drush cr"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api:clear"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api:disable-all"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api:enable-all"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-solr:finalize-index --force"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-reindex"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-index"
+	@echo "  └─ Done"
+
 .PHONY: jhu_up_without_rebuilding
 ## JHU: Make a local site with codebase directory bind mounted, using cloned starter site but without rebuilding the build process.
 jhu_up_without_rebuilding:
@@ -104,7 +132,7 @@ jhu_demo_content:
 	$(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
 	cd islandora_workbench && docker build -t workbench-docker .
 	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/example_content.yml"
-	$(MAKE) reindex-solr
+	$(MAKE) jhu_solr
 
 .PHONY: jhu_clean
 .SILENT: jhu_clean
