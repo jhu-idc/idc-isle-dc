@@ -174,9 +174,21 @@ start:
 	docker ps -a 
 	for i in $$( docker ps -a | grep drupal | awk '{print $$1}' ) ; do echo $$i ; docker inspect "$$i" | grep Image ; done
 	echo "Force solr ISLANDORA config"
+	#docker-compose exec -T drupal bash -c '/bin/rm -f /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml ; /bin/cp -f /var/www/drupal/assets/solr/solrconfig_extra.xml /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml'
+	docker-compose exec -T drupal with-contenv bash -lc "drush  search-api-solr:install-missing-fieldtypes"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-solr:get-server-config default_solr_server /var/www/drupal/solrconfig.zip"
+	docker-compose exec -T drupal with-contenv bash -lc "unzip /var/www/drupal/solrconfig.zip -d /opt/solr/server/solr/ISLANDORA/conf/ -o"
 	docker-compose exec -T drupal bash -c '/bin/rm -f /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml ; /bin/cp -f /var/www/drupal/assets/solr/solrconfig_extra.xml /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml'
 	echo "Restarting solr"
 	docker-compose restart solr
+	docker-compose exec -T drupal with-contenv bash -lc "drush cr"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api:clear"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api:disable-all"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api:enable-all"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-solr:finalize-index --force"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-reindex"
+	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-index"
+	
 
 .PHONY: _docker-up-and-wait
 .SILENT: _docker-up-and-wait
