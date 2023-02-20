@@ -56,6 +56,7 @@ jhu_solr:
 	@echo "Pulling Solr config from Drupal"
 	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-solr:get-server-config default_solr_server /var/www/drupal/solrconfig.zip"
 	docker-compose exec -T drupal with-contenv bash -lc "unzip /var/www/drupal/solrconfig.zip -d /opt/solr/server/solr/ISLANDORA/conf/ -o"
+	docker-compose exec -T drupal with-contenv bash -lc "rm -f /var/www/drupal/solrconfig.zip"
 	@echo "Restarting solr"
 	docker-compose restart solr
 	# Check if Solr is up
