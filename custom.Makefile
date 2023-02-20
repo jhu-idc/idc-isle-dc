@@ -117,6 +117,7 @@ jhu_up: jhu_generate-secrets
 	docker-compose exec -T drupal with-contenv bash -lc 'drush -l $(SITE) migrate:import --userid=1 islandora_fits_tags'
 	$(MAKE) jhu_config_import
 	docker-compose exec -T drupal with-contenv bash -lc 'composer require drupal/migrate_tools ; drush pm:enable -y migrate_tools,idc_default_migration && drush migrate:import idc_default_migration_menu_link_main'
+	$(MAKE) jhu_solr
 
 .PHONY: jhu_demo_content
 #.SILENT: jhu_demo_content
