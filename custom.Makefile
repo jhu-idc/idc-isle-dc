@@ -140,13 +140,13 @@ jhu_demo_content:
 .SILENT: jhu_clean
 ## JHU: Destroys all local data, including codebase, docker volumes, and untracked/ignored files.
 jhu_clean:
-	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, codebase/, and all untracked/ignored files (including .env)."
+	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, codebase/, and all untracked/ignored files (including changes to .env)."
 	$(MAKE) confirm
 	docker-compose down -v --remove-orphans || true
-	sudo rm -fr certs secrets/live/* docker-compose.yml 
-	# codebase islandora_workbench
-	# -git clean -xffd .
-	# -git checkout .
+	sudo rm -fr certs secrets/live/* docker-compose.yml codebase islandora_workbench
+	-git stash
+	-git clean -xffd .
+	-git checkout .
 	@echo "Codebase/ was completely removed."
 	@echo "  └─ Done"
 
@@ -154,11 +154,12 @@ jhu_clean:
 .SILENT: jhu_reset
 ## JHU: Destroys all local data, docker volumes, without removing codebase or workbench.
 jhu_reset:
-	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, and all untracked/ignored files (including .env)."
+	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, certs, secrets."
 	$(MAKE) confirm
 	docker-compose down -v --remove-orphans || true
-	$(MAKE) jhu_up_without_rebuilding
-	@echo "  └─ Done"
+	sudo rm -fr certs secrets/live/* docker-compose.yml
+	@echo "  └─ Done shutting down containers and removing volumes."
+	$(MAKE) jhu_up
 
 .PHONY: jhu_down
 .SILENT: jhu_down
