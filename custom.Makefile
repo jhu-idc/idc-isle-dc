@@ -221,3 +221,10 @@ jhu_sync_repos:
 test:
 	$(MAKE) jhu_demo_content
 	@echo "  └─ Done"
+
+.PHONY: jhu_update_theme
+.SILENT: jhu_update_theme
+## JHU: This updates the theme's hash in composer.
+jhu_update_theme:
+	rm -rf codebase/web/themes/contrib/idc_ui_theme_boots
+	docker-compose exec drupal with-contenv bash -lc 'composer clearcache && composer update --prefer-source "islandora/idc_ui_theme_boots" --with-all-dependencies'
