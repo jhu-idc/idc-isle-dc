@@ -205,6 +205,8 @@ jhu_export_repos:
 	-sudo rsync -avz codebase/ ../idc-codebase --delete
 	-sudo rsync -avz codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
 	-sudo rsync -avz codebase/web/modules/contrib/idc_default_migration ../ --delete
+	-sudo rsync -avz codebase/web/modules/contrib/idc_ui_module ../ --delete
+	-sudo rsync -avz islandora_workbench/islandora_workbench_demo_content ../ --delete
 
 .PHONY: jhu_sync_repos
 .SILENT: jhu_sync_repos
