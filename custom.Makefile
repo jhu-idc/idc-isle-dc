@@ -54,6 +54,7 @@ jhu_solr:
 	@echo "Removing solrconfig_extra.xml"
 	docker-compose exec -T drupal bash -c '/bin/rm -rf /opt/solr/server/solr/ISLANDORA/conf/'
 	@echo "Pulling Solr config from Drupal"
+	-docker-compose exec -T drupal with-contenv bash -lc "touch /var/www/drupal/solrconfig.zip && chown nginx: /var/www/drupal/solrconfig.zip"
 	docker-compose exec -T drupal with-contenv bash -lc "drush search-api-solr:get-server-config default_solr_server /var/www/drupal/solrconfig.zip"
 	docker-compose exec -T drupal with-contenv bash -lc "unzip /var/www/drupal/solrconfig.zip -d /opt/solr/server/solr/ISLANDORA/conf/ -o"
 	docker-compose exec -T drupal with-contenv bash -lc "rm -f /var/www/drupal/solrconfig.zip"
