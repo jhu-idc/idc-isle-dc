@@ -103,8 +103,9 @@ jhu_up: jhu_generate-secrets
 		echo "codebase/ directory is empty, cloning it"; \
 		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /home/root;'; \
 	fi
+	-sudo cp scripts/services.yml codebase/web/sites/default/services.yml
+	-sudo cp scripts/default.services.yml codebase/web/sites/default/default.services.yml
 	$(MAKE) set-codebase-owner
-	-cp scripts/services.yml codebase/web/sites/default/services.yml
 	$(MAKE) set-files-owner SRC=$(CURDIR)/codebase ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
 	# The rest of this should be moved into another function.
@@ -130,7 +131,7 @@ jhu_demo_content:
 	-docker-compose exec -T drupal with-contenv bash -lc "composer require mjordan/islandora_workbench_integration"
 	-docker-compose exec -T drupal with-contenv bash -lc "drush en -y islandora_workbench_integration"
 	[ -d "islandora_workbench" ] || (git clone https://github.com/mjordan/islandora_workbench)
-	cd islandora_workbench ; cd islandora_workbench_demo_content || git clone https://github.com/DonRichards/islandora_workbench_demo_content
+	[ -d "islandora_workbench/islandora_workbench_demo_content" ] || (git clone https://github.com/DonRichards/islandora_workbench_demo_content islandora_workbench/islandora_workbench_demo_content)
 	$(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
 	cd islandora_workbench && docker build -t workbench-docker .
 	# cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/example_content.yml"
@@ -186,22 +187,27 @@ jhu_config_import:
 	docker-compose exec -T drupal drush -l $(SITE) config:import -y --debug
 	$(MAKE) set-codebase-owner
 
-.PHONY: jhu_enable_dev_tools
-.SILENT: jhu_enable_dev_tools
+.PHONY: jhu_dev_tools_enable
+.SILENT: jhu_dev_tools_enable
 ## JHU: Enables devel and devel_generate modules.
-jhu_enable_dev_tools:
+jhu_dev_tools_enable:
 	$(MAKE) set-codebase-owner
+	docker-compose exec drupal with-contenv bash -lc "git config --global --add safe.directory /var/www/drupal/vendor/drupal/coder"
+	-docker-compose exec drupal with-contenv bash -lc "cp ~/.bashrc ~/.bashrc_BAK || echo 'No .bashrc file to backup'"
 	docker-compose exec drupal with-contenv bash -lc "echo \"alias drupal='vendor/drupal/console/bin/drupal'\" > ~/.bashrc"
 	docker-compose exec drupal with-contenv bash -lc "echo \"alias phpcs='vendor/squizlabs/php_codesniffer/bin/phpcs'\" >> ~/.bashrc"
-	# phpcs --config-set installed_paths vendor/slevomat/coding-standard vendor/phpcompatibility/php-compatibility vendor/drupal/coder/coder_sniffer && phpcs --config-set default_standard Drupal
-	cp scripts/services.yml codebase/web/sites/default/services.yml
+	docker-compose exec drupal with-contenv bash -lc "echo \"alias phpcbf='vendor/squizlabs/php_codesniffer/bin/phpcbf'\" >> ~/.bashrc"
+	docker-compose exec drupal with-contenv bash -lc "composer require drupal/coder --dev && git config --global --add safe.directory /var/www/drupal/vendor/drupal/coder"
+	docker-compose exec drupal with-contenv bash -lc "vendor/squizlabs/php_codesniffer/bin/phpcs --config-set installed_paths vendor/slevomat/coding-standard vendor/phpcompatibility/php-compatibility vendor/drupal/coder/coder_sniffer && vendor/squizlabs/php_codesniffer/bin/phpcs --config-set default_standard Drupal"
+	if [ ! -f "codebase/web/sites/default/services.yml" ]; then cp scripts/services.yml codebase/web/sites/default/services.yml; fi
 	docker-compose exec drupal with-contenv bash -lc "drush en devel -y && drush cr"
 
-.PHONY: jhu_export_repos
-.SILENT: jhu_export_repos
+.PHONY: jhu_repos_export
+.SILENT: jhu_repos_export
 ## JHU: This copies the codebase directory and theme directory to a parent directory.
-jhu_export_repos:
+jhu_repos_export:
 	$(MAKE) jhu_config_export
+	cd codebase && git pull
 	-sudo rsync -avz codebase/ ../idc-codebase --delete
 	-sudo rsync -avz codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
 	-sudo rsync -avz codebase/web/modules/contrib/idc_default_migration ../ --delete
@@ -213,9 +219,10 @@ jhu_export_repos:
 ## JHU: This copies the codebase repo and the theme directory from the parent directory.
 jhu_sync_repos:
 	$(MAKE) set-codebase-owner
-	[ -d "../idc-codebase/" ] && rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' ../idc-codebase/ codebase
-	[ -d "../idc_ui_theme_boots/" ] && rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' ../idc_ui_theme_boots/ codebase/web/themes/contrib/idc_ui_theme_boots
-	[ -d "../idc_default_migration/" ] && rsync -avz --update --exclude '.git' --exclude '.gitignore' --exclude '.github' ../idc_default_migration codebase/web/modules/contrib/idc_default_migration
+	[ -d "../idc-codebase/" ] && rsync -avz ../idc-codebase/ codebase
+	[ -d "../idc_ui_theme_boots/" ] && rsync -avz ../idc_ui_theme_boots/ codebase/web/themes/contrib/idc_ui_theme_boots --delete
+	[ -d "../idc_default_migration/" ] && rsync -avz ../idc_default_migration codebase/web/modules/contrib/idc_default_migration --delete
+	[ -d "../islandora_workbench_demo_content/" ] && rsync -avz islandora_workbench/islandora_workbench_demo_content --delete
 	$(MAKE) set-codebase-owner
 
 .PHONY: test
