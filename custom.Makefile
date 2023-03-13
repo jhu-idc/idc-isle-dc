@@ -121,6 +121,8 @@ jhu_up: jhu_generate-secrets
 	$(MAKE) jhu_config_import
 	docker-compose exec -T drupal with-contenv bash -lc 'composer require drupal/migrate_tools ; drush pm:enable -y migrate_tools,idc_default_migration && drush migrate:import idc_default_migration_menu_link_main'
 	$(MAKE) jhu_solr
+	rsync -avz ../idc_ui_community codebase/web/modules/contrib/
+	docker-compose exec -T drupal with-contenv bash -lc 'drush pm:enable idc_ui_community -y ; drush cr'
 
 .PHONY: jhu_demo_content
 #.SILENT: jhu_demo_content
@@ -214,6 +216,7 @@ jhu_repos_export:
 	-sudo rsync -avz codebase/web/modules/contrib/idc_default_migration ../ --delete
 	-sudo rsync -avz codebase/web/modules/contrib/idc_ui_module ../ --delete
 	-sudo rsync -avz islandora_workbench/islandora_workbench_demo_content ../ --delete
+	-sudo rsync -avz codebase/web/modules/contrib/idc_ui_community ../ --delete
 
 .PHONY: jhu_sync_repos
 .SILENT: jhu_sync_repos
