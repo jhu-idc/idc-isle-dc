@@ -1,0 +1,37 @@
+name: Deploy to Test Server
+on:
+  push:
+    branches:
+      - community_version
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - main
+      - development
+  workflow_dispatch:
+jobs:
+    build:
+        name: build
+        runs-on:
+          - self-hosted
+          - testing
+        steps:
+            # Check out current commit
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Build JHU Image
+              run: make jhu_up
+
+            - name: Add demo content
+              run: make jhu_demo_content
+
+            - name: Notify Slack
+              uses: 8398a7/action-slack@v3
+              with:
+                status: ${{ job.status }}
+                fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest # selectable (default: repo,message)
+              env:
+                SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+              if: failure()
