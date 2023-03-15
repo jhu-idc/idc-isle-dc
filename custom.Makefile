@@ -210,13 +210,12 @@ jhu_dev_tools_enable:
 ## JHU: This copies the codebase directory and theme directory to a parent directory.
 jhu_repos_export:
 	$(MAKE) jhu_config_export
-	cd codebase && git pull
-	-sudo rsync -avz codebase/ ../idc-codebase --delete
-	-sudo rsync -avz codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
-	-sudo rsync -avz codebase/web/modules/contrib/idc_default_migration ../ --delete
-	-sudo rsync -avz codebase/web/modules/contrib/idc_ui_module ../ --delete
-	-sudo rsync -avz islandora_workbench/islandora_workbench_demo_content ../ --delete
-	-sudo rsync -avz codebase/web/modules/contrib/idc_ui_community ../ --delete
+	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/ ../idc-codebase --delete
+	-sudo chown -R $(USER): ../idc-codebase
+	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
+	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/modules/contrib/idc_default_migration ../ --delete
+	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' islandora_workbench/islandora_workbench_demo_content ../ --delete
+	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/modules/contrib/idc_ui_community ../ --delete
 
 .PHONY: jhu_sync_repos
 .SILENT: jhu_sync_repos
