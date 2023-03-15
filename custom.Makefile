@@ -121,6 +121,8 @@ jhu_up: jhu_generate-secrets
 	$(MAKE) jhu_config_import
 	docker-compose exec -T drupal with-contenv bash -lc 'composer require drupal/migrate_tools ; drush pm:enable -y migrate_tools,idc_default_migration && drush migrate:import idc_default_migration_menu_link_main'
 	$(MAKE) jhu_solr
+	docker-compose exec -T drupal with-contenv bash -lc 'cp web/core/modules/media/images/icons/generic.png web/sites/default/files/media-icons/generic'
+	docker-compose exec -T drupal with-contenv bash -lc 'chown nginx: web/sites/default/files/media-icons/generic/generic.png'
 
 .PHONY: jhu_demo_content
 #.SILENT: jhu_demo_content
