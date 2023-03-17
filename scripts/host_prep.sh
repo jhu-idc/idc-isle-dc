@@ -28,4 +28,17 @@ if [ -f /etc/server-type.conf ]; then
 
 		docker-compose restart traefik
 	fi
+
+	# Check if the URL is up and has a valid SSL certificate
+	url = "https://$domainname"
+	if curl --output /dev/null --silent --head --fail "$url" ; then
+		echo "Looks like the URL is up and has a valid SSL certificate"
+	else
+		echo "Warning: URL is not available or has an invalid SSL certificate"
+		echo "Rolling back to the backup certs"
+		mv ${ROOT_DIR}certs/privkey.pem.bak ${ROOT_DIR}certs/privkey.pem
+		mv ${ROOT_DIR}certs/cert.pem.bak ${ROOT_DIR}certs/cert.pem
+
+		docker-compose restart traefik
+	fi
 fi
