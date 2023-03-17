@@ -30,10 +30,10 @@ if [ -f /etc/server-type.conf ]; then
 
 		docker-compose restart traefik || exit 1
 	fi
-
+	sleep 10
 	# Check if the URL is up and has a valid SSL certificate
-	url="https://${domainname}"
-	if true | openssl s_client -connect www.google.com:443 2>/dev/null | openssl x509 -noout -checkend 0; then
+	url="${domainname}"
+	if true | openssl s_client -connect ${url}:443 2>/dev/null | openssl x509 -noout -checkend 0; then
 		echo "Looks like the URL is up and has a valid SSL certificate"
 	else
 		echo "Warning: URL is not available or has an invalid SSL certificate"
