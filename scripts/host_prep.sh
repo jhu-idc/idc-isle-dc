@@ -6,15 +6,14 @@ cd ${ROOT_DIR} || exit 1
 
 if [ -f /etc/server-type.conf ]; then
 	servertypename=$(cat /etc/server-type.conf)
-	domainname=$(cat /etc/domain.conf)
-	echo "Server Type: $servertypename Domain Name: $domainname"
-
 	if [ $servertypename == "test" ]; then
 		if [ ! -f /etc/domain.conf ]; then
 			echo "File Missing /etc/domain.conf"
 			exit 1
 		fi
-
+		domainname=$(cat /etc/domain.conf)
+		echo ""
+		echo "Server Type: $servertypename Domain Name: $domainname"\
 		sed -i "s/DOMAIN=.*/DOMAIN=$domainname/g" .env
 
 		if [ ! -f ${ROOT_DIR}certs/privkey.pem.bak ]; then
@@ -34,7 +33,7 @@ if [ -f /etc/server-type.conf ]; then
 
 	# Check if the URL is up and has a valid SSL certificate
 	url = "https://${domainname}"
-	if curl --output /dev/null --silent --head --fail "$url" ; then
+	if true | openssl s_client -connect www.google.com:443 2>/dev/null | openssl x509 -noout -checkend 0; then
 		echo "Looks like the URL is up and has a valid SSL certificate"
 	else
 		echo "Warning: URL is not available or has an invalid SSL certificate"
