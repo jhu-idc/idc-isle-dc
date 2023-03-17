@@ -12,9 +12,11 @@ if [ -f /etc/server-type.conf ]; then
 			exit 1
 		fi
 		domainname=$(cat /etc/domain.conf)
+
 		echo ""
-		echo "Server Type: $servertypename Domain Name: $domainname"\
+		echo "Server Type: $servertypename Domain Name: $domainname"
 		sed -i "s/DOMAIN=.*/DOMAIN=$domainname/g" .env
+		sed -i "s/INCLUDE_TRAEFIK_SERVICE=.*/INCLUDE_TRAEFIK_SERVICE=no/g" .env
 
 		if [ ! -f ${ROOT_DIR}certs/privkey.pem.bak ]; then
 			echo "Copying ${ROOT_DIR}certs/privkey.pem to ${ROOT_DIR}certs/privkey.pem.bak"
@@ -28,9 +30,10 @@ if [ -f /etc/server-type.conf ]; then
 		fi
 		sudo cp /etc/pki/tls/certs/star_mse.jhu.edu.pem ${ROOT_DIR}certs/cert.pem || exit 1
 
-		docker-compose restart traefik || exit 1
+		make -B docker-compose.yml
+		docker-composer down ; docker-compose up -d
+		sleep 10
 	fi
-	sleep 10
 	# Check if the URL is up and has a valid SSL certificate
 	url="${domainname}"
 	if true | openssl s_client -connect ${url}:443 2>/dev/null | openssl x509 -noout -checkend 0; then
