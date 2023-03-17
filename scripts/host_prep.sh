@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 
 ROOT_DIR='/var/idc-isle-dc/'
+
 cd ${ROOT_DIR} || exit 1
 
 if [ -f /etc/server-type.conf ]; then
 	servertypename=$(cat /etc/server-type.conf)
+	domainname=$(cat /etc/domain.conf)
+	echo "Server Type: $servertypename Domain Name: $domainname"
+
 	if [ $servertypename == "test" ]; then
 		if [ ! -f /etc/domain.conf ]; then
 			echo "File Missing /etc/domain.conf"
 			exit 1
 		fi
 
-		domainname=$(cat /etc/domain.conf)
 		sed -i "s/DOMAIN=.*/DOMAIN=$domainname/g" .env
 
 		if [ ! -f ${ROOT_DIR}certs/privkey.pem.bak ]; then
@@ -30,7 +33,7 @@ if [ -f /etc/server-type.conf ]; then
 	fi
 
 	# Check if the URL is up and has a valid SSL certificate
-	url = "https://$domainname"
+	url = "https://${domainname}"
 	if curl --output /dev/null --silent --head --fail "$url" ; then
 		echo "Looks like the URL is up and has a valid SSL certificate"
 	else
