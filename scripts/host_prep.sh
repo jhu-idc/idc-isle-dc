@@ -3,7 +3,16 @@
 cd /var/idc-isle-dc/codebase/ || exit 1
 
 if [ -f /etc/server-type.conf ]; then
-	if [ $(cat /etc/server-type.conf) == "test" ]; then
+	servertypename=$(cat /etc/server-type.conf)
+	if [ $servertypename == "test" ]; then
+		if [ ! -f /etc/domain.conf ]; then
+			echo "File Missing /etc/domain.conf"
+			exit 1
+		fi
+		domainname=$(cat /etc/domain.conf)
+		# Replace the "DOMAIN=" in the .env file with the one from the server.
+		sed -i "s/DOMAIN=.*/DOMAIN=$domainname/g" .env
+
 		if [ ! -f /var/idc-isle-dc/codebase/certs/privkey.pem.bak ]; then
 			cp /var/idc-isle-dc/codebase/certs/privkey.pem /var/idc-isle-dc/codebase/certs/privkey.pem.bak
 		fi
