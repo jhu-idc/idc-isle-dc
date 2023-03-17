@@ -32,7 +32,7 @@ if [ -f /etc/server-type.conf ]; then
 	fi
 
 	# Check if the URL is up and has a valid SSL certificate
-	url = "https://${domainname}"
+	url="https://${domainname}"
 	if true | openssl s_client -connect www.google.com:443 2>/dev/null | openssl x509 -noout -checkend 0; then
 		echo "Looks like the URL is up and has a valid SSL certificate"
 	else
