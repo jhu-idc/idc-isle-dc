@@ -110,7 +110,7 @@ jhu_up: jhu_generate-secrets
 	$(MAKE) set-files-owner SRC=$(CURDIR)/codebase ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
 	# The rest of this should be moved into another function.
-	docker-compose exec -T drupal with-contenv bash -lc 'rm -rf vendor/ web/modules/contrib/* web/themes/contrib/* ; composer install'
+	docker-compose exec -T drupal wit h-contenv bash -lc 'rm -rf vendor/ web/modules/contrib/* web/themes/contrib/* ; su nginx -s /bin/bash -c "composer install"'
 	$(MAKE) set-codebase-owner
 	docker-compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx .'
 	$(MAKE) drupal-database update-settings-php
@@ -121,8 +121,11 @@ jhu_up: jhu_generate-secrets
 	$(MAKE) jhu_config_import
 	docker-compose exec -T drupal with-contenv bash -lc 'composer require drupal/migrate_tools ; drush pm:enable -y migrate_tools,idc_default_migration && drush migrate:import idc_default_migration_menu_link_main'
 	$(MAKE) jhu_solr
+	docker-compose exec -T drupal with-contenv bash -lc 'mkdir -p web/sites/default/files/styles/thumbnail/public/media-icons/generic'
+	docker-compose exec -T drupal with-contenv bash -lc 'cp web/core/modules/media/images/icons/* web/sites/default/files/media-icons/generic/'
 	docker-compose exec -T drupal with-contenv bash -lc 'cp web/core/modules/media/images/icons/generic.png web/sites/default/files/media-icons/generic'
 	docker-compose exec -T drupal with-contenv bash -lc 'chown nginx: web/sites/default/files/media-icons/generic/generic.png'
+	docker-compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx /var/www/drupal/sites/default/files/'
 
 .PHONY: jhu_demo_content
 #.SILENT: jhu_demo_content
@@ -176,6 +179,7 @@ jhu_down:
 .SILENT: jhu_config_export
 ## JHU: Exports the sites configuration.
 jhu_config_export:
+	cd codebase && rm -rf config/sync/* && git checkout -- config/sync
 	docker-compose exec drupal with-contenv bash -lc "chown -R nginx: /var/www/drupal/config/sync/"
 	docker-compose exec -T drupal drush -l $(SITE) config:export -y
 	$(MAKE) set-codebase-owner

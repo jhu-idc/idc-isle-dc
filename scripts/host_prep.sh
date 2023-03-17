@@ -17,6 +17,7 @@ if [ -f /etc/server-type.conf ]; then
 		echo "Server Type: $servertypename Domain Name: $domainname"
 		sed -i "s/DOMAIN=.*/DOMAIN=$domainname/g" .env
 		sed -i "s/INCLUDE_TRAEFIK_SERVICE=.*/INCLUDE_TRAEFIK_SERVICE=no/g" .env
+		sed -i "s#host:.*#host: 'https://${domainname}/'#g" islandora_workbench/islandora_workbench_demo_content/jhu_root_collections.yml
 
 		if [ ! -f ${ROOT_DIR}certs/privkey.pem.bak ]; then
 			echo "Copying ${ROOT_DIR}certs/privkey.pem to ${ROOT_DIR}certs/privkey.pem.bak"
