@@ -125,7 +125,7 @@ jhu_up: jhu_generate-secrets
 	docker-compose exec -T drupal with-contenv bash -lc 'cp web/core/modules/media/images/icons/* web/sites/default/files/media-icons/generic/'
 	docker-compose exec -T drupal with-contenv bash -lc 'cp web/core/modules/media/images/icons/generic.png web/sites/default/files/media-icons/generic'
 	docker-compose exec -T drupal with-contenv bash -lc 'chown nginx: web/sites/default/files/media-icons/generic/generic.png'
-	docker-compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx /var/www/drupal/sites/default/files/'
+	docker-compose exec -T drupal with-contenv bash -lc 'mkdir -p /var/www/drupal/private ; chown -R nginx:nginx /var/www/drupal/private ; chmod -R 755 /var/www/drupal/private'
 
 .PHONY: jhu_demo_content
 #.SILENT: jhu_demo_content
