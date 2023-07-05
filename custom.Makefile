@@ -148,7 +148,6 @@ jhu_demo_content: QUOTED_CURDIR = "$(CURDIR)"
 jhu_demo_content:
 	# fetch repo that has csv and binaries to data/samples
 	# if prod do this by default
-	# Create secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME if it doesn't exist
 	[ -f "secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME" ] || (echo "admin" > secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME)
 	[ -f "secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD" ] || (echo "password" > secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)
 	-docker-compose exec -T drupal with-contenv bash -lc "composer require mjordan/islandora_workbench_integration"
@@ -157,9 +156,9 @@ jhu_demo_content:
 	[ -d "islandora_workbench/islandora_workbench_demo_content" ] || (git clone https://github.com/DonRichards/islandora_workbench_demo_content islandora_workbench/islandora_workbench_demo_content)
 	# $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
 	# Username
-	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^username.*/username\: $(shell cat secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME) /g' {} +
+	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^username.*/username\: $(shell cat secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME)/g' {} +
 	# Password
-	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' {} +
+	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)/g' {} +
 	# Domain
 	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) '/^host:/s/.*/host: "$(subst /,\/,$(subst .,\.,$(SITE)))\/"/' {} +
 	cd islandora_workbench && docker build -t workbench-docker .
@@ -252,6 +251,7 @@ jhu_repos_export:
 	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
 	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/modules/contrib/idc_default_migration ../ --delete
 	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' islandora_workbench/islandora_workbench_demo_content ../ --delete
+	$(MAKE) set-codebase-owner
 
 .PHONY: jhu_sync_repos
 .SILENT: jhu_sync_repos
