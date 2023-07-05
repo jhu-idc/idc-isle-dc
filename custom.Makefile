@@ -148,13 +148,16 @@ jhu_demo_content: QUOTED_CURDIR = "$(CURDIR)"
 jhu_demo_content:
 	# fetch repo that has csv and binaries to data/samples
 	# if prod do this by default
-	# -docker-compose exec -T drupal with-contenv bash -lc "composer require mjordan/islandora_workbench_integration"
-	# -docker-compose exec -T drupal with-contenv bash -lc "drush en -y islandora_workbench_integration"
-	# [ -d "islandora_workbench" ] || (git clone https://github.com/mjordan/islandora_workbench)
-	# [ -d "islandora_workbench/islandora_workbench_demo_content" ] || (git clone https://github.com/DonRichards/islandora_workbench_demo_content islandora_workbench/islandora_workbench_demo_content)
+	# Create secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME if it doesn't exist
+	[ -f "secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME" ] || (echo "admin" > secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME)
+	[ -f "secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD" ] || (echo "password" > secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)
+	-docker-compose exec -T drupal with-contenv bash -lc "composer require mjordan/islandora_workbench_integration"
+	-docker-compose exec -T drupal with-contenv bash -lc "drush en -y islandora_workbench_integration"
+	[ -d "islandora_workbench" ] || (git clone https://github.com/mjordan/islandora_workbench)
+	[ -d "islandora_workbench/islandora_workbench_demo_content" ] || (git clone https://github.com/DonRichards/islandora_workbench_demo_content islandora_workbench/islandora_workbench_demo_content)
 	# $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
 	# Username
-	# find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^username.*/username\: $(shell cat secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME) /g' {} +
+	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^username.*/username\: $(shell cat secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME) /g' {} +
 	# Password
 	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' {} +
 	# Domain
@@ -172,7 +175,7 @@ jhu_demo_content:
 	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_subject.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/jhu_root_collections.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/islandora_objects.yml"
-	# $(MAKE) jhu_solr
+	$(MAKE) jhu_solr
 
 .PHONY: jhu_clean
 .SILENT: jhu_clean
@@ -275,3 +278,9 @@ test:
 jhu_update_theme:
 	rm -rf codebase/web/themes/contrib/idc_ui_theme_boots
 	docker-compose exec drupal with-contenv bash -lc 'composer clearcache && composer update --prefer-source "islandora/idc_ui_theme_boots" --with-all-dependencies'
+
+.PHONY: jhu_change_domain
+.SILENT: jhu_change_domain
+jhu_change_domain:
+	# Change the DOMAIN= in .env
+	sed -i "s/DOMAIN=.*/DOMAIN=$(DOMAIN)/g" .env
