@@ -158,16 +158,20 @@ jhu_demo_content:
 	[ -d "islandora_workbench" ] || (git clone https://github.com/mjordan/islandora_workbench)
 	[ -d "islandora_workbench/islandora_workbench_demo_content" ] || (git clone https://github.com/DonRichards/islandora_workbench_demo_content islandora_workbench/islandora_workbench_demo_content)
 	# $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
-	# Username
+	# Hack to disable SSL verification/warnings | InsecureRequestWarning: Unverified HTTPS request is being made to host 'islandora.traefik.me'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+    FILE="islandora_workbench/workbench.py"; \
+    if ! grep -q "import requests" "$$FILE"; then \
+        sed -i '/def create():/i import requests\nfrom requests.packages.urllib3.exceptions import InsecureRequestWarning\n\n# Disable SSL/TLS related warnings\nrequests.packages.urllib3.disable_warnings(InsecureRequestWarning)' "$$FILE"; \
+    fi
+	# Set the Username within the YAML files.
 	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^username.*/username\: $(shell cat secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME)/g' {} +
-	# Password
+	# Set the Password within the YAML files.
 	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)/g' {} +
-	# Domain
+	# Set the Domain within the YAML files.
 	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) '/^host:/s/.*/host: "$(subst /,\/,$(subst .,\.,$(SITE)))\/"/' {} +
+	# Build the workbench docker image.
 	cd islandora_workbench && docker build -t workbench-docker .
-	# This is a template for creating a new csv file.
-	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_example_geo.yml --get_csv_template"
-	# These are the commands to run the workbench for the demo content.
+	# These Import taxonomy terms.
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_geo_location.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_copyright_and_use.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_family.yml"
@@ -175,9 +179,11 @@ jhu_demo_content:
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_corporate_body.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_genre.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_subject.yml"
+	# These Import collections and objects.
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/jhu_root_collections.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/islandora_objects.yml"
 	$(MAKE) jhu_solr
+	@echo "  └─ Done"
 
 .PHONY: jhu_clean
 .SILENT: jhu_clean
