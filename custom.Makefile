@@ -118,11 +118,10 @@ jhu_up: jhu_generate-secrets
 		echo "codebase/ directory is empty, cloning it"; \
 		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /home/root;'; \
 	fi
-	-sudo cp scripts/services.yml codebase/web/sites/default/services.yml
-	-sudo cp scripts/default.services.yml codebase/web/sites/default/default.services.yml
 	$(MAKE) set-codebase-owner
 	$(MAKE) set-files-owner SRC=$(CURDIR)/codebase ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
+	docker-compose exec -T drupal with-contenv bash -lc 'git config --global --add safe.directory /var/www/drupal/web/modules/contrib/islandora_fits'
 	# The rest of this should be moved into another function.
 	docker-compose exec -T drupal with-contenv bash -lc 'rm -rf vendor/ web/modules/contrib/* web/themes/contrib/* ; composer install'
 	$(MAKE) set-codebase-owner
@@ -140,6 +139,10 @@ jhu_up: jhu_generate-secrets
 	docker-compose exec -T drupal with-contenv bash -lc 'cp web/core/modules/media/images/icons/generic.png web/sites/default/files/media-icons/generic'
 	docker-compose exec -T drupal with-contenv bash -lc 'chown nginx: web/sites/default/files/media-icons/generic/generic.png'
 	docker-compose exec -T drupal with-contenv bash -lc 'mkdir -p /var/www/drupal/private ; chown -R nginx:nginx /var/www/drupal/private ; chmod -R 755 /var/www/drupal/private'
+	sudo rsync -avz scripts/services.yml codebase/web/sites/default/services.yml
+	sudo rsync -avz scripts/default.services.yml codebase/web/sites/default/default.services.yml
+	docker-compose down
+	docker-compose up -d
 
 .PHONY: jhu_demo_content
 .SILENT: jhu_demo_content
@@ -163,17 +166,17 @@ jhu_demo_content:
 	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) '/^host:/s/.*/host: "$(subst /,\/,$(subst .,\.,$(SITE)))\/"/' {} +
 	cd islandora_workbench && docker build -t workbench-docker .
 	# This is a template for creating a new csv file.
-	# cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_example_geo.yml --get_csv_template"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_example_geo.yml --get_csv_template"
 	# These are the commands to run the workbench for the demo content.
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_geo_location.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_copyright_and_use.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_family.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_person.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_corporate_body.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_genre.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_subject.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/jhu_root_collections.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v $(QUOTED_CURDIR)/islandora_workbench:/workbench --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/islandora_objects.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_geo_location.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_copyright_and_use.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_family.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_person.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_corporate_body.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_genre.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_subject.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/jhu_root_collections.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/islandora_objects.yml"
 	$(MAKE) jhu_solr
 
 .PHONY: jhu_clean
