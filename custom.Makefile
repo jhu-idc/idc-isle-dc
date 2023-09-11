@@ -8,9 +8,9 @@
 #
 DOCKCOMPOSE_FILE = $(CURDIR)/docker-compose.yml
 ifneq ("$(wildcard $(DOCKCOMPOSE_FILE))","")
-    DF_FILE_EXISTS = 1
+	DF_FILE_EXISTS = 1
 else
-    DF_FILE_EXISTS = 0
+	DF_FILE_EXISTS = 0
 endif
 
 ifneq ("$(wildcard /etc/server-type.conf)","")
@@ -159,10 +159,11 @@ jhu_demo_content:
 	[ -d "islandora_workbench/islandora_workbench_demo_content" ] || (git clone https://github.com/DonRichards/islandora_workbench_demo_content islandora_workbench/islandora_workbench_demo_content)
 	# $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
 	# Hack to disable SSL verification/warnings | InsecureRequestWarning: Unverified HTTPS request is being made to host 'islandora.traefik.me'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
-    FILE="islandora_workbench/workbench.py"; \
-    if ! grep -q "import requests" "$$FILE"; then \
-        sed -i '/def create():/i import requests\nfrom requests.packages.urllib3.exceptions import InsecureRequestWarning\n\n# Disable SSL/TLS related warnings\nrequests.packages.urllib3.disable_warnings(InsecureRequestWarning)' "$$FILE"; \
-    fi
+	FILE="islandora_workbench/workbench"; \
+	if ! grep -q "import requests" "$$FILE"; then \
+		echo "Fixing the file: $$FILE"; \
+		sed -i '/def create():/i import requests\nfrom requests.packages.urllib3.exceptions import InsecureRequestWarning\n\n# Disable SSL/TLS related warnings\nrequests.packages.urllib3.disable_warnings(InsecureRequestWarning)' "$$FILE"; \
+	fi
 	# Set the Username within the YAML files.
 	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^username.*/username\: $(shell cat secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME)/g' {} +
 	# Set the Password within the YAML files.
@@ -172,15 +173,15 @@ jhu_demo_content:
 	# Build the workbench docker image.
 	cd islandora_workbench && docker build -t workbench-docker .
 	# These Import taxonomy terms.
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_geo_location.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_copyright_and_use.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_family.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_person.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_corporate_body.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_genre.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_subject.yml"
-	# These Import collections and objects.
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/jhu_root_collections.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_geo_location.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_copyright_and_use.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_family.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_person.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_corporate_body.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_genre.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_subject.yml"
+	# # These Import collections and objects.
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/jhu_root_collections.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/islandora_objects.yml"
 	$(MAKE) jhu_solr
 	@echo "  └─ Done"
@@ -192,10 +193,10 @@ jhu_clean:
 	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, codebase/, and all untracked/ignored files (including changes to .env)."
 	$(MAKE) confirm
 	docker-compose down -v --remove-orphans || true
-	sudo rm -fr certs secrets/live/* docker-compose.yml codebase islandora_workbench
-	-git stash
-	-git clean -xffd .
-	-git checkout .
+	# sudo rm -fr certs secrets/live/* docker-compose.yml codebase islandora_workbench
+	# -git stash
+	# -git clean -xffd .
+	# -git checkout .
 	@echo "Codebase/ was completely removed."
 	@echo "  └─ Done"
 
