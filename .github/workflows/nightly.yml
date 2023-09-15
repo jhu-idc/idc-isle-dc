@@ -1,7 +1,7 @@
 name: Nightly
 on:
-  schedule:
-    - cron: '5 4 * * *'
+  #schedule:
+  #  - cron: '5 4 * * *'
   push:
     branches: [ development ]
   workflow_dispatch:
@@ -101,12 +101,12 @@ jobs:
         with:
           name: reports-${{ matrix.suite }}
           path: end-to-end/reports/${{ matrix.suite }}
-      - name: Notify Slack
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest # selectable (default: repo,message)
-        env:
-            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
-            MATRIX_CONTEXT: ${{ toJson(matrix) }} # required
-        if: failure()
+      #- name: Notify Slack
+      #  uses: 8398a7/action-slack@v3
+      #  with:
+      #    status: ${{ job.status }}
+      #    fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest # selectable (default: repo,message)
+      #  env:
+      #      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+      #      MATRIX_CONTEXT: ${{ toJson(matrix) }} # required
+      #  if: failure()
