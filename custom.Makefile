@@ -294,3 +294,12 @@ jhu_update_theme:
 jhu_change_domain:
 	# Change the DOMAIN= in .env
 	sed -i "s/DOMAIN=.*/DOMAIN=$(DOMAIN)/g" .env
+
+.PHONY: jhu_stop
+.SILENT: jhu_stop
+## JHU: Turn off idc without losing anything.
+jhu_stop:
+	@echo ""
+	@echo "Stopping containers"
+	docker-compose stop
+	@echo "  └─ Done"
