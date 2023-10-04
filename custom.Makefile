@@ -173,7 +173,7 @@ jhu_demo_content:
 	# Set the Domain within the YAML files.
 	find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) '/^host:/s/.*/host: "$(subst /,\/,$(subst .,\.,$(SITE)))\/"/' {} +
 	# Build the workbench docker image.
-	cd islandora_workbench && docker build -t workbench-docker .
+	cd islandora_workbench && DOCKER_BUILDKIT=0 docker build -t workbench-docker .
 	# These Import taxonomy terms.
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_geo_location.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_copyright_and_use.yml"
