@@ -141,6 +141,8 @@ jhu_up: jhu_generate-secrets
 	docker-compose exec -T drupal with-contenv bash -lc 'mkdir -p /var/www/drupal/private ; chown -R nginx:nginx /var/www/drupal/private ; chmod -R 755 /var/www/drupal/private'
 	sudo rsync -avz scripts/services.yml codebase/web/sites/default/services.yml
 	sudo rsync -avz scripts/default.services.yml codebase/web/sites/default/default.services.yml
+	curl -k -u admin:$(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) -H "Content-Type: application/json" -d "@build/demo-data/jhu_homepage.json" https://${DOMAIN}/node?_format=json
+	curl -k -u admin:$(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) -H "Content-Type: application/json" -d "@build/demo-data/browse-collections.json" https://${DOMAIN}/node?_format=json
 	docker-compose down
 	docker-compose up -d
 
