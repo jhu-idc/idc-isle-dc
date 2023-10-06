@@ -175,15 +175,15 @@ jhu_demo_content:
 	# Build the workbench docker image.
 	cd islandora_workbench && DOCKER_BUILDKIT=0 docker build -t workbench-docker .
 	# These Import taxonomy terms.
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_geo_location.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_copyright_and_use.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_family.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_person.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_corporate_body.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_genre.yml"
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_subject.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_geo_location.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_copyright_and_use.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_family.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_person.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_corporate_body.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_genre.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/idc_subject.yml"
 	# These Import collections and objects.
-	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/jhu_root_collections.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/jhu_root_collections.yml"
 	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/islandora_objects.yml"
 	$(MAKE) jhu_solr
 	@echo "  └─ Done"
