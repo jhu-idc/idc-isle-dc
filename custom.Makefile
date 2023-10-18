@@ -118,15 +118,16 @@ jhu_up: jhu_generate-secrets
 		echo "codebase/ directory is empty, cloning it"; \
 		mkdir -p $(CURDIR)/codebase; \
 		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /home/root;'; \
+		echo "codebase/ was cloned"; \
 	fi
-	$(MAKE) set-codebase-owner
-	docker-compose up -d --remove-orphans
-	# The rest of this should be moved into another function.
 	@echo "Wait for the /var/www/drupal/composer.json file to be available"
 	while ! docker compose exec -T drupal with-contenv bash -lc 'test -f /var/www/drupal/composer.json'; do \
 		echo "Waiting for /var/www/drupal/composer.json file to be available..."; \
 		sleep 2; \
 	done
+	$(MAKE) set-codebase-owner
+	docker-compose up -d --remove-orphans
+	# The rest of this should be moved into another function.
 	docker-compose exec -T drupal with-contenv bash -lc 'rm -rf vendor/ web/modules/contrib/* web/themes/contrib/*'
 	docker compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx /var/www/drupal/ && su nginx -s /bin/bash -c "composer install"'
 	docker-compose exec -T drupal with-contenv bash -lc 'git config --global --add safe.directory /var/www/drupal/web/modules/contrib/islandora_fits'
