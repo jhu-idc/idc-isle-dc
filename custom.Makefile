@@ -115,7 +115,7 @@ jhu_up: jhu_generate-secrets
 	@echo "docker-compose.yml does not exist, creating starter site"
 	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
 		echo "codebase/ directory is empty, cloning it"; \
-		git clone -b main https://github.com/jhu-idc/idc-codebase; \
+		git clone -b main https://github.com/jhu-idc/idc-codebase codebase; \
 		echo "codebase/ was cloned"; \
 	fi
 	@echo "Wait for the /var/www/drupal/composer.json file to be available"
