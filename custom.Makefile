@@ -112,11 +112,11 @@ jhu_up: jhu_generate-secrets
 		echo " Forcing an exit to prevent running creation steps again."; \
 		echo ""; \
 	fi
-	@echo "docker-compose.yml does not exist, creating starter site"
-	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase/config/sync/)" ]; then \
+	@echo "Running Starter-init"
+	$(MAKE) starter-init ENVIRONMENT=starter_dev
+	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
 		echo "codebase/ directory is empty, cloning it"; \
-		sudo rm -rf codebase/ ; \
-		git clone -b main https://github.com/jhu-idc/idc-codebase codebase; \
+		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /home/root;'; \
 		echo "codebase/ was cloned"; \
 	fi
 	@echo "Wait for the /var/www/drupal/composer.json file to be available"
@@ -125,7 +125,6 @@ jhu_up: jhu_generate-secrets
 		sleep 2; \
 	done
 	$(MAKE) set-codebase-owner
-	$(MAKE) starter-init ENVIRONMENT=starter_dev
 	docker-compose up -d --remove-orphans
 	# The rest of this should be moved into another function.
 	docker-compose exec -T drupal with-contenv bash -lc 'rm -rf vendor/ web/modules/contrib/* web/themes/contrib/*'
