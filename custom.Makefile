@@ -127,11 +127,10 @@ jhu_up: jhu_generate-secrets
 	$(MAKE) set-codebase-owner
 	docker-compose up -d --remove-orphans
 	# The rest of this should be moved into another function.
-	docker-compose exec -T drupal with-contenv bash -lc 'rm -rf vendor/ web/modules/contrib/* web/themes/contrib/*'
+	-docker-compose exec -T drupal with-contenv bash -lc 'rm -rf vendor/ web/modules/contrib/* web/themes/contrib/*'
 	docker compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx /var/www/drupal/ && su nginx -s /bin/bash -c "composer install"'
-	docker-compose exec -T drupal with-contenv bash -lc 'git config --global --add safe.directory /var/www/drupal/web/modules/contrib/islandora_fits'
+	-docker-compose exec -T drupal with-contenv bash -lc 'git config --global --add safe.directory /var/www/drupal/web/modules/contrib/islandora_fits'
 	$(MAKE) set-codebase-owner
-	docker-compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx .'
 	$(MAKE) drupal-database update-settings-php
 	docker-compose exec -T drupal with-contenv bash -lc "drush si -y --existing-config minimal --account-pass $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)"
 	docker-compose exec -T drupal with-contenv bash -lc "drush -l $(SITE) user:role:add fedoraadmin admin"
