@@ -1,37 +1,62 @@
-name: Deploy to Test Server
+name: Deploy and Rollback
+
 on:
   push:
     branches:
       - community_version
-    tags:
-      - v*
-  pull_request:
-    branches:
-      - main
-      - development
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action (deploy/latest or rollback)'
+        required: true
+        default: 'deploy/latest'
+
 jobs:
-    build:
-        name: build
-        runs-on:
-          - self-hosted
-          - testing
-        steps:
-            # Check out current commit
-            - name: Checkout
-              uses: actions/checkout@v3
+  build-and-deploy:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'deploy/latest')
+    name: build and deploy
+    runs-on:
+      - self-hosted
+      - testing
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-            - name: Build JHU Image
-              run: make jhu_up
+      - name: Build JHU Image
+        run: make jhu_up
 
-            - name: Add demo content
-              run: make jhu_demo_content
+      - name: Add demo content
+        run: make jhu_demo_content
 
-            - name: Notify Slack
-              uses: 8398a7/action-slack@v3
-              with:
-                status: ${{ job.status }}
-                fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest # selectable (default: repo,message)
-              env:
-                SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
-              if: failure()
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: failure()
+
+  rollback:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'rollback'
+    name: rollback
+    runs-on:
+      - self-hosted
+      - testing
+    steps:
+      # Add steps here for rolling back your deployment, e.g.:
+      - name: Checkout previous version
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.before }}
+
+      # ... additional rollback steps ...
+
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: failure()
