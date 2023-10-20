@@ -19,6 +19,16 @@ else
 	SERVER_TYPE = local
 endif
 
+.PHONY: wait-for-endpoint
+.SILENT: wait-for-endpoint
+wait-for-endpoint:
+	@echo "Checking if the https://$(DOMAIN)/ endpoint is available..."
+	@while ! curl -k -s -o /dev/null -w "%{http_code}" https://$(DOMAIN)/ | grep -q "200"; do \
+		echo "Waiting for https://$(DOMAIN)/ endpoint to be available..."; \
+		sleep 5; \
+	done
+	@echo "Endpoint is available!"
+
 .PHONY: jhu_check_and_warn
 .SILENT: jhu_check_and_warn
 jhu_check_and_warn:
@@ -146,10 +156,12 @@ jhu_up: jhu_generate-secrets
 	docker-compose exec -T drupal with-contenv bash -lc 'mkdir -p /var/www/drupal/private ; chown -R nginx:nginx /var/www/drupal/private ; chmod -R 755 /var/www/drupal/private'
 	sudo rsync -avz scripts/services.yml codebase/web/sites/default/services.yml
 	sudo rsync -avz scripts/default.services.yml codebase/web/sites/default/default.services.yml
+	$(MAKE) wait-for-endpoint
 	curl -k -u admin:$(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) -H "Content-Type: application/json" -d "@build/demo-data/jhu_homepage.json" https://${DOMAIN}/node?_format=json
 	curl -k -u admin:$(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) -H "Content-Type: application/json" -d "@build/demo-data/browse-collections.json" https://${DOMAIN}/node?_format=json
 	docker-compose down
 	docker-compose up -d
+	# drush config:set system.logging error_level verbose -y
 
 .PHONY: jhu_demo_content
 .SILENT: jhu_demo_content
