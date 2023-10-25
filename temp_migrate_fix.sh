@@ -29,8 +29,9 @@ for TITLE in "${TITLES[@]}"; do
 
   # Check if NODE_ID is numeric (meaning we found a valid node ID)
   if [[ $NODE_ID =~ ^[0-9]+$ ]]; then
-    echo "Replace the collection_object:$TITLE with the Node ID in the file"
+    echo "Replace the collection_object:$TITLE with the Node ID: $NODE_ID in the file"
     sed -i "s/,\"collection_object:$TITLE\",/,$NODE_ID,/g" "$FILE_PATH"
+    sed -i "s/,collection_object:$TITLE,/,$NODE_ID,/g" "$FILE_PATH"
   else
     echo "No Node ID found for title: $TITLE"
   fi
