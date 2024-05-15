@@ -307,6 +307,8 @@ jhu_sync_repos:
 	[ -d "../idc_default_migration/" ] && rsync -avz ../idc_default_migration codebase/web/modules/contrib/idc_default_migration --delete
 	mkdir -p islandora_workbench/islandora_workbench_demo_content
 	[ -d "../islandora_workbench_demo_content/" ] && rsync -avz islandora_workbench/islandora_workbench_demo_content --delete
+	docker-compose exec drupal with-contenv bash -lc 'cp -r /var/www/drupal/web/core/assets/vendor/popperjs /var/www/drupal/web/libraries/popperjs ; cp -r /var/www/drupal/vendor/twbs/bootstrap /var/www/drupal/web/libraries/bootstrap ; chown -R nginx: /var/www/drupal/web/libraries/'
+	docker-compose exec drupal with-contenv bash -lc 'find /var/www/drupal/web/libraries/ -type d -exec chmod 755 {} \; -o -type f -exec chmod 644 {} \;'
 	$(MAKE) set-codebase-owner
 
 .PHONY: test
