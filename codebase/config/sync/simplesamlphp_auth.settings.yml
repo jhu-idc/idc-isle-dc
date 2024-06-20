@@ -26,6 +26,8 @@ user_register_original: visitors_admin_approval
 sync:
   mail: true
   user_name: true
+path:
+  alias: '/jhlogin'
 autoenablesaml: false
 debug: false
 secure: false

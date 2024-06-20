@@ -18,5 +18,15 @@ settings:
   id: user_login_block
   label: 'User login'
   label_display: visible
-  provider: user
-visibility: {  }
+visibility:
+  user_role:
+    id: user_role
+    roles:
+      administrator: administrator
+      global_admin: global_admin
+      collection_level_admin: collection_level_admin
+      fedoraadmin: fedoraadmin
+      authenticated: authenticated
+    negate: false
+    context_mapping:
+      user: '@user.current_user_context:current_user'
