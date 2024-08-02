@@ -1,0 +1,364 @@
+# To write custom Makefile commands and have them show up under `make help`.
+#
+#  .PHONY: function_name
+#  .SILENT: function_name
+#  ## JHU: Updates codebase folder to be owned by the host user and nginx group.
+#  function_name:
+#  ⟼ Tab (not space characters) and each line is executed as part of this function.
+#
+export $(shell sed 's/=.*//' .env)
+## Debug output to verify DOMAIN
+
+print-domain:
+	@echo "DOMAIN is set to $(DOMAIN)"
+
+DOCKCOMPOSE_FILE = $(CURDIR)/docker-compose.yml
+ifneq ("$(wildcard $(DOCKCOMPOSE_FILE))","")
+	DF_FILE_EXISTS = 1
+else
+	DF_FILE_EXISTS = 0
+endif
+
+ifneq ("$(wildcard /etc/server-type.conf)","")
+	SERVER_TYPE = $(shell cat /etc/server-type.conf)
+else
+	SERVER_TYPE = local
+endif
+
+# Define the command you want to block
+BLOCKED_COMMANDS := jhu_clean
+
+.PHONY: wait-for-endpoint
+.SILENT: wait-for-endpoint
+wait-for-endpoint:
+	@echo "Checking if the https://$(DOMAIN)/ endpoint is available..."
+	@while ! curl -k -s -o /dev/null -w "%{http_code}" https://$(DOMAIN)/ | grep -q "200"; do \
+		echo "Waiting for https://$(DOMAIN)/ endpoint to be available..."; \
+		sleep 5; \
+	done
+	@echo "Endpoint is available!"
+
+.PHONY: jhu_check_and_warn
+.SILENT: jhu_check_and_warn
+jhu_check_and_warn:
+	if [ $(SERVER_TYPE) != 'local' ]; then \
+		echo "Not allowed on the $(SERVER_TYPE) environment"; \
+		exit 1; \
+	fi
+
+.PHONY: jhu_generate-secrets
+.SILENT: jhu_generate-secrets
+jhu_generate-secrets: QUOTED_CURDIR = "$(CURDIR)"
+jhu_generate-secrets:
+	@echo ""
+	# cp -r secrets/template/* secrets/live
+	$(MAKE) generate-secrets
+	@echo " jhu_generate-secrets └─ Done"
+	@echo ""
+
+.PHONY: set-codebase-owner
+.SILENT: set-codebase-owner
+## JHU: Updates codebase folder to be owned by the host user and nginx group.
+set-codebase-owner:
+	@echo ""
+	@echo "Setting codebase/ folder owner back to $(shell id -u):101"
+	if [ -n "$$(docker ps -q -f name=drupal)" ]; then \
+		echo "  └─ Using docker compose codebase/ directory"; \
+		docker compose exec -T drupal with-contenv bash -lc "find . -not -user $(shell id -u) -not -path '*/sites/default/files' -exec chown $(shell id -u):101 {} \;" ; \
+		docker compose exec -T drupal with-contenv bash -lc "find . -not -group 101 -not -path '*/sites/default/files' -exec chown $(shell id -u):101 {} \;" ; \
+	elif [ -d "codebase" ]; then \
+		echo "  └─ Using local codebase/ directory"; \
+		sudo find ./codebase -not -user $(shell id -u) -not -path '*/sites/default/files' -exec chown $(shell id -u):101 {} \; ; \
+		sudo find ./codebase -not -group 101 -not -path '*/sites/default/files' -exec chown $(shell id -u):101 {} \; ; \
+	else \
+		echo "  └─ No codebase/ directory found, skipping"; \
+	fi
+	@echo "    └─ Done"
+	@echo ""
+
+.PHONY: jhu_solr
+.SILENT: jhu_solr
+## JHU: This pulls the Solr config from Drupal and puts it in the Solr container.
+jhu_solr:
+	@echo ""
+	@echo "Installing missing field types"
+	docker compose exec -T drupal with-contenv bash -lc "drush  search-api-solr:install-missing-fieldtypes"
+	# docker compose exec -T drupal bash -c '/bin/rm -f /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml ; /bin/cp -f web/modules/contrib/search_api_solr/jump-start/solr7/config-set/solrconfig_extra.xml /opt/solr/server/solr/ISLANDORA/conf/solrconfig_extra.xml'
+	@echo "Removing solrconfig_extra.xml"
+	docker compose exec -T drupal bash -c '/bin/rm -rf /opt/solr/server/solr/ISLANDORA/conf/'
+	@echo "Pulling Solr config from Drupal"
+	-docker compose exec -T drupal with-contenv bash -lc "touch /var/www/drupal/solrconfig.zip && chown nginx: /var/www/drupal/solrconfig.zip"
+	docker compose exec -T drupal with-contenv bash -lc "drush search-api-solr:get-server-config default_solr_server /var/www/drupal/solrconfig.zip"
+	docker compose exec -T drupal with-contenv bash -lc "unzip /var/www/drupal/solrconfig.zip -d /opt/solr/server/solr/ISLANDORA/conf/ -o"
+	docker compose exec -T drupal with-contenv bash -lc "rm -f /var/www/drupal/solrconfig.zip"
+	@echo "Restarting solr"
+	docker compose restart solr
+	# Check if Solr is up
+	@echo "Checking if Solr's healthy"
+	sleep 5
+	docker compose exec -T solr bash -c 'curl -s http://localhost:8983/solr/admin/info/system?wt=json' | jq -r .lucene || (echo "Solr is not healthy, waiting 10 seconds." && sleep 10)
+	docker compose exec -T drupal with-contenv bash -lc "drush cr"
+	docker compose exec -T drupal with-contenv bash -lc "drush search-api:clear"
+	docker compose exec -T drupal with-contenv bash -lc "drush search-api:disable-all"
+	docker compose exec -T drupal with-contenv bash -lc "drush search-api:enable-all"
+	docker compose exec -T drupal with-contenv bash -lc "drush search-api-solr:finalize-index --force"
+	docker compose exec -T drupal with-contenv bash -lc "drush search-api-reindex"
+	docker compose exec -T drupal with-contenv bash -lc "drush search-api-index"
+	@echo "  └─ Done"
+
+.PHONY: jhu_up_without_rebuilding
+## JHU: Make a local site with codebase directory bind mounted, using cloned starter site but without rebuilding the build process.
+jhu_up_without_rebuilding:
+	@echo ""
+	if [ $(DF_FILE_EXISTS) -eq 0 ]; then \
+		echo "docker-compose.yml does not exist, creating starter site"; \
+	fi
+	docker compose up -d --build
+	$(MAKE) set-codebase-owner
+	$(MAKE) jhu_config_import
+	@echo "  └─ Done"
+
+jhu_first_time:
+	@echo "Running Starter-init"
+	$(MAKE) starter-init ENVIRONMENT=starter_dev
+	if [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
+		echo "codebase/ directory is empty, cloning it"; \
+		docker container run --rm -v $(CURDIR)/codebase:/home/root $(REPOSITORY)/nginx:$(TAG) with-contenv bash -lc 'git clone -b main https://github.com/jhu-idc/idc-codebase /home/root;'; \
+		echo "codebase/ was cloned"; \
+	fi
+	$(MAKE) set-codebase-owner
+	@echo "Wait for the /var/www/drupal/composer.json file to be available"
+	while ! test -f codebase/composer.json; do \
+		echo "Waiting for /var/www/drupal/composer.json file to be available..."; \
+		sleep 2; \
+	done
+	docker compose up -d --remove-orphans
+	# The rest of this should be moved into another function.
+	# -docker compose exec -T drupal with-contenv bash -lc 'rm -rf vendor/ web/modules/contrib/* web/themes/contrib/*'
+	docker compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx /var/www/drupal/ && su nginx -s /bin/bash -c "composer install"'
+	-docker compose exec -T drupal with-contenv bash -lc 'git config --global --add safe.directory /var/www/drupal/web/modules/contrib/islandora_fits'
+	$(MAKE) set-codebase-owner
+	$(MAKE) drupal-database update-settings-php
+	-docker compose exec -T drupal with-contenv bash -lc "drush si -y --existing-config minimal --account-pass $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)"
+	docker compose exec -T drupal with-contenv bash -lc "drush -l $(SITE) user:role:add fedoraadmin admin"
+	MIGRATE_IMPORT_USER_OPTION=--userid=1 $(MAKE) hydrate
+	docker compose exec -T drupal with-contenv bash -lc 'drush -l $(SITE) migrate:import --userid=1 islandora_fits_tags'
+	$(MAKE) jhu_config_import
+	docker compose exec -T drupal with-contenv bash -lc 'composer require drupal/migrate_tools ; drush pm:enable -y migrate_tools,idc_default_migration && drush migrate:import idc_default_migration_menu_link_main'
+	$(MAKE) jhu_solr
+	docker compose exec -T drupal with-contenv bash -lc 'mkdir -p web/sites/default/files/styles/thumbnail/public/media-icons/generic'
+	docker compose exec -T drupal with-contenv bash -lc 'cp web/core/modules/media/images/icons/* web/sites/default/files/media-icons/generic/'
+	docker compose exec -T drupal with-contenv bash -lc 'cp web/core/modules/media/images/icons/generic.png web/sites/default/files/media-icons/generic'
+	docker compose exec -T drupal with-contenv bash -lc 'chown nginx: web/sites/default/files/media-icons/generic/generic.png'
+	docker compose exec -T drupal with-contenv bash -lc 'mkdir -p /var/www/drupal/private ; chown -R nginx:nginx /var/www/drupal/private ; chmod -R 755 /var/www/drupal/private'
+	sudo rsync -avz scripts/services.yml codebase/web/sites/default/services.yml
+	sudo rsync -avz scripts/default.services.yml codebase/web/sites/default/default.services.yml
+	$(MAKE) wait-for-endpoint
+	# This needs to be a check to see if the page exists already.
+	curl -k -u admin:$(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) -H "Content-Type: application/json" -d "@build/demo-data/jhu_homepage.json" https://${DOMAIN}/node?_format=json
+	curl -k -u admin:$(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) -H "Content-Type: application/json" -d "@build/demo-data/browse-collections.json" https://${DOMAIN}/node?_format=json
+	docker compose down
+	docker compose up -d
+
+.PHONY: jhu_up
+## JHU: Make a local site with codebase directory bind mounted, using cloned starter site.
+jhu_up:
+	@echo ""
+	if [ $(DF_FILE_EXISTS) -eq 1 ]; then \
+		$(MAKE) jhu_generate-secrets ; \
+		echo "docker-compose.yml already exists, skipping starter site creation"; \
+		docker compose up -d ; \
+		echo "  └─ Done"; \
+		echo ""; \
+		echo " Forcing an exit to prevent running creation steps again."; \
+		echo ""; \
+	elif [ -z "$$(ls -A $(QUOTED_CURDIR)/codebase)" ]; then \
+		$(MAKE) jhu_first_time ; \
+	fi
+	# docker compose exec -T drupal with-contenv bash -lc 'drush config:set system.logging error_level verbose -y'
+
+.PHONY: jhu_demo_content
+.SILENT: jhu_demo_content
+## JHU: Helper function for demo sites: do a workbench import of sample objects
+jhu_demo_content: QUOTED_CURDIR = "$(CURDIR)"
+jhu_demo_content:
+	# fetch repo that has csv and binaries to data/samples
+	# if prod do this by default
+	# [ -f "secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME" ] || (echo "admin" > secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME)
+	# [ -f "secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD" ] || (echo "password" > secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)
+	# @echo "\n\nChecking if the workbench module is enabled."
+	# -docker compose exec -T drupal with-contenv bash -lc "composer require mjordan/islandora_workbench_integration"
+	# -docker compose exec -T drupal with-contenv bash -lc "drush en -y islandora_workbench_integration"
+	# [ -d "islandora_workbench" ] || (git clone https://github.com/mjordan/islandora_workbench)
+	# [ -d "islandora_workbench/islandora_workbench_demo_content" ] || (git clone https://github.com/DonRichards/islandora_workbench_demo_content islandora_workbench/islandora_workbench_demo_content)
+	# @echo "\n\nSet the Username/Password within the YAML files."
+	# $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD) /g' islandora_workbench/islandora_workbench_demo_content/example_content.yml
+	# # Hack to disable SSL verification/warnings | InsecureRequestWarning: Unverified HTTPS request is being made to host 'islandora.traefik.me'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+	# FILE="islandora_workbench/workbench"; \
+	# if ! grep -q "import requests" "$$FILE"; then \
+	#  	echo "Fixing the file: $$FILE"; \
+	#  	sed -i '/def create():/i import requests\nfrom requests.packages.urllib3.exceptions import InsecureRequestWarning\n\n# Disable SSL/TLS related warnings\nrequests.packages.urllib3.disable_warnings(InsecureRequestWarning)' "$$FILE"; \
+	# fi
+	# find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^username.*/username\: $(shell cat secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME)/g' {} +
+	# find islandora_workbench/dgi_test/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^username.*/username\: $(shell cat secrets/live/DRUPAL_DEFAULT_ADMIN_USERNAME)/g' {} +
+	# # Set the Password within the YAML files.
+	# find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^nopassword.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)/g' {} +
+	# find islandora_workbench/dgi_test/ -type f -name '*.yml' -exec $(SED_DASH_I) 's/^password.*/password\: $(shell cat secrets/live/DRUPAL_DEFAULT_ACCOUNT_PASSWORD)/g' {} +
+	# # Set the Domain within the YAML files.
+	# find islandora_workbench/islandora_workbench_demo_content/ -type f -name '*.yml' -exec $(SED_DASH_I) '/^host:/s/.*/host: "$(subst /,\/,$(subst .,\.,$(SITE)))\/"/' {} +
+	# find islandora_workbench/dgi_test/ -type f -name '*.yml' -exec $(SED_DASH_I) '/^host:/s/.*/host: "$(subst /,\/,$(subst .,\.,$(SITE)))\/"/' {} +
+	# # Look up the Node ID of the collection you want to import into and replace the value with one live on the site.
+	# # This is a hack to work around for workbench. There is a better method.
+	# # @echo "Starting hack for workbench."
+	# # bash temp_migrate_fix.sh
+	# @echo "\n\nBuild the workbench docker image."
+	# DOCKER_BUILDKIT=0 docker build -t workbench-docker islandora_workbench
+	# @echo "Migrate/Import taxonomy terms."
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/dgi_test/geo_location.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/dgi_test/copyright_and_use.yml"
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/dgi_test/family.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/dgi_test/person.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/dgi_test/corporate_body.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/dgi_test/genre.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/dgi_test/subject.yml"
+	@echo "Migrate/Import taxonomy terms complete."
+	@echo "Migrate/Import collections and objects."
+	# NOPE # cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/islandora_workbench_demo_content/jhu_root_collections.yml"
+	cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench -v /mnt/idc_store/tmp:/tmp -v /mnt/data/local/:/mnt/data/local/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/dgi_test/islandora_objects.yml"
+	@echo "Migrate/Import collections and objects complete."
+	# Example of a rollback
+	# cd islandora_workbench && docker run -it --rm --network="host" -v .:/workbench/ --name my-running-workbench workbench-docker bash -lc "./workbench --config /workbench/rollback.yml"
+	$(MAKE) jhu_solr
+	@echo "  └─ Done"
+
+.PHONY: jhu_clean
+.SILENT: jhu_clean
+## JHU: Destroys all local data, including codebase, docker volumes, and untracked/ignored files.
+jhu_clean:
+	@echo "Domain: $(DOMAIN)."
+ifeq ($(DOMAIN),islandora.traefik.me)
+	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, islandora_workbench, certs, secrets, codebase/, and all untracked/ignored files (including changes to .env)."
+	docker compose down -v --remove-orphans || true
+	$(MAKE) confirm
+	# sudo rm -fr certs secrets/live/* docker-compose.yml codebase islandora_workbench
+	# -git stash
+	# -git clean -xffd .
+	# -git checkout .
+	@echo "Codebase/ was completely removed."
+	@echo "  └─ Done"
+else
+	@echo "Warning: jhu_clean command is blocked on production server (DOMAIN=$(DOMAIN))."
+endif
+
+.PHONY: jhu_reset
+.SILENT: jhu_reset
+## JHU: Destroys all local data, docker volumes, without removing codebase or workbench.
+jhu_reset:
+	@echo "**DANGER** About to rm your SERVER data subdirs, your docker volumes, certs, secrets."
+	$(MAKE) confirm
+	docker compose down -v --remove-orphans || true
+	sudo rm -fr certs docker-compose.yml
+	@echo "  └─ Done shutting down containers and removing volumes."
+	$(MAKE) jhu_up
+
+.PHONY: jhu_down
+.SILENT: jhu_down
+## JHU: Brings the local site down without destroying data.
+jhu_down:
+	-docker compose down
+
+.PHONY: jhu_config_export
+.SILENT: jhu_config_export
+## JHU: Exports the sites configuration.
+jhu_config_export:
+	# rm -rf codebase/config/sync/* && git checkout -- config/sync
+	docker compose exec drupal with-contenv bash -lc "chown -R nginx: /var/www/drupal/config/sync/"
+	docker compose exec -T drupal drush -l $(SITE) config:export -y
+	$(MAKE) set-codebase-owner
+
+.PHONY: jhu_config_import
+.SILENT: jhu_config_import
+## JHU: Imports the sites configuration.
+jhu_config_import:
+	$(MAKE) set-codebase-owner
+	@echo "Wait for the /var/www/drupal directory to be available"
+	while ! docker compose exec -T drupal with-contenv bash -lc 'test -d /var/www/drupal'; do \
+		echo "Waiting for /var/www/drupal directory to be available..."; \
+		sleep 2; \
+	done
+	docker compose exec -T drupal with-contenv bash -lc 'chown -R nginx:nginx /var/www/drupal/ && su nginx -s /bin/bash -c "composer install"'
+	docker compose exec drupal with-contenv bash -lc "chown -R nginx: /var/www/drupal/config/sync/"
+	docker compose exec -T drupal drush -l $(SITE) config:import -y --debug
+	$(MAKE) set-codebase-owner
+
+.PHONY: jhu_dev_tools_enable
+.SILENT: jhu_dev_tools_enable
+## JHU: Enables devel and devel_generate modules.
+jhu_dev_tools_enable:
+	$(MAKE) set-codebase-owner
+	docker compose exec drupal with-contenv bash -lc "git config --global --add safe.directory /var/www/drupal/vendor/drupal/coder"
+	-docker compose exec drupal with-contenv bash -lc "cp ~/.bashrc ~/.bashrc_BAK || echo 'No .bashrc file to backup'"
+	docker compose exec drupal with-contenv bash -lc "echo \"alias drupal='vendor/drupal/console/bin/drupal'\" > ~/.bashrc"
+	docker compose exec drupal with-contenv bash -lc "echo \"alias phpcs='vendor/squizlabs/php_codesniffer/bin/phpcs'\" >> ~/.bashrc"
+	docker compose exec drupal with-contenv bash -lc "echo \"alias phpcbf='vendor/squizlabs/php_codesniffer/bin/phpcbf'\" >> ~/.bashrc"
+	docker compose exec drupal with-contenv bash -lc "composer require drupal/coder --dev && git config --global --add safe.directory /var/www/drupal/vendor/drupal/coder"
+	docker compose exec drupal with-contenv bash -lc "vendor/squizlabs/php_codesniffer/bin/phpcs --config-set installed_paths vendor/slevomat/coding-standard vendor/phpcompatibility/php-compatibility vendor/drupal/coder/coder_sniffer && vendor/squizlabs/php_codesniffer/bin/phpcs --config-set default_standard Drupal"
+	if [ ! -f "codebase/web/sites/default/services.yml" ]; then cp scripts/services.yml codebase/web/sites/default/services.yml; fi
+	docker compose exec drupal with-contenv bash -lc "drush en devel -y && drush cr"
+
+.PHONY: jhu_repos_export
+.SILENT: jhu_repos_export
+## JHU: This copies the codebase directory and theme directory to a parent directory.
+jhu_repos_export:
+	$(MAKE) jhu_config_export
+	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/ ../idc-codebase --delete
+	-sudo chown -R $(USER): ../idc-codebase
+	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/themes/contrib/idc_ui_theme_boots ../ --delete
+	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' codebase/web/modules/contrib/idc_default_migration ../ --delete
+	-sudo rsync -avz --exclude '.git' --exclude '.gitignore' --exclude '.github' islandora_workbench/islandora_workbench_demo_content ../ --delete
+	$(MAKE) set-codebase-owner
+
+.PHONY: jhu_sync_repos
+.SILENT: jhu_sync_repos
+## JHU: This copies the codebase repo and the theme directory from the parent directory.
+jhu_sync_repos:
+	$(MAKE) set-codebase-owner
+	[ -d "../idc-codebase/" ] && rsync -avz ../idc-codebase/ codebase
+	[ -d "../idc_ui_theme_boots/" ] && rsync -avz ../idc_ui_theme_boots/ codebase/web/themes/contrib/idc_ui_theme_boots --delete
+	[ -d "../idc_default_migration/" ] && rsync -avz ../idc_default_migration codebase/web/modules/contrib/idc_default_migration --delete
+	mkdir -p islandora_workbench/islandora_workbench_demo_content
+	[ -d "../islandora_workbench_demo_content/" ] && rsync -avz islandora_workbench/islandora_workbench_demo_content --delete
+	$(MAKE) set-codebase-owner
+
+.PHONY: jhu_update_theme
+.SILENT: jhu_update_theme
+## JHU: This updates the theme's hash in composer.
+jhu_update_theme:
+	rm -rf codebase/web/themes/contrib/idc_ui_theme_boots
+	docker compose exec drupal with-contenv bash -lc 'composer clearcache && composer update --prefer-source "islandora/idc_ui_theme_boots" --with-all-dependencies'
+
+.PHONY: jhu_change_domain
+.SILENT: jhu_change_domain
+jhu_change_domain:
+	# Change the DOMAIN= in .env
+	sed -i "s/DOMAIN=.*/DOMAIN=$(DOMAIN)/g" .env
+
+.PHONY: jhu_stop
+.SILENT: jhu_stop
+## JHU: Turn off idc without losing anything.
+jhu_stop:
+	@echo ""
+	@echo "Stopping containers"
+	docker compose stop
+	@echo "  └─ Done"
+
+.PHONY: jhu_reg_jwt
+.SILENT: jhu_reg_jwt
+## JHU: Regenerate JWT secrets.
+jhu_reg_jwt:
+	docker run --rm -t \
+		-v "$(CURDIR)/secrets":/secrets \
+		-v "$(CURDIR)/build/scripts/generate-jwt-secrets.sh":/generate-jwt-secrets.sh \
+		-w / \
+		--entrypoint bash \
+		$(REPOSITORY)/drupal:$(TAG) -c "/generate-jwt-secrets.sh && chown -R `id -u`:`id -g` /secrets"

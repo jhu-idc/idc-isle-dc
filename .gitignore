@@ -94,3 +94,9 @@ Dockerfile
 # User provided certs for TLS.
 certs
 acme
+
+database_dump.sql
+
+idc-staging.cloud.library.jhu.edu.csr
+
+idc-staging.cloud.library.jhu.edu.key

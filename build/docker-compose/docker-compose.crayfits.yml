@@ -1,4 +1,3 @@
-version: "3.7"
 networks:
   default:
     internal: true
@@ -6,6 +5,8 @@ services:
   crayfits:
     restart: ${RESTART_POLICY:-unless-stopped}
     image: ${REPOSITORY:-islandora}/crayfits:${TAG:-latest}
+    volumes:
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
     depends_on:
       - fits
     deploy:
@@ -17,6 +18,8 @@ services:
   fits:
     restart: ${RESTART_POLICY:-unless-stopped}
     image: ${REPOSITORY:-islandora}/fits:${TAG:-latest}
+    volumes:
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
     deploy:
       resources:
           limits:

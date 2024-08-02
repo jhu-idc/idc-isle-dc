@@ -1,4 +1,3 @@
-version: "3.7"
 networks:
   default:
     internal: true
@@ -6,6 +5,11 @@ services:
   homarus:
     restart: ${RESTART_POLICY:-unless-stopped}
     image: ${REPOSITORY:-islandora}/homarus:${TAG:-latest}
+    volumes:
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
+      - ../build/configs/custom_www.conf:/etc/php83/php-fpm.d/www.conf:ro
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
     deploy:
       resources:
           limits:
@@ -15,6 +19,15 @@ services:
   houdini:
     restart: ${RESTART_POLICY:-unless-stopped}
     image: ${REPOSITORY:-islandora}/houdini:${TAG:-latest}
+    volumes:
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+    networks:
+      - default
+    depends_on:
+      - drupal
+      - fcrepo
     deploy:
       resources:
           limits:
@@ -24,6 +37,10 @@ services:
   hypercube:
     restart: ${RESTART_POLICY:-unless-stopped}
     image: ${REPOSITORY:-islandora}/hypercube:${TAG:-latest}
+    volumes:
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
     deploy:
       resources:
           limits:
@@ -33,8 +50,11 @@ services:
   milliner:
     restart: ${RESTART_POLICY:-unless-stopped}
     image: ${REPOSITORY:-islandora}/milliner:${TAG:-latest}
+    volumes:
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
     environment:
       MILLINER_FEDORA6: ${FEDORA_6}
+      LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
     networks:
       default:
       gateway:

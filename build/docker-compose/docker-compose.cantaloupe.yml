@@ -1,4 +1,3 @@
-version: "3.7"
 networks:
   default:
     internal: true
@@ -14,6 +13,7 @@ services:
       CANTALOUPE_HTTPSOURCE_LOOKUP_STRATEGY: ${CANTALOUPE_HTTPSOURCE_LOOKUP_STRATEGY} # ScriptLookupStrategy
     volumes:
       - cantaloupe-data:/data
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
     labels:
       - traefik.enable=${EXPOSE_CANTALOUPE:-true}
       - traefik.http.services.${COMPOSE_PROJECT_NAME-isle-dc}-cantaloupe.loadbalancer.server.port=8182

@@ -7,7 +7,6 @@
 # For a traefik to be able to route traffic to a given container, that
 # container needs to be on the `gateway` network, otherwise traefik will
 # discover it via Docker but will not be able to redirect traffic to it.
-version: "3.7"
 networks:
   gateway:
     driver: bridge
@@ -56,7 +55,6 @@ services:
       - ../../build/traefik-tls.yml:/etc/traefik/tls.yml
       - ../../certs:/etc/ssl/traefik
     labels:
-      # Do not expose in production.
       - traefik.http.routers.api.service=api@internal
     networks:
       default:
@@ -69,6 +67,3 @@ services:
             memory: ${TRAEFIK_MEMORY_LIMIT:-8G}
           reservations:
             memory: 4G
-  drupal:
-    depends_on:
-      - traefik

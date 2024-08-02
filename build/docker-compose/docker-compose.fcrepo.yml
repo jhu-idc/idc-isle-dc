@@ -1,4 +1,3 @@
-version: "3.7"
 networks:
   default:
     internal: true
@@ -16,6 +15,7 @@ services:
       FCREPO_DISABLE_SYN: ${DISABLE_SYN}
     volumes:
       - fcrepo-data:/data
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
     depends_on:
       - activemq
     networks:

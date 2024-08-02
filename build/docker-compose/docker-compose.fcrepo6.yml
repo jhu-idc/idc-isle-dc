@@ -1,9 +1,6 @@
-version: "3.7"
 networks:
   default:
     internal: true
-volumes:
-  fcrepo-data:
 services:
   fcrepo:
     restart: ${RESTART_POLICY:-unless-stopped}
@@ -15,7 +12,9 @@ services:
       FCREPO_TOMCAT_ADMIN_USER: admin
       FCREPO_DISABLE_SYN: ${DISABLE_SYN}
     volumes:
-      - fcrepo-data:/data
+      # - fcrepo-data:/data
+      - /mnt/data2/local/fedora:/data:rw
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
     depends_on:
       - activemq
     networks:

@@ -1,4 +1,3 @@
-version: "3.7"
 networks:
   default:
     internal: true
@@ -6,11 +5,20 @@ services:
   alpaca:
     restart: ${RESTART_POLICY:-unless-stopped}
     image: ${REPOSITORY:-islandora}/alpaca:${TAG:-latest}
+    volumes:
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
     environment:
       ALPACA_OCR_TIMEOUT: ${ALPACA_OCR_TIMEOUT:-10000}
       ALPACA_HOUDINI_TIMEOUT: ${ALPACA_HOUDINI_TIMEOUT:-10000}
       ALPACA_HOMARUS_TIMEOUT: ${ALPACA_HOMARUS_TIMEOUT:-10000}
       ALPACA_FITS_TIMEOUT: ${ALPACA_HOMARUS_TIMEOUT:-10000}
+      LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
+    depends_on:
+      - activemq
+      - crayfits
+      - homarus
+      - houdini
+      - hypercube
     deploy:
       resources:
           limits:

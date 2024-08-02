@@ -1,6 +1,5 @@
 # Example of using a different backend for confd rather then
 # environment variables.
-version: "3.7"
 networks:
   default:
     internal: true
@@ -21,6 +20,7 @@ services:
       ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
     volumes:
       - etcd-data:/data
+      - /etc/docker/custom-resolv.conf:/etc/resolv.conf
     ports:
       - 2379
       - 2380
